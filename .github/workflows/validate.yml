@@ -39,4 +39,4 @@ jobs:
         run: .venv/bin/python scripts/validate_resources.py
 
       - name: Validate Agent Skill
-        run: .venv/bin/skills-ref validate skills/typecraft-skills
+        run: .venv/bin/agentskills validate skills/typecraft-skills
