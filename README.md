@@ -71,6 +71,25 @@ Explicit user choices must never be silently overridden.
 
 ## Installation
 
+### Install directly through an AI Agent
+
+You can ask a supported AI agent to install TypeCraft directly from GitHub.
+
+Copy this repository URL into your AI agent chat:
+
+`https://github.com/krupakar5535Kk/typecraft-skills`
+
+Then say:
+
+`Install this skill in your environment. Read INSTALL.md and follow its instructions. Install the complete typecraft-skills directory, including all references, and verify installation and skill discovery.`
+
+The agent must have repository access and permission to install persistent skills.
+
+See [INSTALL.md](INSTALL.md) for the universal AI-agent installation instructions.
+
+### Install manually
+
+
 TypeCraft is distributed as a single Agent Skill.
 
 Clone the repository:

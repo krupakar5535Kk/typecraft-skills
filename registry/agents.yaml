@@ -1,0 +1,551 @@
+# TypeCraft Universal Agent Compatibility Registry
+# Version: 1.1.0-dev
+#
+# This registry separates:
+# - installer availability
+# - platform skill compatibility
+# - installation verification
+#
+# Never mark a platform Verified without an actual installation
+# and skill-discovery test.
+
+registry_version: "1.0"
+project_version: "1.1.0-dev"
+canonical_skill:
+  name: typecraft-skills
+  path: skills/typecraft-skills
+  manifest: SKILL.md
+  repository: https://github.com/krupakar5535Kk/typecraft-skills
+
+verification_levels:
+  verified: "Installation and skill discovery tested successfully."
+  compatible: "Platform documents support for the shared Agent Skills format."
+  research_required: "Installation method or compatibility needs investigation."
+  unsupported: "No supported persistent skill installation mechanism identified."
+
+installers:
+  github_cli:
+    name: GitHub CLI Agent Skills
+    command: gh skill install
+    availability: locally_detected
+    preview_tested: true
+    installation_tested: false
+    source: https://cli.github.com/manual/gh_skill_install
+    supported_agents:
+      - github-copilot
+      - claude-code
+      - cursor
+      - codex
+      - gemini-cli
+      - antigravity
+      - antigravity-cli
+      - antigravity2.0
+      - adal
+      - amp
+      - augment
+      - bob
+      - cline
+      - codebuddy
+      - command-code
+      - continue
+      - cortex
+      - crush
+      - deepagents
+      - devin
+      - droid
+      - firebender
+      - goose
+      - grok
+      - iflow-cli
+      - junie
+      - kilo
+      - kimi-cli
+      - kiro-cli
+      - kode
+      - mcpjam
+      - mistral-vibe
+      - mux
+      - neovate
+      - openclaw
+      - opencode
+      - openhands
+      - pi
+      - pochi
+      - qoder
+      - qwen-code
+      - replit
+      - roo
+      - trae
+      - trae-cn
+      - universal
+      - warp
+      - zencoder
+
+platforms:
+  antigravity:
+    display_name: Google Antigravity
+    category: ai_ide_and_agent
+    skill_format: agentskills
+    compatibility: compatible
+    installation:
+      method: native_directory
+      project_path: .agents/skills
+      user_path: ~/.gemini/config/skills
+      cli_project_path: .agents/skills
+      cli_user_path: ~/.gemini/antigravity-cli/skills
+    chat_installation:
+      possible: conditional
+      requirements:
+        - repository_access
+        - filesystem_access
+        - user_permission
+    evidence:
+      - https://antigravity.google/docs/skills
+    notes: "App, IDE and CLI have different global paths. Select the path for the actual Antigravity surface."
+
+  chatgpt:
+    display_name: ChatGPT
+    category: ai_chat_and_workspace
+    skill_format: agentskills
+    compatibility: compatible
+    installation:
+      method: official_skill_upload
+      user_action: "Skills > Create > Upload from your computer"
+      package_required: true
+    chat_installation:
+      possible: conditional
+      requirements:
+        - eligible_account
+        - skills_feature_available
+        - upload_or_workspace_install_permission
+    evidence:
+      - https://help.openai.com/en/articles/20001066-skills-in-chatgpt
+      - https://learn.chatgpt.com/docs/build-skills
+    notes: "Ordinary chat cannot guarantee persistent installation. Availability depends on account and workspace."
+
+  claude_code:
+    display_name: Claude Code
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: compatible
+    installer: github_cli
+    installation:
+      method: native_directory
+      project_path: .claude/skills
+      user_path: ~/.claude/skills
+    chat_installation:
+      possible: conditional
+      requirements:
+        - repository_access
+        - filesystem_access
+        - user_permission
+
+  codex:
+    display_name: OpenAI Codex
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: compatible
+    installer: github_cli
+    installation:
+      method: native_directory
+      project_path: .agents/skills
+      user_path: ~/.agents/skills
+    chat_installation:
+      possible: conditional
+      requirements:
+        - repository_access
+        - filesystem_access
+        - user_permission
+
+  cursor:
+    display_name: Cursor
+    category: ai_ide
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  opencode:
+    display_name: OpenCode
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: compatible
+    installer: github_cli
+    installation:
+      method: native_directory
+      project_path: .opencode/skills
+      user_path: ~/.config/opencode/skills
+
+  gemini_cli:
+    display_name: Gemini CLI
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  cline:
+    display_name: Cline
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  roo_code:
+    display_name: Roo Code
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  goose:
+    display_name: Goose
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  openhands:
+    display_name: OpenHands
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  qwen_code:
+    display_name: Qwen Code
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+
+  windsurf:
+    display_name: Windsurf
+    category: ai_ide
+    skill_format: agentskills
+    compatibility: research_required
+    installation:
+      method: needs_verification
+
+  zed:
+    display_name: Zed
+    category: ai_editor
+    skill_format: agentskills
+    compatibility: research_required
+    installation:
+      method: needs_verification
+
+  aider:
+    display_name: Aider
+    category: coding_agent
+    skill_format: needs_verification
+    compatibility: research_required
+    installation:
+      method: needs_verification
+
+  custom_agents:
+    display_name: Custom Agent Frameworks
+    category: agent_framework
+    skill_format: agentskills
+    compatibility: research_required
+    installation:
+      method: adapter_required
+    notes: "Evaluate each framework for filesystem access, skill discovery and persistent storage."
+
+# Individual GitHub CLI agent catalog.
+# GitHub CLI owns the host-specific installation paths.
+# These entries do not imply independent installation testing.
+agent_catalog:
+  - agent_id: github-copilot
+    display_name: "GitHub Copilot"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: claude-code
+    display_name: "Claude Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: cursor
+    display_name: "Cursor"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: codex
+    display_name: "OpenAI Codex"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: gemini-cli
+    display_name: "Gemini CLI"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: antigravity
+    display_name: "Google Antigravity"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: antigravity-cli
+    display_name: "Antigravity CLI"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: antigravity2.0
+    display_name: "Antigravity 2.0"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: adal
+    display_name: "AdaL"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: amp
+    display_name: "Amp"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: augment
+    display_name: "Augment"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: bob
+    display_name: "IBM Bob"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: cline
+    display_name: "Cline"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: codebuddy
+    display_name: "CodeBuddy"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: command-code
+    display_name: "Command Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: continue
+    display_name: "Continue"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: cortex
+    display_name: "Cortex Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: crush
+    display_name: "Crush"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: deepagents
+    display_name: "Deep Agents"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: devin
+    display_name: "Devin"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: droid
+    display_name: "Droid"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: firebender
+    display_name: "Firebender"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: goose
+    display_name: "Goose"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: grok
+    display_name: "Grok"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: iflow-cli
+    display_name: "iFlow CLI"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: junie
+    display_name: "Junie"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: kilo
+    display_name: "Kilo Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: kimi-cli
+    display_name: "Kimi Code CLI"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: kiro-cli
+    display_name: "Kiro CLI"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: kode
+    display_name: "Kode"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: mcpjam
+    display_name: "MCPJam"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: mistral-vibe
+    display_name: "Mistral Vibe"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: mux
+    display_name: "Mux"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: neovate
+    display_name: "Neovate"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: openclaw
+    display_name: "OpenClaw"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: opencode
+    display_name: "OpenCode"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: openhands
+    display_name: "OpenHands"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: pi
+    display_name: "Pi"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: pochi
+    display_name: "Pochi"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: qoder
+    display_name: "Qoder"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: qwen-code
+    display_name: "Qwen Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: replit
+    display_name: "Replit"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: roo
+    display_name: "Roo Code"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: trae
+    display_name: "Trae"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: trae-cn
+    display_name: "Trae CN"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: universal
+    display_name: "Universal"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: warp
+    display_name: "Warp"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+  - agent_id: zencoder
+    display_name: "Zencoder"
+    installer: github_cli
+    installation_method: github_cli_managed
+    installation_verified: false
+    skill_discovery_verified: false
+coverage_policy:
+  discover_new_agents: true
+  accept_new_adapters: true
+  preserve_single_canonical_skill: true
+  never_guess_installation_paths: true
+  never_claim_unverified_compatibility: true
+  distinguish_chat_from_persistent_installation: true
