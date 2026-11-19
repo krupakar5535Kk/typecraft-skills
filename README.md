@@ -1,0 +1,144 @@
+# TypeCraft Skills
+
+**One library. Every creative developer. Beautiful typography without boundaries.**
+
+TypeCraft Skills is an open-source AI Agent Skill for typography, visual design direction, and creative composition.
+
+It helps AI agents select and apply typography styles and design templates across five creative domains.
+
+## What Is TypeCraft?
+
+TypeCraft provides a structured creative resource library and reusable design instructions for AI agents.
+
+It separates two important design concepts:
+
+- **Typography Style:** Defines the visual personality and treatment of typography.
+- **Design Template:** Defines the structural arrangement of content and composition.
+
+A style controls how typography looks. A template controls how content is arranged. They can be used independently or combined.
+
+## Resource Library
+
+The initial library contains 20 resources.
+
+### Typography Styles
+
+| ID | Style |
+|---|---|
+| TCS-STYLE-001 | Swiss International Typographic Style |
+| TCS-STYLE-002 | Art Deco Typographic Style |
+| TCS-STYLE-003 | Bauhaus Typographic Style |
+| TCS-STYLE-004 | Punk Typographic Style |
+| TCS-STYLE-005 | Constructivist Typographic Style |
+| TCS-STYLE-006 | De Stijl Typographic Style |
+| TCS-STYLE-007 | Art Nouveau Typographic Style |
+| TCS-STYLE-008 | Psychedelic Typographic Style |
+| TCS-STYLE-009 | Brutalist Typographic Style |
+| TCS-STYLE-010 | Kinetic Typographic Style |
+
+### Design Templates
+
+| ID | Template |
+|---|---|
+| TCS-TEMPLATE-001 | Swiss Grid Editorial Poster |
+| TCS-TEMPLATE-002 | Cinematic Title Poster |
+| TCS-TEMPLATE-003 | Swiss Editorial Magazine Spread |
+| TCS-TEMPLATE-004 | Corporate Annual Report Layout |
+| TCS-TEMPLATE-005 | Modern Business Presentation Deck |
+| TCS-TEMPLATE-006 | E-commerce Product Showcase Layout |
+| TCS-TEMPLATE-007 | Creative Portfolio Case Study Layout |
+| TCS-TEMPLATE-008 | Event and Conference Promotional Layout |
+| TCS-TEMPLATE-009 | Social Media Campaign Carousel Layout |
+| TCS-TEMPLATE-010 | Data Visualization and Infographic Storytelling Layout |
+
+**Resource lifecycle:** The current collection contains draft and review resources. Inclusion in the library does not imply production approval.
+
+## Creative Domains
+
+1. **Static Graphics** — Posters, advertisements, banners, covers, and social media graphics.
+2. **Motion Graphics** — Kinetic typography, animated text, and motion compositions.
+3. **Video** — Opening titles, closing credits, lower thirds, captions, and title sequences.
+4. **Web and UI** — Websites, landing pages, application interfaces, and responsive typography.
+5. **Editorial** — Magazines, books, reports, brochures, and publication layouts.
+
+## Selection Modes
+
+- **Automatic:** The agent selects suitable styles and templates based on the creative brief.
+- **Manual:** The agent respects the user's explicitly selected resources.
+- **Mixed:** The agent preserves explicit choices and automatically selects unspecified components.
+
+Explicit user choices must never be silently overridden.
+
+## Installation
+
+TypeCraft is distributed as a single Agent Skill.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/krupakar5535Kk/typecraft-skills.git
+cd typecraft-skills
+```
+
+The installable skill directory is:
+
+`skills/typecraft-skills/`
+
+See the [Installation Guide](docs/installation.md) for installation instructions.
+
+## Compatibility
+
+TypeCraft uses a tool-independent architecture with tool-aware execution.
+
+Intended environments include:
+
+- Claude Code
+- OpenAI Codex
+- ChatGPT
+- Google Antigravity
+- Cursor
+- Windsurf
+
+Platform compatibility and installation behavior must be verified independently. Listing an environment as a target does not imply that its integration has been tested.
+
+See the [Compatibility Guide](docs/compatibility.md).
+
+## Usage
+
+Describe the creative brief and intended output.
+
+The agent will:
+
+1. Identify the creative domain.
+2. Determine whether a typography style or design template is needed.
+3. Select resources using Automatic, Manual, or Mixed mode.
+4. Apply the selected design direction.
+5. Adapt the result to the target medium and available tools.
+
+You can request a style, a template, or both.
+
+**Examples:**
+
+- Create a poster using the Swiss International Typographic Style.
+- Use the Cinematic Title Poster template for a film announcement.
+- Automatically choose a style and template for a technology conference.
+- Combine an explicitly selected style with an automatically selected template.
+
+See the [Usage Guide](docs/usage.md).
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Authoring Standard](docs/authoring-standard.md)
+- [Resource Schema](docs/resource-schema.md)
+- [Installation Guide](docs/installation.md)
+- [Compatibility Guide](docs/compatibility.md)
+- [Design Guidelines](docs/design-guidelines.md)
+- [Usage Guide](docs/usage.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## License
+
+Released under the [MIT License](LICENSE).

@@ -1,0 +1,38 @@
+name: Validate TypeCraft Skills
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Skill and Resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install skills-ref==0.1.0 strictyaml
+
+      - name: Validate resource library
+        run: python scripts/validate_resources.py
+
+      - name: Validate Agent Skill
+        run: skills-ref validate skills/typecraft-skills

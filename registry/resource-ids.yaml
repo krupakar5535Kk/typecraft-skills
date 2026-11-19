@@ -1,0 +1,63 @@
+registry_version: "1.0"
+schema_version: "1.2"
+resources:
+  - id: TCS-STYLE-001
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-TEMPLATE-001
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-STYLE-002
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-003
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-004
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-005
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-006
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-007
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-008
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-009
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-STYLE-010
+    resource_type: typography_style
+    registry_status: active
+  - id: TCS-TEMPLATE-002
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-003
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-004
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-005
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-006
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-007
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-008
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-009
+    resource_type: design_template
+    registry_status: active
+  - id: TCS-TEMPLATE-010
+    resource_type: design_template
+    registry_status: active

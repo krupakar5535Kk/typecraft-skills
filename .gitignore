@@ -1,0 +1,28 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local agent configuration
+.claude/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build and distribution
+dist/
+build/
+*.egg-info/
