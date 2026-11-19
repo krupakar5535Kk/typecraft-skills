@@ -77,20 +77,6 @@ def main():
         print(f"\nTotal: {len(targets)}")
         return 0
 
-    if not shutil.which("gh"):
-        print("ERROR: GitHub CLI (gh) is not installed.")
-        return 1
-
-    check = subprocess.run(
-        ["gh", "skill", "--help"],
-        capture_output=True,
-        text=True
-    )
-
-    if check.returncode != 0:
-        print("ERROR: GitHub CLI Agent Skills support is unavailable.")
-        return 1
-
     if args.all:
         selected = list(targets)
     elif args.agent:
@@ -116,6 +102,20 @@ def main():
             print(f"[PREVIEW] {agent} — {names.get(agent, agent)}")
         print("\nPreview complete. Nothing was installed.")
         return 0
+
+    if not shutil.which("gh"):
+        print("ERROR: GitHub CLI (gh) is not installed.")
+        return 1
+
+    check = subprocess.run(
+        ["gh", "skill", "--help"],
+        capture_output=True,
+        text=True
+    )
+
+    if check.returncode != 0:
+        print("ERROR: GitHub CLI Agent Skills support is unavailable.")
+        return 1
 
     success = []
     failed = []
