@@ -32,7 +32,7 @@ jobs:
       - name: Install validation dependencies
         run: |
           .venv/bin/python -m pip install --upgrade pip
-          .venv/bin/python -m pip install skills-ref==0.1.0 strictyaml
+          .venv/bin/python -m pip install "git+https://github.com/agentskills/agentskills.git@83021e2be457a9b6679148719c1f6074f0ad975e#subdirectory=skills-ref"
 
       - name: Validate resource library
         run: .venv/bin/python scripts/validate_resources.py
@@ -46,7 +46,7 @@ jobs:
       - name: Check Python syntax
         run: |
           .venv/bin/python -m py_compile scripts/install.py
-          .venv/bin/python -m py_compile scripts/validate_agent_registry.py
+          .venv/bin/python -m py_compile scripts/validate_agent_registry.py scripts/validate_skill.py
 
       - name: Test agent listing
         run: .venv/bin/python scripts/install.py --list
