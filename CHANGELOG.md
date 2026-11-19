@@ -6,28 +6,77 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
-### Added
+No unreleased changes yet.
 
-- Initial TypeCraft Skills project structure.
-- Single unified AI Agent Skill.
-- Ten typography style resources.
-- Ten design template resources.
-- Five creative domains: Static Graphics, Motion Graphics, Video, Web and UI, and Editorial.
-- Automatic, Manual, and Mixed resource selection modes.
-- Resource lifecycle management.
-- Resource schema and authoring standards.
-- Installation, compatibility, usage, and design guidelines.
-- Contribution guidelines.
-- Code of Conduct.
-- Security reporting policy.
+## [1.0.0] - 2026-11-19
 
-### Documentation
+### Initial Public Release
 
-- Added project architecture documentation.
-- Added resource schema documentation.
-- Added authoring standard documentation.
+- Published the TypeCraft Skills open-source project.
+- Created one unified, tool-independent AI Agent Skill.
+- Established five creative domains: Static Graphics, Motion Graphics, Video, Web and UI, and Editorial.
+- Introduced automatic, manual and mixed resource selection modes.
+- Established independent typography style and design template systems.
 
-### Validation
+### Typography Style Library
 
-- Validated the initial collection of ten typography styles and ten design templates.
-- Verified resource IDs, metadata, and lifecycle statuses.
+Added 10 typography style resources:
+
+- Swiss International Typographic Style
+- Art Deco Typographic Style
+- Bauhaus Typographic Style
+- Punk Typographic Style
+- Constructivist Typographic Style
+- De Stijl Typographic Style
+- Art Nouveau Typographic Style
+- Psychedelic Typographic Style
+- Brutalist Typographic Style
+- Kinetic Typographic Style
+
+### Design Template Library
+
+Added 10 design template resources:
+
+- Swiss Grid Editorial Poster
+- Cinematic Title Poster
+- Swiss Editorial Magazine Spread
+- Corporate Annual Report Layout
+- Modern Business Presentation Deck
+- E-commerce Product Showcase Layout
+- Creative Portfolio Case Study Layout
+- Event and Conference Promotional Layout
+- Social Media Campaign Carousel Layout
+- Data Visualization and Infographic Storytelling Layout
+
+### Documentation and Governance
+
+- Added technical architecture documentation.
+- Added resource schema and authoring standards.
+- Added installation, compatibility and usage guides.
+- Added design guidelines.
+- Added contribution guidelines and Code of Conduct.
+- Added security reporting policy.
+- Adopted the MIT License.
+
+### Validation and Automation
+
+- Added automated resource-library validation.
+- Added official Agent Skill validation.
+- Added GitHub Actions continuous integration.
+- Verified 10 typography styles and 10 design templates.
+- Verified resource IDs, metadata, lifecycle statuses and registry consistency.
+- Confirmed successful GitHub Actions validation.
+
+### Resource Lifecycle Disclosure
+
+The initial v1.0.0 library contains:
+
+- 1 resource in Review status.
+- 19 resources in Draft status.
+- 0 resources in Approved status.
+
+Draft and Review resources are provided for evaluation and testing. They are not represented as production-approved resources.
+
+### Compatibility Disclosure
+
+The project uses a tool-independent architecture. Target AI environments are documented, but platform-specific installation and execution compatibility must be independently verified before being declared supported.
