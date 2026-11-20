@@ -87,6 +87,46 @@ The agent must have repository access and permission to install persistent skill
 
 See [INSTALL.md](INSTALL.md) for the universal AI-agent installation instructions.
 
+### Install for all 48 supported GitHub CLI targets
+
+TypeCraft includes a registry-driven installer for 48 GitHub CLI-supported agent targets.
+
+**Prerequisites:** Git, Python 3.12 or compatible, and GitHub CLI with `gh skill` support.
+
+Clone the repository:
+
+`git clone https://github.com/krupakar5535Kk/typecraft-skills.git`
+
+`cd typecraft-skills`
+
+Create the Python environment:
+
+`python3.12 -m venv .venv`
+
+Install dependencies:
+
+`.venv/bin/python -m pip install -r requirements-installer.txt`
+
+Preview all targets:
+
+`.venv/bin/python scripts/install.py --all --scope user --dry-run`
+
+Install all targets:
+
+`.venv/bin/python scripts/install.py --all --scope user`
+
+Install selected agents:
+
+`.venv/bin/python scripts/install.py --agent claude-code --agent cursor`
+
+Use `--version v1.0.0` to select a specific release. Existing installations are skipped by default. Use `--force` only when you explicitly intend to overwrite an installation.
+
+Some agents share physical installation directories. Therefore, 48 agent targets do not necessarily mean 48 separate folders.
+
+ChatGPT uses a separate installation route and is not included in these 48 GitHub CLI targets.
+
+See [INSTALL.md](INSTALL.md) for AI-agent installation instructions.
+
 ### Install manually
 
 

@@ -29,7 +29,8 @@ installers:
     command: gh skill install
     availability: locally_detected
     preview_tested: true
-    installation_tested: false
+    installation_tested: true
+    installation_tested_count: 48
     source: https://cli.github.com/manual/gh_skill_install
     supported_agents:
       - github-copilot
@@ -258,289 +259,289 @@ agent_catalog:
     display_name: "GitHub Copilot"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: claude-code
     display_name: "Claude Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: cursor
     display_name: "Cursor"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: codex
     display_name: "OpenAI Codex"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: gemini-cli
     display_name: "Gemini CLI"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: antigravity
     display_name: "Google Antigravity"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: antigravity-cli
     display_name: "Antigravity CLI"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: antigravity2.0
     display_name: "Antigravity 2.0"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: adal
     display_name: "AdaL"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: amp
     display_name: "Amp"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: augment
     display_name: "Augment"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: bob
     display_name: "IBM Bob"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: cline
     display_name: "Cline"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: codebuddy
     display_name: "CodeBuddy"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: command-code
     display_name: "Command Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: continue
     display_name: "Continue"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: cortex
     display_name: "Cortex Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: crush
     display_name: "Crush"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: deepagents
     display_name: "Deep Agents"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: devin
     display_name: "Devin"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: droid
     display_name: "Droid"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: firebender
     display_name: "Firebender"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: goose
     display_name: "Goose"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: grok
     display_name: "Grok"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: iflow-cli
     display_name: "iFlow CLI"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: junie
     display_name: "Junie"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: kilo
     display_name: "Kilo Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: kimi-cli
     display_name: "Kimi Code CLI"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: kiro-cli
     display_name: "Kiro CLI"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: kode
     display_name: "Kode"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: mcpjam
     display_name: "MCPJam"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: mistral-vibe
     display_name: "Mistral Vibe"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: mux
     display_name: "Mux"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: neovate
     display_name: "Neovate"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: openclaw
     display_name: "OpenClaw"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: opencode
     display_name: "OpenCode"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: openhands
     display_name: "OpenHands"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: pi
     display_name: "Pi"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: pochi
     display_name: "Pochi"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: qoder
     display_name: "Qoder"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: qwen-code
     display_name: "Qwen Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: replit
     display_name: "Replit"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: roo
     display_name: "Roo Code"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: trae
     display_name: "Trae"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: trae-cn
     display_name: "Trae CN"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: universal
     display_name: "Universal"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: warp
     display_name: "Warp"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
   - agent_id: zencoder
     display_name: "Zencoder"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
+    installation_verified: true
     skill_discovery_verified: false
 coverage_policy:
   discover_new_agents: true
