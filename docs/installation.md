@@ -4,138 +4,77 @@ TypeCraft is distributed as one canonical Agent Skill:
 
 `skills/typecraft-skills/`
 
-The complete skill includes `SKILL.md` and all files in `references/`. Always install the complete directory.
+The complete skill includes `SKILL.md` and every file in `references/`. Always install the complete directory.
 
-## 1. Install through an AI agent
+## 1. URL-first installation
 
-Repository:
+For supported local coding agents, users should be able to paste only this repository URL into the agent chat and press Enter:
 
-https://github.com/krupakar5535Kk/typecraft-skills
+`https://github.com/krupakar5535Kk/typecraft-skills`
 
-Ask your AI agent:
+The repository URL by itself is the install request. The agent should inspect `INSTALL.md`, detect its own host, install the complete skill, and verify the result without asking for a second prompt. This requires repository access, persistent filesystem access, and the platform's normal permission to write files.
 
-> Install this skill in your environment. Read INSTALL.md and follow its instructions. Install the complete typecraft-skills directory, including all references, and verify installation and skill discovery.
+See [INSTALL.md](../INSTALL.md) for the full machine-readable agent procedure, host IDs, platform exceptions, and verification contract.
 
-The agent needs repository access, permission to write to a persistent location, and a supported skill installation mechanism.
+## 2. Supported local-agent route
 
-See [INSTALL.md](../INSTALL.md).
+GitHub CLI provides a common installer for supported local Agent Skills hosts. For a detected host, the agent can use:
 
-## 2. Install with GitHub CLI
+`gh skill install krupakar5535Kk/typecraft-skills typecraft-skills --agent <HOST_ID> --scope user`
 
-The repository includes a registry-driven installer for 48 GitHub CLI-supported agent targets.
+Examples of host IDs include `claude-code`, `codex`, `antigravity`, `antigravity-cli`, and `opencode`. The agent must select the ID for its actual runtime and must not use `--all` for a single-host request.
 
-### Prerequisites
+GitHub CLI Agent Skills support is a preview feature. Check `gh skill --help` before relying on it. When it is unavailable, use the platform's official persistent skill directory and copy the complete skill folder without executing repository scripts.
 
-- Git
-- Python 3.12 or a compatible version
-- GitHub CLI with `gh skill` support
-- GitHub CLI authentication where required
+## 3. Platform-specific routes
 
-Check GitHub CLI:
+- **Claude Code:** personal skills use `~/.claude/skills/`. Check discovery with `/skills` in Claude Code.
+- **OpenAI Codex:** user skills use `~/.agents/skills/`. Start or refresh a session if the installed skill does not appear.
+- **Google Antigravity App:** global skills use `~/.gemini/config/skills/`.
+- **Google Antigravity CLI:** global skills use `~/.gemini/antigravity-cli/skills/`. App and CLI discovery must be tested separately.
+- **OpenCode:** global skills use `~/.config/opencode/skills/`; it also reads shared Agent Skills directories.
+- **Cursor:** Cursor's documented GitHub-repository import requires a Cursor plugin package with `.cursor-plugin/marketplace.json` and installation through its plugin/marketplace flow. Do not claim that the URL-only repository import is ready until the TypeCraft Cursor adapter is packaged and tested.
+- **ChatGPT Skills:** ChatGPT uses its own Create with chat or Upload from your computer process, with eligibility and workspace restrictions. It is not installed by the local GitHub CLI command. See [INSTALL.md](../INSTALL.md).
 
-`gh skill --help`
+## 4. Manual multi-agent installer (maintainer workflow)
 
-`gh auth status`
+The repository also includes a registry-driven Python installer for maintainers who intentionally want to install TypeCraft for multiple GitHub CLI targets from a terminal. This is a maintainer utility, not the end-user URL-only workflow.
 
-### Clone the repository
+Prerequisites: Git, Python 3.12 or compatible, and GitHub CLI with `gh skill` support.
+
+Clone and prepare the repository:
 
 `git clone https://github.com/krupakar5535Kk/typecraft-skills.git`
 
 `cd typecraft-skills`
 
-### Set up the installer
-
 `python3.12 -m venv .venv`
-
-`.venv/bin/python -m pip install --upgrade pip`
 
 `.venv/bin/python -m pip install -r requirements-installer.txt`
 
-### List supported agents
+List targets and preview before installing:
 
 `.venv/bin/python scripts/install.py --list`
 
-### Preview all 48 targets
-
 `.venv/bin/python scripts/install.py --all --scope user --dry-run`
 
-### Install all targets
+Install all targets only when that is explicitly intended:
 
 `.venv/bin/python scripts/install.py --all --scope user`
 
-The default scope is `user`. Use `--scope project` for project-level installation.
+Existing installations are skipped by default. Use `--force` only with explicit permission to replace them. The number of agent targets does not necessarily equal the number of separate directories because some hosts share paths.
 
-### Install selected agents
+## 5. Verification requirements
 
-`.venv/bin/python scripts/install.py --agent claude-code`
+Verify these separately:
 
-Select multiple agents by repeating `--agent`:
+1. The final target directory exists and is readable.
+2. `SKILL.md` exists.
+3. Every reference file from the source is present.
+4. The target application's own discovery mechanism sees the skill.
+5. Any required reload, new session, or user confirmation is reported.
 
-`.venv/bin/python scripts/install.py --agent claude-code --agent cursor`
-
-### Select a specific version
-
-Use `--version` to pin a release tag or commit SHA:
-
-`.venv/bin/python scripts/install.py --agent claude-code --version v1.0.0`
-
-The requested version must exist as a tag or commit in the repository.
-
-### Existing installations and updates
-
-Existing TypeCraft installations are skipped by default. This makes repeated installer runs safe.
-
-When a different version is requested, the installer reports the installed and requested versions and skips the existing installation.
-
-Use `--force` only when you explicitly intend to overwrite existing TypeCraft installations:
-
-`.venv/bin/python scripts/install.py --agent claude-code --version v1.0.0 --force`
-
-Review the requested version and target before using this option.
-
-Some agent targets share physical installation directories. Therefore, 48 agent targets do not necessarily correspond to 48 separate directories.
-
-## 3. ChatGPT and other installation routes
-
-The 48 targets refer specifically to the GitHub CLI-supported agent catalog. They do not represent every AI application.
-
-ChatGPT uses a separate distribution and skill-upload route. Do not assume the GitHub CLI installer installs skills into ChatGPT.
-
-Other applications without a compatible GitHub CLI installation mechanism require their own documented installation procedure.
-
-## 4. Verify installation
-
-Check that the installed skill directory contains:
-
-- `SKILL.md`
-- The complete `references/` directory
-- All expected reference Markdown files
-
-Then check whether the target AI application discovers and activates the skill.
-
-Installation success and skill discovery are separate verification steps. A successful file copy or installer exit code does not independently prove discovery.
-
-## 5. Troubleshooting
-
-**Missing Python dependency**
-
-Create the virtual environment and install `requirements-installer.txt`.
-
-**GitHub CLI skill command unavailable**
-
-Install or update GitHub CLI to a version that provides `gh skill` support. Confirm using `gh skill --help`.
-
-**Skill already installed**
-
-The installer skips existing TypeCraft installations by default. Use `--force` only when replacement is intentional.
-
-**Skill not discovered**
-
-Check the target application's official skill-discovery mechanism, installation scope, and any required reload or restart procedure.
-
-**References missing**
-
-Install the complete `skills/typecraft-skills/` directory rather than only `SKILL.md`.
+A successful installer exit code or a file listing proves installation/file presence, not runtime discovery.
 
 ## Related documentation
 

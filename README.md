@@ -71,21 +71,23 @@ Explicit user choices must never be silently overridden.
 
 ## Installation
 
-### Install directly through an AI Agent
+### Install with one GitHub URL
 
-You can ask a supported AI agent to install TypeCraft directly from GitHub.
-
-Copy this repository URL into your AI agent chat:
+**Copy only this URL, paste it into your AI agent chat, and press Enter:**
 
 `https://github.com/krupakar5535Kk/typecraft-skills`
 
-Then say:
+No second prompt should be required. When this repository URL is supplied by itself, a compatible agent should treat it as a TypeCraft installation request, read [INSTALL.md](INSTALL.md), detect its own environment, install the complete skill, and verify the result.
 
-`Install this skill in your environment. Read INSTALL.md and follow its instructions. Install the complete typecraft-skills directory, including all references, and verify installation and skill discovery.`
+This one-URL flow requires the agent to have GitHub/repository access, persistent filesystem access, and permission to install skills. The agent must not claim success when those capabilities are unavailable.
 
-The agent must have repository access and permission to install persistent skills.
+**Platform notes:**
 
-See [INSTALL.md](INSTALL.md) for the universal AI-agent installation instructions.
+- Claude Code, OpenAI Codex, Google Antigravity, and OpenCode can use their documented skill directories; GitHub CLI provides a common installer for supported local agents.
+- Cursor's documented GitHub-repository import uses a Cursor plugin package and marketplace flow. The Cursor-specific adapter must be tested separately.
+- ChatGPT Skills uses ChatGPT's own create/upload and workspace-eligibility flow; it is not installed by the local GitHub CLI command.
+
+See [INSTALL.md](INSTALL.md) for host detection, installation, safety, and verification requirements.
 
 ### Install for all 48 supported GitHub CLI targets
 
