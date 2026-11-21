@@ -51,6 +51,9 @@ jobs:
       - name: Test agent listing
         run: .venv/bin/python scripts/install.py --list
 
+      - name: Test installer inventory matching
+        run: .venv/bin/python -m unittest discover -s tests -v
+
       - name: Test all 48 agent installation previews
         run: .venv/bin/python scripts/install.py --all --dry-run
 

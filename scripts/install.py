@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -26,6 +27,57 @@ def load_registry():
 
 def normalize_source(url):
     return (url or "").strip().rstrip("/").removesuffix(".git").lower()
+
+
+def is_typecraft_installation(row):
+    """Recognize this repository's skill, including shared installs with no sourceURL."""
+    source = normalize_source(row.get("sourceURL"))
+    if source:
+        return source == normalize_source(SOURCE_URL)
+
+    path_value = row.get("path")
+    if not path_value:
+        return False
+
+    try:
+        skill_path = Path(path_value).expanduser().resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+
+    if not skill_path.is_dir() or skill_path.name.lower() != SKILL:
+        return False
+
+    manifest_path = skill_path / "SKILL.md"
+    try:
+        manifest = manifest_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    # Only use the on-disk fallback when the CLI omitted sourceURL. Require
+    # both the Agent Skills manifest name and TypeCraft's canonical heading.
+    parts = manifest.split("---", 2)
+    if len(parts) != 3 or parts[0].strip():
+        return False
+
+    name_match = re.search(
+        r"""(?m)^name:\s*['"]?([A-Za-z0-9._-]+)['"]?\s*$""",
+        parts[1],
+    )
+    return bool(
+        name_match
+        and name_match.group(1) == SKILL
+        and "# TypeCraft Skills" in parts[2][:1000]
+    )
+
+
+def normalize_install_path(path_value):
+    """Canonicalize install paths so symlink aliases compare as one location."""
+    if not path_value:
+        return None
+    try:
+        return str(Path(path_value).expanduser().resolve(strict=False))
+    except (OSError, RuntimeError):
+        return str(Path(path_value).expanduser())
 
 
 def check_gh():
@@ -74,7 +126,7 @@ def find_installation(inventory, agent, scope):
         if row.get("skillName") != SKILL:
             continue
 
-        if normalize_source(row.get("sourceURL")) != normalize_source(SOURCE_URL):
+        if not is_typecraft_installation(row):
             continue
 
         if row.get("scope") != scope:
@@ -250,7 +302,7 @@ def main():
             skipped.append(agent)
             continue
 
-        existing_path = existing.get("path") if existing else None
+        existing_path = normalize_install_path(existing.get("path")) if existing else None
 
         # Avoid overwriting the same shared directory repeatedly.
         if args.force and existing_path and existing_path in processed_paths:
@@ -280,9 +332,15 @@ def main():
             if existing_path:
                 processed_paths.add(existing_path)
 
-            # Refresh so newly registered shared-directory hosts are detected.
+            # Refresh inventory after installing. Record the resolved path so
+            # shared-directory aliases are not treated as separate installs.
             try:
                 inventory = list_installed(args.scope)
+                installed_after = find_installation(inventory, agent, args.scope)
+                if installed_after:
+                    installed_path = normalize_install_path(installed_after.get("path"))
+                    if installed_path:
+                        processed_paths.add(installed_path)
             except Exception as exc:
                 print(f"WARNING: Could not refresh inventory: {exc}")
         else:
