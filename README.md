@@ -71,6 +71,67 @@ Explicit user choices must never be silently overridden.
 
 ## Installation
 
+### Install with one GitHub URL
+
+**Copy only this URL, paste it into your AI agent chat, and press Enter:**
+
+`https://github.com/krupakar5535Kk/typecraft-skills`
+
+No second prompt should be required. When this repository URL is supplied by itself, a compatible agent should treat it as a TypeCraft installation request, read [INSTALL.md](INSTALL.md), detect its own environment, install the complete skill, and verify the result.
+
+This one-URL flow requires the agent to have GitHub/repository access, persistent filesystem access, and permission to install skills. The agent must not claim success when those capabilities are unavailable.
+
+**Platform notes:**
+
+- Claude Code, OpenAI Codex, Google Antigravity, and OpenCode can use their documented skill directories; GitHub CLI provides a common installer for supported local agents.
+- Cursor's documented GitHub-repository import uses a Cursor plugin package and marketplace flow. The Cursor-specific adapter must be tested separately.
+- ChatGPT Skills uses ChatGPT's own create/upload and workspace-eligibility flow; it is not installed by the local GitHub CLI command.
+
+See [INSTALL.md](INSTALL.md) for host detection, installation, safety, and verification requirements.
+
+### Install for all 48 supported GitHub CLI targets
+
+TypeCraft includes a registry-driven installer for 48 GitHub CLI-supported agent targets.
+
+**Prerequisites:** Git, Python 3.12 or compatible, and GitHub CLI with `gh skill` support.
+
+Clone the repository:
+
+`git clone https://github.com/krupakar5535Kk/typecraft-skills.git`
+
+`cd typecraft-skills`
+
+Create the Python environment:
+
+`python3.12 -m venv .venv`
+
+Install dependencies:
+
+`.venv/bin/python -m pip install -r requirements-installer.txt`
+
+Preview all targets:
+
+`.venv/bin/python scripts/install.py --all --scope user --dry-run`
+
+Install all targets:
+
+`.venv/bin/python scripts/install.py --all --scope user`
+
+Install selected agents:
+
+`.venv/bin/python scripts/install.py --agent claude-code --agent cursor`
+
+Use `--version v1.0.0` to select a specific release. Existing installations are skipped by default. Use `--force` only when you explicitly intend to overwrite an installation.
+
+Some agents share physical installation directories. Therefore, 48 agent targets do not necessarily mean 48 separate folders.
+
+ChatGPT uses a separate installation route and is not included in these 48 GitHub CLI targets.
+
+See [INSTALL.md](INSTALL.md) for AI-agent installation instructions.
+
+### Install manually
+
+
 TypeCraft is distributed as a single Agent Skill.
 
 Clone the repository:
