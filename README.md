@@ -73,23 +73,30 @@ Explicit user choices must never be silently overridden.
 
 ### Install with one GitHub URL
 
-**Copy only this URL, paste it into your AI agent chat, and press Enter:**
+**Paste this repository URL into a compatible agent:**
 
-`https://github.com/krupakar5535Kk/typecraft-skills`
+`https://github.com/krupakar5535Kk/typecraft-skills.git`
 
-No second prompt should be required. When this repository URL is supplied by itself, a compatible agent should treat it as a TypeCraft installation request, read [INSTALL.md](INSTALL.md), detect its own environment, install the complete skill, and verify the result.
+The URL by itself is an installation request. The same applies when it is followed by a request such as “Install this skill.” A compatible agent should inspect this repository, read [INSTALL.md](INSTALL.md), identify its actual platform, install the complete canonical skill, and check the platform's own discovery mechanism. Do not infer the platform from the repository, operating system, or installed applications.
 
-This one-URL flow requires the agent to have GitHub/repository access, persistent filesystem access, and permission to install skills. The agent must not claim success when those capabilities are unavailable.
+The flow requires repository access and, for persistent local installation, filesystem access and permission to write to the documented skill location. ChatGPT requires a ZIP upload and user confirmation. Chat-only environments without persistent installation access can use the files in the current conversation only; they must not claim a persistent installation.
+
+When a repository checkout and local terminal are available, the tested installer router is:
+
+`.venv/bin/python -m scripts.install_url --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." --agent auto`
+
+`--agent auto` uses `TYPECRAFT_AGENT` supplied by the active runtime. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. Use `--agent chatgpt --package-output /tmp/typecraft-skills.zip` to prepare a package for manual upload.
 
 **Platform notes:**
 
-- Claude Code, OpenAI Codex, Google Antigravity, and OpenCode can use their documented skill directories; GitHub CLI provides a common installer for supported local agents.
-- Cursor's documented GitHub-repository import uses a Cursor plugin package and marketplace flow. The Cursor-specific adapter must be tested separately.
-- ChatGPT Skills uses ChatGPT's own create/upload and workspace-eligibility flow; it is not installed by the local GitHub CLI command.
+- Claude Code, OpenAI Codex, Gemini CLI, Cursor, OpenCode, and the Antigravity App have documented native skill directories. The router uses only the paths listed in [INSTALL.md](INSTALL.md) and checks discovery separately.
+- GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been runtime-tested on every host.
+- ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.
+- Chat-only agents without persistent installation access can use the canonical files for the current conversation only.
 
 See [INSTALL.md](INSTALL.md) for host detection, installation, safety, and verification requirements.
 
-### Install for all 48 supported GitHub CLI targets
+### Maintainer: install for GitHub CLI targets
 
 TypeCraft includes a registry-driven installer for 48 GitHub CLI-supported agent targets.
 
@@ -111,15 +118,15 @@ Install dependencies:
 
 Preview all targets:
 
-`.venv/bin/python scripts/install.py --all --scope user --dry-run`
+`.venv/bin/python -m scripts.install --all --scope user --dry-run`
 
 Install all targets:
 
-`.venv/bin/python scripts/install.py --all --scope user`
+`.venv/bin/python -m scripts.install --all --scope user`
 
 Install selected agents:
 
-`.venv/bin/python scripts/install.py --agent claude-code --agent cursor`
+`.venv/bin/python -m scripts.install --agent claude-code --agent cursor`
 
 Use `--version v1.0.0` to select a specific release. Existing installations are skipped by default. Use `--force` only when you explicitly intend to overwrite an installation.
 

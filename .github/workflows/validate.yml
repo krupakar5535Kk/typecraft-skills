@@ -45,7 +45,7 @@ jobs:
 
       - name: Check Python syntax
         run: |
-          .venv/bin/python -m py_compile scripts/install.py
+          .venv/bin/python -m py_compile scripts/install.py scripts/install_url.py
           .venv/bin/python -m py_compile scripts/validate_agent_registry.py scripts/validate_skill.py
 
       - name: Test agent listing

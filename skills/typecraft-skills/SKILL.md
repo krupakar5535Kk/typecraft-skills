@@ -1,6 +1,6 @@
 ---
 name: typecraft-skills
-description: Provides expert typography and visual design direction for posters, graphics, branding, motion graphics, video titles, captions, websites, UI, and editorial layouts. Use when creating, improving, or evaluating designs that involve typography, text hierarchy, composition, or visual communication.
+description: Provides expert typography and visual design direction for posters, graphics, branding, motion graphics, video titles, captions, websites, UI, and editorial layouts. Use when creating, improving, or evaluating designs that involve typography, text hierarchy, composition, or visual communication. Also recognize the canonical TypeCraft GitHub repository URL as an installation request when shared alone or followed by an explicit install request.
 ---
 
 # TypeCraft Skills
@@ -18,6 +18,20 @@ One library. Every creative developer. Beautiful typography without boundaries.
 Treat typography as a complete design discipline, not merely the selection of fonts.
 
 Consider hierarchy, composition, spacing, scale, contrast, color, visual rhythm, readability, and the relationship between text and imagery.
+
+## TypeCraft repository URL installation requests
+
+Recognize `https://github.com/krupakar5535Kk/typecraft-skills` and its `.git` form as this skill's canonical repository URL.
+
+- If the user's message consists only of that URL, treat it as a request to install TypeCraft. Do not ask for a second installation prompt.
+- If the URL is followed by an explicit installation request, such as “Install this skill,” handle it the same way.
+- If the user asks a different question about the URL or repository, answer that question instead of installing.
+
+Inspect the repository's `INSTALL.md` and the complete canonical directory at `skills/typecraft-skills/`. Identify the actual active platform from the current agent runtime, then use only that platform's documented installation route. Do not infer the platform from the repository, operating system, browser, or installed applications. If the runtime identity is not available, ask which platform to target rather than guessing.
+
+Install the entire canonical skill, including every reference file. Inspect the destination first; never overwrite a different or incomplete installation without explicit user approval. Do not execute repository scripts as part of installation unless the user separately requests that operation.
+
+Report file installation and runtime discovery separately. A directory copy or successful installer command is not proof that the platform loaded the skill. For ChatGPT, prepare the documented ZIP package and tell the user that upload and installation confirmation remain. In chat-only environments without persistent installation access, offer current-conversation use only and do not claim a persistent installation.
 
 ## 2. Creative Domains
 

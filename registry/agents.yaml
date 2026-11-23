@@ -15,11 +15,11 @@ canonical_skill:
   name: typecraft-skills
   path: skills/typecraft-skills
   manifest: SKILL.md
-  repository: https://github.com/krupakar5535Kk/typecraft-skills
+  repository: https://github.com/krupakar5535Kk/typecraft-skills.git
 
 verification_levels:
-  verified: "Installation and skill discovery tested successfully."
-  compatible: "Platform documents support for the shared Agent Skills format."
+  verified: "Installation and runtime skill discovery tested successfully."
+  compatible: "Official platform documentation describes a supported skill format and install route."
   research_required: "Installation method or compatibility needs investigation."
   unsupported: "No supported persistent skill installation mechanism identified."
 
@@ -93,8 +93,6 @@ platforms:
       method: native_directory
       project_path: .agents/skills
       user_path: ~/.gemini/config/skills
-      cli_project_path: .agents/skills
-      cli_user_path: ~/.gemini/antigravity-cli/skills
     chat_installation:
       possible: conditional
       requirements:
@@ -103,7 +101,31 @@ platforms:
         - user_permission
     evidence:
       - https://antigravity.google/docs/skills
-    notes: "App, IDE and CLI have different global paths. Select the path for the actual Antigravity surface."
+    notes: "Verified locations are for the Antigravity App. Do not infer CLI paths from App paths."
+
+  antigravity_cli:
+    display_name: Antigravity CLI
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+    installation:
+      method: needs_platform_documentation
+    evidence:
+      - https://antigravity.google/docs/skills
+    notes: "The App documentation does not establish a CLI-specific directory or runtime discovery route."
+
+  github_copilot:
+    display_name: GitHub Copilot
+    category: coding_agent
+    skill_format: agentskills
+    compatibility: compatible
+    installer: github_cli
+    installation:
+      method: github_cli_managed
+    evidence:
+      - https://cli.github.com/manual/gh_skill_install
+    notes: "GitHub CLI supports this target; TypeCraft runtime discovery has not been independently tested."
 
   chatgpt:
     display_name: ChatGPT
@@ -111,9 +133,10 @@ platforms:
     skill_format: agentskills
     compatibility: compatible
     installation:
-      method: official_skill_upload
+      method: zip_upload_with_user_confirmation
       user_action: "Skills > Create > Upload from your computer"
       package_required: true
+      persistent_installation_verified: false
     chat_installation:
       possible: conditional
       requirements:
@@ -123,7 +146,7 @@ platforms:
     evidence:
       - https://help.openai.com/en/articles/20001066-skills-in-chatgpt
       - https://learn.chatgpt.com/docs/build-skills
-    notes: "Ordinary chat cannot guarantee persistent installation. Availability depends on account and workspace."
+    notes: "The package can be prepared, but upload, scanning, and installation require the user's ChatGPT UI and workspace permissions."
 
   claude_code:
     display_name: Claude Code
@@ -163,8 +186,15 @@ platforms:
     display_name: Cursor
     category: ai_ide
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     installer: github_cli
+    installation:
+      method: native_directory
+      project_path: .cursor/skills
+      user_path: ~/.cursor/skills
+    evidence:
+      - https://cursor.com/docs/skills
+    notes: "Cursor also discovers .agents/skills and Claude/Codex skill directories. Runtime discovery must still be checked in Cursor."
 
   opencode:
     display_name: OpenCode
@@ -181,8 +211,15 @@ platforms:
     display_name: Gemini CLI
     category: coding_agent
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     installer: github_cli
+    installation:
+      method: native_directory
+      project_path: .gemini/skills
+      user_path: ~/.gemini/skills
+    evidence:
+      - https://geminicli.com/docs/cli/skills/
+    notes: "Gemini CLI also supports .agents/skills aliases and `gemini skills list --all` for discovery; activation can request user consent."
 
   cline:
     display_name: Cline
@@ -252,6 +289,55 @@ platforms:
       method: adapter_required
     notes: "Evaluate each framework for filesystem access, skill discovery and persistent storage."
 
+native_adapters:
+  claude-code:
+    platform: claude_code
+    scope_paths:
+      user: ~/.claude/skills
+      project: .claude/skills
+    evidence: https://code.claude.com/docs/en/skills
+  codex:
+    platform: codex
+    scope_paths:
+      user: ~/.agents/skills
+      project: .agents/skills
+    evidence: https://developers.openai.com/codex/skills/
+  cursor:
+    platform: cursor
+    scope_paths:
+      user: ~/.cursor/skills
+      project: .cursor/skills
+    evidence: https://cursor.com/docs/skills
+  gemini-cli:
+    platform: gemini_cli
+    scope_paths:
+      user: ~/.gemini/skills
+      project: .gemini/skills
+    evidence: https://geminicli.com/docs/cli/skills/
+  opencode:
+    platform: opencode
+    scope_paths:
+      user: ~/.config/opencode/skills
+      project: .opencode/skills
+    evidence: https://opencode.ai/docs/skills/
+  antigravity:
+    platform: antigravity
+    scope_paths:
+      user: ~/.gemini/config/skills
+      project: .agents/skills
+    evidence: https://antigravity.google/docs/skills
+
+runtime_detection:
+  environment_variable: TYPECRAFT_AGENT
+  automatic_detection_requires_explicit_host_identity: true
+  do_not_guess_from_installed_applications_or_paths: true
+
+fallbacks:
+  chat-only:
+    persistent_installation: unsupported
+    user_action: "For temporary use, ask the agent to read the canonical skill files in this repository for the current conversation."
+    notes: "A chat-only agent without repository/filesystem access cannot install or persist a skill."
+
 # Individual GitHub CLI agent catalog.
 # GitHub CLI owns the host-specific installation paths.
 # These entries do not imply independent installation testing.
@@ -265,31 +351,31 @@ agent_catalog:
   - agent_id: claude-code
     display_name: "Claude Code"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: cursor
     display_name: "Cursor"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: codex
     display_name: "OpenAI Codex"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: gemini-cli
     display_name: "Gemini CLI"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: antigravity
     display_name: "Google Antigravity"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: antigravity-cli
@@ -469,7 +555,7 @@ agent_catalog:
   - agent_id: opencode
     display_name: "OpenCode"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: openhands
