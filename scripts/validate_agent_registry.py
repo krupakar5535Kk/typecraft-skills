@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 from strictyaml import load, YAMLValidationError
 import sys
@@ -76,6 +77,10 @@ for key, platform in platforms.items():
     status = platform.get("compatibility")
     if status not in ALLOWED_STATUSES:
         fail(f"{key}: invalid compatibility status {status}")
+    try:
+        date.fromisoformat(str(platform.get("documentation_checked", "")))
+    except ValueError:
+        fail(f"{key}: documentation_checked must be an ISO date")
 
     for field in (
         "display_name",
@@ -89,6 +94,25 @@ for key, platform in platforms.items():
             fail(f"{key}: missing {field}")
         if platform.get("native_installer_available") not in {"true", "false", "unknown"}:
             fail(f"{key}: invalid native installer availability")
+    environment = platform.get("verification_environment", {})
+    if (
+        not isinstance(environment, dict)
+        or environment.get("kind") not in {
+            "documentation_review",
+            "historical_runtime_test",
+            "manual_runtime_test",
+            "automated_runtime_test",
+        }
+        or not environment.get("environment")
+    ):
+        fail(f"{key}: missing verification environment details")
+    runtime_test = environment.get("kind") in {
+        "historical_runtime_test",
+        "manual_runtime_test",
+        "automated_runtime_test",
+    }
+    if (status == "verified") != runtime_test:
+        fail(f"{key}: verification environment conflicts with compatibility status")
     documentation_url = platform.get("official_documentation_url")
     if status in {"compatible", "verified"} and not (
         isinstance(documentation_url, str)
@@ -112,19 +136,25 @@ for key, platform in platforms.items():
 
     file_status = platform.get("file_installation_verification")
     discovery_status = platform.get("runtime_discovery_verification")
+    invocation_status = platform.get("skill_invocation_verification", "not_tested")
     if file_status not in {"verified", "not_tested", "failed", "not_applicable"}:
         fail(f"{key}: invalid file installation verification status")
     if discovery_status not in {
         "verified", "not_tested", "failed", "not_supported"
     }:
         fail(f"{key}: invalid runtime discovery verification status")
+    if invocation_status not in {
+        "verified", "not_tested", "failed", "not_supported"
+    }:
+        fail(f"{key}: invalid skill invocation verification status")
 
     if status == "verified":
         verification = platform.get("runtime_verification", {})
         environment = verification.get("environment", {})
         installation = verification.get("installation", {})
         discovery = verification.get("skill_discovery", {})
-        references = discovery.get("references_exercised", [])
+        invocation = verification.get("invocation", {})
+        references = invocation.get("references_exercised", [])
         agent_id = verification.get("agent_id")
         catalog_entry = next(
             (entry for entry in catalog if entry.get("agent_id") == agent_id),
@@ -136,7 +166,7 @@ for key, platform in platforms.items():
             and verification.get("skill_version")
             and all(
                 environment.get(field)
-                for field in ("product", "editor", "host", "session")
+                for field in ("product", "host", "session")
             )
             and installation.get("tested") == "true"
             and installation.get("scope") in {"user", "project"}
@@ -147,10 +177,10 @@ for key, platform in platforms.items():
             == str(REFERENCE_FILE_COUNT)
             and discovery.get("tested") == "true"
             and discovery.get("result") == "confirmed"
-            and discovery.get("skill_read") == "true"
-            and isinstance(references, list)
-            and references
-            and all(isinstance(reference, str) and reference for reference in references)
+            and invocation.get("tested") in {"true", "false"}
+            and (
+                invocation.get("tested") == "true"
+            ) == (invocation_status == "verified")
             and catalog_entry
             and catalog_entry.get("installation_verified") == "true"
             and catalog_entry.get("skill_discovery_verified") == "true"
@@ -161,7 +191,18 @@ for key, platform in platforms.items():
                 f"{key}: verified compatibility requires complete runtime evidence "
                 "and matching verified catalog flags"
             )
-    elif file_status == "verified" or discovery_status == "verified":
+        if invocation.get("tested") == "true" and not (
+            invocation.get("result") == "confirmed"
+            and isinstance(references, list)
+            and references
+            and all(isinstance(reference, str) and reference for reference in references)
+        ):
+            fail(f"{key}: invocation evidence requires confirmed exercised references")
+    elif (
+        file_status == "verified"
+        or discovery_status == "verified"
+        or invocation_status == "verified"
+    ):
         fail(f"{key}: verification statuses require compatibility: verified")
 
     user_report = platform.get("user_reported_runtime_verification")

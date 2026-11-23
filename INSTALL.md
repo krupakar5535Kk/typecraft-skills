@@ -47,11 +47,11 @@ its documented skill directory. The registry records surface-specific details.
   surfaces. The CLI documents `copilot skill add` and `copilot skill list`;
   use the registry's scope and do not treat Copilot VS Code verification as
   proof for another surface.
-- **Gemini CLI:** prefer
-  `gemini skills install https://github.com/krupakar5535Kk/typecraft-skills.git --path skills/typecraft-skills --scope user`
-  when the installed CLI advertises `--path` and `--scope`. The router does
-  not pass `--consent`; review Gemini's prompt. Otherwise use the documented
-  native directory.
+- **Gemini CLI:** when the installed CLI advertises native scoped installation,
+  the router installs the checked canonical skill directory with
+  `gemini skills install <canonical-skill-directory> --scope user|workspace`.
+  The router does not pass `--consent`; review Gemini's prompt. Otherwise use
+  the documented native directory.
 - **Antigravity App:** documented locations are `~/.gemini/config/skills/`
   and workspace `.agents/skills/`. The official skills page does not establish
   a separate CLI directory; do not assume the App path works in Antigravity
@@ -59,9 +59,9 @@ its documented skill directory. The registry records surface-specific details.
 - **OpenCode:** it supports several skill directories. The router prefers the
   shared `.agents/skills` location; check other active directories first to
   avoid duplicate skill IDs.
-- **ChatGPT Skills:** prepare a ZIP, then have the user upload it in
-  **Skills → Create → Upload from your computer**, wait for scanning, and
-  confirm installation. Packaging is not installation.
+- **ChatGPT Skills:** prepare a ZIP, then have the user open
+  **Plugins → Plugin Directory → Skills → Create → Upload from your computer**,
+  wait for scanning, and confirm installation. Packaging is not installation.
 - **Windsurf:** stop and report that the route needs confirmation. Its former
   documentation URL redirects to Devin docs, which is not sufficient evidence
   for current Windsurf-specific behavior.

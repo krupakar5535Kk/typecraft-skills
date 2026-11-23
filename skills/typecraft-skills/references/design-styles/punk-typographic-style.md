@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A rebellious typographic approach inspired by punk DIY culture, using cut-and-paste lettering, collage, irregular layouts, photocopy textures, and expressive visual disruption.
 domains:
   - static_graphics
@@ -95,6 +95,12 @@ Useful directions include:
 Font selection should support the concept rather than imitate a famous band's artwork or a single historical designer.
 
 When constructing cutout lettering digitally, use original lettering, licensed assets, or appropriately permitted source material. Do not reproduce protected artwork or assume that an existing typeface is free to use.
+
+### Practical Pairing
+
+- Pair Archivo Black for a short, forceful headline with IBM Plex Sans for supporting information.
+- Use IBM Plex Mono selectively for documentary labels or notes, not as a substitute for readable body text.
+- Treat these as contemporary choices and verify language coverage and licensing.
 
 ## Color Direction
 

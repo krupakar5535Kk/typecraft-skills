@@ -13,7 +13,7 @@ import zipfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from strictyaml import load
+from strictyaml import StrictYAMLError, load
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = ROOT / "registry" / "agents.yaml"
@@ -185,11 +185,13 @@ def _is_typecraft_copy(path):
         text = manifest.read_text(encoding="utf-8")
     except (OSError, UnicodeError):
         return False
-    signature = _manifest_signature(text)
-    return bool(
-        signature
-        and signature[0] == SKILL_NAME
-        and "# TypeCraft Skills" in signature[-1][:1000]
+    parsed = _parse_manifest(text)
+    if parsed is None:
+        return False
+    frontmatter, body = parsed
+    return (
+        frontmatter.get("name") == SKILL_NAME
+        and "# TypeCraft Skills" in body[:1000]
     )
 
 
@@ -411,7 +413,7 @@ def package_skill(source, output, overwrite=False):
     return output, len(files)
 
 
-def _load_gh_inventory(platform, scope):
+def _load_gh_inventory(platform, scope, cwd=None):
     fields = "skillName,sourceURL,agentHosts,path,version,scope"
     result = subprocess.run(
         [
@@ -421,6 +423,7 @@ def _load_gh_inventory(platform, scope):
         capture_output=True,
         text=True,
         check=False,
+        cwd=cwd,
     )
     if result.returncode:
         raise InstallationError(
@@ -450,7 +453,7 @@ def _is_typecraft_source(row):
     return source.lower() == f"https://github.com/{REPOSITORY}".lower()
 
 
-def _verify_cli_files(source, row):
+def _verify_cli_files(source, row, metadata_source="repository"):
     path_value = row.get("path")
     if not path_value:
         return False
@@ -474,36 +477,85 @@ def _verify_cli_files(source, row):
         if not installed.is_file():
             return False
         if relative == Path("SKILL.md"):
-            if _manifest_signature(installed.read_text(encoding="utf-8")) != (
-                _manifest_signature(path.read_text(encoding="utf-8"))
-            ):
+            expected_signature = _manifest_signature(
+                path.read_text(encoding="utf-8")
+            )
+            installed_signature = _manifest_signature(
+                installed.read_text(encoding="utf-8"),
+                metadata_source=metadata_source,
+            )
+            if expected_signature is None or installed_signature != expected_signature:
                 return False
-        elif installed.read_bytes() != path.read_bytes():
+        elif _sha256(installed) != _sha256(path):
             return False
     return True
 
 
-def _manifest_signature(text):
+def _parse_manifest(text):
     parts = text.split("---", 2)
     if len(parts) != 3 or parts[0].strip():
         return None
-    values = []
-    for field in ("name", "description"):
-        match = re.search(rf"(?m)^{field}:\s*(.*?)\s*$", parts[1])
-        values.append(match.group(1).strip("\"'") if match else None)
-    return tuple(values) + (parts[2],)
+    try:
+        frontmatter = dict(load(parts[1]).data)
+    except StrictYAMLError:
+        return None
+    return frontmatter, parts[2]
 
 
-def _install_with_github_cli(platform, scope, source, overwrite, version):
+def _manifest_signature(text, metadata_source=None):
+    parsed = _parse_manifest(text)
+    if parsed is None:
+        return None
+
+    frontmatter, body = parsed
+    metadata = frontmatter.pop("metadata", None)
+    if metadata is not None:
+        if not isinstance(metadata, dict):
+            return None
+        if metadata_source == "repository":
+            if (
+                set(metadata) != {"sourceURL"}
+                or not _is_typecraft_source({"sourceURL": metadata["sourceURL"]})
+            ):
+                return None
+        elif (
+            metadata_source is None
+            or set(metadata) != {"local-path"}
+            or metadata["local-path"] != metadata_source
+        ):
+            return None
+
+    normalized = json.dumps(
+        frontmatter,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    body = body.lstrip("\r\n")
+    return hashlib.sha256(f"{normalized}\n---\n{body}".encode("utf-8")).hexdigest()
+
+
+def _install_with_github_cli(
+    platform, scope, source, overwrite, version, project_root=None
+):
     if not shutil.which("gh"):
         raise InstallationError(
             f"No verified native directory adapter for {platform}, and GitHub CLI is unavailable."
         )
+    cwd = None
+    if scope == "project":
+        project = Path.cwd() if project_root is None else Path(project_root)
+        if not project.is_dir():
+            raise InstallationError(
+                f"Project installation directory does not exist: {project}"
+            )
+        cwd = project.resolve()
     help_result = subprocess.run(
         ["gh", "skill", "install", "--help"],
         capture_output=True,
         text=True,
         check=False,
+        cwd=cwd,
     )
     if help_result.returncode:
         raise InstallationError("GitHub CLI Agent Skills support is unavailable.")
@@ -513,7 +565,7 @@ def _install_with_github_cli(platform, scope, source, overwrite, version):
             f"The installed GitHub CLI does not advertise support for {platform}."
         )
 
-    rows = _load_gh_inventory(platform, scope)
+    rows = _load_gh_inventory(platform, scope, cwd=cwd)
     existing = _matching_rows(rows, platform, scope)
     if existing:
         current = next((row for row in existing if _is_typecraft_source(row)), None)
@@ -543,13 +595,13 @@ def _install_with_github_cli(platform, scope, source, overwrite, version):
     ]
     if overwrite:
         command.append("--force")
-    result = subprocess.run(command, check=False)
+    result = subprocess.run(command, check=False, cwd=cwd)
     if result.returncode:
         raise InstallationError(
             f"GitHub CLI installation failed for {platform} (exit {result.returncode})."
         )
 
-    refreshed = _load_gh_inventory(platform, scope)
+    refreshed = _load_gh_inventory(platform, scope, cwd=cwd)
     installed = next(
         (
             row for row in _matching_rows(refreshed, platform, scope)
@@ -606,7 +658,6 @@ def _gemini_native_installer_supported(executable):
     help_text = f"{result.stdout}\n{result.stderr}"
     return (
         result.returncode == 0
-        and "--path" in help_text
         and "--scope" in help_text
     )
 
@@ -648,9 +699,7 @@ def _install_with_gemini_cli(
         executable,
         "skills",
         "install",
-        f"https://github.com/{REPOSITORY}.git",
-        "--path",
-        "skills/typecraft-skills",
+        str(Path(source).resolve()),
         "--scope",
         native_scope,
     ]
@@ -809,7 +858,9 @@ def execute_install(
             message,
             version,
         )
-    return _install_with_github_cli(platform, scope, source, overwrite, version)
+    return _install_with_github_cli(
+        platform, scope, source, overwrite, version, project_root=project_root
+    )
 
 
 def print_result(result, json_output=False):

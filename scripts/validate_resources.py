@@ -72,6 +72,8 @@ def scan(resource_type, folder):
 
         if data["status"] not in VALID_STATUSES:
             error(f"{path.name}: invalid lifecycle status")
+        elif data["status"] != "approved":
+            error(f"{path.name}: final library resources must be approved")
 
         if not data["domains"] or not data["tags"]:
             error(f"{path.name}: empty domains or tags")
@@ -141,6 +143,7 @@ def main():
 
     print("PASS: 10 typography styles")
     print("PASS: 10 design templates")
+    print("PASS: 20 production-approved resources")
     print("PASS: Unique resource IDs")
     print("PASS: Metadata and lifecycle statuses")
     print("PASS: Registry consistency")

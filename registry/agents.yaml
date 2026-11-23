@@ -18,10 +18,11 @@ canonical_skill:
   repository: https://github.com/krupakar5535Kk/typecraft-skills.git
 
 verification_levels:
-  verified: "Installation and runtime skill discovery tested successfully."
+  verified: "TypeCraft files installed and native skill discovery confirmed; invocation is tracked separately."
   compatible: "Official platform documentation describes a supported skill format and install route."
   research_required: "Installation method or compatibility needs investigation."
   unsupported: "No supported persistent skill installation mechanism identified."
+  invocation: "Actual skill invocation is recorded independently; an unrecorded invocation is not tested."
 
 installers:
   github_cli:
@@ -31,8 +32,9 @@ installers:
     preview_tested: true
     preview_tested_count: 48
     preview_tested_method: "Non-installing dry-run; target support is checked against the installed CLI help."
-    installation_tested: false
-    installation_tested_count: 0
+    installation_tested: true
+    installation_tested_count: 1
+    installation_tested_method: "Actual local GitHub CLI install and skill-list discovery for github-copilot in a temporary project using gh 2.103.3; all 20 references matched by SHA-256, with no GitHub credentials."
     source: https://cli.github.com/manual/gh_skill_install
     supported_agents:
       - github-copilot
@@ -93,6 +95,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://antigravity.google/docs/skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Antigravity App was not run and TypeCraft was not installed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -119,6 +124,9 @@ platforms:
     compatibility: research_required
     official_documentation_url: https://antigravity.google/docs/skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official skills documentation reviewed; no Antigravity CLI installation or runtime test was performed."
     native_installer_available: unknown
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -140,9 +148,13 @@ platforms:
     compatibility: verified
     official_documentation_url: https://docs.github.com/en/copilot/concepts/customizations/agent-skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: historical_runtime_test
+      environment: "Linux GitHub Codespaces; Visual Studio Code; fresh Copilot Agent session; user scope."
     native_installer_available: false
     file_installation_verification: verified
     runtime_discovery_verification: verified
+    skill_invocation_verification: verified
     installer: github_cli
     installation:
       method: github_cli_managed
@@ -168,6 +180,9 @@ platforms:
         tested: true
         result: confirmed
         skill_read: true
+      invocation:
+        tested: true
+        result: confirmed
         references_exercised:
           - Art Deco Typographic Style
           - Swiss International Typographic Style
@@ -189,6 +204,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Copilot CLI was not run and TypeCraft was not installed."
     native_installer_available: true
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -210,6 +228,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://docs.github.com/en/copilot/how-tos/github-copilot-app/customize-github-copilot-app
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Copilot app was not run and TypeCraft was not installed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -230,6 +251,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; no cloud-agent task or TypeCraft installation test was performed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -250,19 +274,22 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://help.openai.com/en/articles/20001066-skills-in-chatgpt
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; no eligible ChatGPT workspace was accessed and no upload was performed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
     installation:
       method: zip_upload_with_user_confirmation
-      user_action: "Skills > Create > Upload from your computer; wait for scanning and confirmation"
+      user_action: "Plugins > Plugin Directory > Skills > Create > Upload from your computer; wait for scanning and confirmation"
       package_required: true
       persistent_installation_verified: false
       user_scope_directory: not_applicable
       project_scope_directory: not_applicable
     discovery:
       mechanism: "ChatGPT Skills UI after upload, scan, and installation confirmation"
-      user_action: "Upload the ZIP and confirm that ChatGPT installs it."
+      user_action: "Open Plugins > Plugin Directory > Skills, upload the ZIP, and confirm that ChatGPT installs it."
     chat_installation:
       possible: conditional
       requirements:
@@ -279,6 +306,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://code.claude.com/docs/en/skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; the user-reported local observation was not independently reproduced."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -316,8 +346,11 @@ platforms:
     product_surface: Codex CLI and IDE extension
     skill_format: agentskills
     compatibility: compatible
-    official_documentation_url: https://developers.openai.com/codex/skills/
+    official_documentation_url: https://learn.chatgpt.com/docs/build-skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Codex CLI and IDE extension were not run and TypeCraft was not installed."
     native_installer_available: true
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -345,6 +378,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://cursor.com/docs/skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Cursor local Agent and Cloud Agents were not run and TypeCraft was not installed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -366,6 +402,9 @@ platforms:
     compatibility: compatible
     official_documentation_url: https://opencode.ai/docs/skills/
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; OpenCode was not run and TypeCraft was not installed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -384,22 +423,51 @@ platforms:
     category: coding_agent
     product_surface: Gemini CLI
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     official_documentation_url: https://geminicli.com/docs/cli/skills/
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: manual_runtime_test
+      environment: "Linux GitHub Codespaces; Gemini CLI 0.70.0; isolated temporary HOME; user scope; no personal credentials or model session."
     native_installer_available: true
-    file_installation_verification: not_tested
-    runtime_discovery_verification: not_tested
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: not_tested
     installer: github_cli
     installation:
       method: native_cli_with_safe_directory_fallback
-      native_command: "gemini skills install REPOSITORY --path skills/typecraft-skills --scope user|workspace"
+      native_command: "gemini skills install CANONICAL_SKILL_DIRECTORY --scope user|workspace"
       project_scope_directory: .gemini/skills
       user_scope_directory: ~/.gemini/skills
+    runtime_verification:
+      agent_id: gemini-cli
+      tested_at: "2026-11-23"
+      skill_version: "1.1.0-dev"
+      environment:
+        product: Gemini CLI
+        host: Linux GitHub Codespaces
+        session: "Isolated non-model CLI test; no account or credential used."
+        cli_version: "0.70.0"
+      installation:
+        tested: true
+        scope: user
+        method: "gemini skills install <local canonical path> --scope user --consent"
+        path: "$HOME/.gemini/skills/typecraft-skills/"
+        skill_manifest_present: true
+        reference_files_present: 20
+        sha256_tree_match: true
+      skill_discovery:
+        tested: true
+        result: confirmed
+        command: "gemini skills list --all"
+      invocation:
+        tested: false
+        result: not_attempted
+        reason: "Skill listing does not establish model-session invocation."
     discovery:
       mechanism: "gemini skills list --all"
-      user_action: "Review Gemini's consent prompt when activating the skill."
-    notes: "Gemini also reads .gemini/skills and ~/.gemini/skills; the shared .agents/skills alias avoids a second copy where possible."
+      user_action: "Review Gemini's consent prompt during installation; the router does not bypass it."
+    notes: "Automated runtime evidence covers native user-scope installation and discovery only. Project-scope discovery requires a trusted workspace and was not claimed; model invocation was not tested."
 
   cline:
     display_name: Cline
@@ -410,6 +478,9 @@ platforms:
     installer: github_cli
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Cline was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: github_cli_preview_fallback
@@ -431,6 +502,9 @@ platforms:
     installer: github_cli
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Roo Code was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: github_cli_preview_fallback
@@ -452,6 +526,9 @@ platforms:
     installer: github_cli
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Goose was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: github_cli_preview_fallback
@@ -473,6 +550,9 @@ platforms:
     installer: github_cli
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; OpenHands was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: github_cli_preview_fallback
@@ -494,6 +574,9 @@ platforms:
     installer: github_cli
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Qwen Code was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: github_cli_preview_fallback
@@ -514,6 +597,9 @@ platforms:
     compatibility: research_required
     official_documentation_url: https://docs.windsurf.com/windsurf/cascade/skills
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "The former documentation URL redirected to Devin documentation; Windsurf was not run."
     native_installer_available: unknown
     installation:
       method: needs_verification
@@ -534,6 +620,9 @@ platforms:
     compatibility: research_required
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Zed Agent was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: needs_verification
@@ -554,6 +643,9 @@ platforms:
     compatibility: research_required
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Aider was not run and no native route was confirmed."
     native_installer_available: unknown
     installation:
       method: needs_verification
@@ -574,6 +666,9 @@ platforms:
     compatibility: research_required
     official_documentation_url: null
     documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Registry review only; custom frameworks require individual product documentation and runtime testing."
     native_installer_available: false
     installation:
       method: adapter_required
@@ -598,7 +693,7 @@ native_adapters:
     scope_paths:
       user: ~/.agents/skills
       project: .agents/skills
-    evidence: https://developers.openai.com/codex/skills/
+    evidence: https://learn.chatgpt.com/docs/build-skills
   cursor:
     platform: cursor
     scope_paths:
@@ -700,9 +795,9 @@ agent_catalog:
   - agent_id: gemini-cli
     display_name: "Gemini CLI"
     installer: github_cli
-    installation_method: native_directory
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_method: native_cli
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: antigravity
     display_name: "Google Antigravity"
     installer: github_cli

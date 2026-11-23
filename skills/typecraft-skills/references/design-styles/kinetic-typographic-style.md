@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A motion-based typographic approach using animated letters, timed transitions, transformations, rhythm, and movement to communicate messages across time-based media.
 domains:
   - static_graphics
@@ -102,6 +102,12 @@ Useful font directions include:
 Consider font weight, character spacing, glyph complexity, and language support when planning animation.
 
 Use fonts with appropriate licensing. Confirm that the rendering environment supports any variable-font or advanced typographic features required by the design.
+
+### Practical Pairing
+
+- Pair Barlow Condensed for animated display headlines with Source Sans 3 for captions and supporting information.
+- Choose stable, legible letterforms for text that must remain readable during movement.
+- This is a contemporary option, not a fixed visual rule; verify renderer support, language coverage, and licensing.
 
 ## Color Direction
 

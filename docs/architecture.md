@@ -9,6 +9,8 @@
 
 ## 1. Product Vision
 
+**ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**
+
 TypeCraft Skills is a tool-independent AI typography and text-design skill for creative professionals.
 
 It provides reusable typography knowledge, creative direction and design execution instructions to compatible AI agents.
@@ -114,11 +116,12 @@ out of scope.
 Platform integrations are recorded by product surface in
 [`registry/agents.yaml`](../registry/agents.yaml). A documented route is not
 proof that TypeCraft has been installed; file verification is not runtime
-discovery. The only verified TypeCraft runtime is GitHub Copilot Agent mode in
-Visual Studio Code running in GitHub Codespaces. Copilot CLI, app, and cloud
-agent are separate surfaces. Claude Code local sessions are not equivalent to
-Cowork or remote cloud sessions. Windsurf and Antigravity CLI remain
-unverified.
+discovery, and discovery is not skill invocation. Runtime discovery evidence
+exists for GitHub Copilot Agent mode in Visual Studio Code running in GitHub
+Codespaces and Gemini CLI user scope. Only the Copilot record includes actual
+skill-invocation evidence. Copilot CLI, app, and cloud agent are separate
+surfaces. Claude Code local sessions are not equivalent to Cowork or remote
+cloud sessions. Windsurf and Antigravity CLI remain unverified.
 
 Platform-specific installation instructions must accurately describe the requirements and limitations of each environment.
 
@@ -181,4 +184,4 @@ Independent and flexible design combinations.
 
 One consistent design philosophy.
 
-**TYPECRAFT SKILLS — One library. Every creative developer. Beautiful typography without boundaries.**
+**TYPECRAFT SKILLS — ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**

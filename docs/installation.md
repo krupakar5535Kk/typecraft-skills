@@ -25,7 +25,9 @@ There is exactly one TypeCraft implementation, with 10 typography styles and
 The [compatibility registry](../registry/agents.yaml) records documentation
 URLs, current route, scopes, file checks, runtime checks, and outstanding user
 actions. `compatible` means the official documentation supports a route;
-`verified` requires TypeCraft installation and runtime discovery evidence.
+`verified` requires TypeCraft installation and native runtime discovery.
+Actual skill invocation is tracked separately and is never inferred from
+discovery.
 
 | Surface | Documented route and scope | Discovery and limits |
 |---|---|---|
@@ -36,11 +38,11 @@ actions. `compatible` means the official documentation supports a route;
 | GitHub Copilot CLI | Router copies to the documented `~/.copilot/skills/` or `.github/skills/` directory; `copilot skill add <DIRECTORY>` registers an alternate location | Check `copilot skill list` or `/skills info typecraft-skills`; this surface is not TypeCraft-tested. |
 | GitHub Copilot app | Use skills configured for a repository or Copilot CLI; manage in **Customize → Skills** | App discovery and installation are not the same as VS Code or CLI verification. |
 | GitHub Copilot cloud agent/code review | Add a project skill to the repository's documented skills directory | A personal local copy is not cloud persistence. Test a fresh cloud task separately. |
-| Gemini CLI | Prefer `gemini skills install <repo> --path skills/typecraft-skills --scope user\|workspace`; safe directory copy if the installed CLI lacks those options | The router checks `gemini skills list --all`. Gemini may request consent on activation. |
+| Gemini CLI | Native local-directory install with user or workspace scope; safe directory copy if the installed CLI lacks scoped install support | User-scope install and `gemini skills list --all` verified with Gemini CLI 0.70.0 in isolated Ubuntu CI. Review the install consent prompt. Workspace discovery requires the project to be trusted; model invocation was not tested. |
 | Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Check discovery in the App. The registry does not claim TypeCraft runtime testing. |
 | Antigravity CLI | GitHub CLI preview fallback only when that installed CLI advertises `antigravity-cli` | Official documentation names the CLI surface but does not establish a CLI-specific directory here; no path is guessed. |
 | OpenCode | Shared native `~/.agents/skills/` or `.agents/skills/` | OpenCode also reads its own directories. The shared path avoids installing a duplicate when possible; inspect all active sources. |
-| ChatGPT Skills | Create a ZIP, then use **Skills → Create → Upload from your computer** | ZIP creation is not installation. The user must upload, wait for scanning, and confirm availability. |
+| ChatGPT Skills | Create a ZIP, then use **Plugins → Plugin Directory → Skills → Create → Upload from your computer** | ZIP creation is not installation. The user must upload, wait for scanning, and confirm availability. |
 | Windsurf | No route is advertised by this project yet | The former skills documentation URL redirects to Devin documentation. Current Windsurf-specific behavior needs verification. |
 
 Other `gh skill` host IDs are installer integrations only. At the time of this

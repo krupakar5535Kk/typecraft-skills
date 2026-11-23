@@ -1,5 +1,6 @@
 import io
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -196,8 +197,16 @@ class UniversalInstallTests(unittest.TestCase):
             repository_root / "registry" / "agents.yaml"
         ).read_text(encoding="utf-8")
         unverified_claim = registry_text.replace(
-            "    compatibility: compatible",
-            "    compatibility: verified",
+            "    compatibility: compatible\n"
+            "    official_documentation_url: https://antigravity.google/docs/skills\n",
+            "    compatibility: verified\n"
+            "    official_documentation_url: https://antigravity.google/docs/skills\n",
+            1,
+        ).replace(
+            "      kind: documentation_review\n"
+            "      environment: \"Official documentation reviewed; Antigravity App was not run and TypeCraft was not installed.\"\n",
+            "      kind: historical_runtime_test\n"
+            "      environment: \"Runtime test environment not recorded.\"\n",
             1,
         )
         self.assertNotEqual(unverified_claim, registry_text)
@@ -227,7 +236,7 @@ class UniversalInstallTests(unittest.TestCase):
             for platform_id, platform in platforms.items()
             if platform["compatibility"] == "verified"
         ]
-        self.assertEqual(verified, ["github_copilot"])
+        self.assertEqual(verified, ["github_copilot", "gemini_cli"])
 
         verification = platforms["github_copilot"]["runtime_verification"]
         self.assertEqual(verification["tested_at"], "2026-11-23")
@@ -253,7 +262,7 @@ class UniversalInstallTests(unittest.TestCase):
             },
         )
         self.assertEqual(
-            verification["skill_discovery"]["references_exercised"],
+            verification["invocation"]["references_exercised"],
             [
                 "Art Deco Typographic Style",
                 "Swiss International Typographic Style",
@@ -268,12 +277,27 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(copilot["installation_verified"], "true")
         self.assertEqual(copilot["skill_discovery_verified"], "true")
+        gemini = next(
+            entry
+            for entry in self.registry["agent_catalog"]
+            if entry["agent_id"] == "gemini-cli"
+        )
+        self.assertEqual(gemini["installation_verified"], "true")
+        self.assertEqual(gemini["skill_discovery_verified"], "true")
+        gemini_platform = platforms["gemini_cli"]
+        self.assertEqual(
+            gemini_platform["skill_invocation_verification"], "not_tested"
+        )
+        self.assertEqual(
+            gemini_platform["runtime_verification"]["invocation"]["tested"],
+            "false",
+        )
         self.assertTrue(
             all(
                 entry["installation_verified"] == "false"
                 and entry["skill_discovery_verified"] == "false"
                 for entry in self.registry["agent_catalog"]
-                if entry["agent_id"] != "github-copilot"
+                if entry["agent_id"] not in {"github-copilot", "gemini-cli"}
             )
         )
 
@@ -351,6 +375,49 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(report["version"], self.registry["project_version"])
         self.assertEqual(report["file_verification"], "SUCCESS")
         self.assertEqual(report["skill_discovery"], "NOT_VERIFIED")
+
+    def test_all_native_adapters_install_complete_skill_at_both_scopes(self):
+        with patch("scripts.install_url.shutil.which", return_value=None):
+            for platform in self.registry["native_adapters"]:
+                for scope in ("user", "project"):
+                    root = self.root / f"{platform}-{scope}"
+                    project = root / "project"
+                    project.mkdir(parents=True)
+                    home = root / "home"
+
+                    result = execute_install(
+                        REQUEST,
+                        platform,
+                        scope=scope,
+                        source=SKILL_SOURCE,
+                        registry=self.registry,
+                        project_root=project,
+                        home=home,
+                    )
+                    destination = Path(result.location)
+                    self.assertEqual(
+                        result.installation,
+                        "FILES_INSTALLED_DISCOVERY_UNVERIFIED",
+                    )
+                    self.assertTrue(verify_skill_tree(SKILL_SOURCE, destination))
+                    self.assertEqual(
+                        len(list((destination / "references").rglob("*.md"))),
+                        20,
+                    )
+
+                    repeated = execute_install(
+                        REQUEST,
+                        platform,
+                        scope=scope,
+                        source=SKILL_SOURCE,
+                        registry=self.registry,
+                        project_root=project,
+                        home=home,
+                    )
+                    self.assertEqual(
+                        repeated.installation,
+                        "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED",
+                    )
 
     def test_file_verification_detects_missing_and_modified_reference_files(self):
         destination = self.root / "installed"
@@ -633,20 +700,168 @@ class UniversalInstallTests(unittest.TestCase):
         row = {"path": str(destination)}
         manifest_path = destination / "SKILL.md"
         manifest_path.write_text(
-            "---\nname: typecraft-skills\ndescription: TypeCraft\n"
-            "metadata:\n  sourceURL: https://github.com/source/repo\n"
+            f"---\nname: typecraft-skills\ndescription: TypeCraft\n"
+            f"metadata:\n  sourceURL: {URL}\n"
             "---\n# TypeCraft Skills\n",
             encoding="utf-8",
         )
         self.assertTrue(_verify_cli_files(self.source, row))
 
-        manifest_path.write_text(
-            manifest_path.read_text(encoding="utf-8").replace(
-                "# TypeCraft Skills", "# Altered Skill"
-            ),
-            encoding="utf-8",
+        invalid_manifests = (
+            f"---\nname: typecraft-skills\ndescription: TypeCraft\n"
+            "metadata:\n  sourceURL: https://github.com/attacker/repo\n"
+            "---\n# TypeCraft Skills\n",
+            f"---\nname: typecraft-skills\ndescription: TypeCraft\n"
+            f"metadata:\n  sourceURL: {URL}\n  permissions: [network]\n"
+            "---\n# TypeCraft Skills\n",
+            f"---\nname: typecraft-skills\ndescription: Altered\n"
+            f"metadata:\n  sourceURL: {URL}\n"
+            "---\n# TypeCraft Skills\n",
+            f"---\nname: typecraft-skills\ndescription: TypeCraft\n"
+            f"metadata:\n  sourceURL: {URL}\n"
+            "---\n# Altered Skill\n",
         )
-        self.assertFalse(_verify_cli_files(self.source, row))
+        for manifest in invalid_manifests:
+            with self.subTest(manifest=manifest):
+                manifest_path.write_text(manifest, encoding="utf-8")
+                self.assertFalse(_verify_cli_files(self.source, row))
+
+    @patch("scripts.install_url.subprocess.run")
+    @patch("scripts.install_url.shutil.which", return_value="/usr/bin/gh")
+    @patch("scripts.install_url._load_gh_inventory")
+    def test_github_cli_project_install_uses_requested_project_root(
+        self, inventory, _which, run
+    ):
+        project = self.root / "project"
+        project.mkdir()
+        destination = project / ".agents" / "skills" / "typecraft-skills"
+        destination.parent.mkdir(parents=True)
+        shutil.copytree(self.source, destination)
+        inventory.side_effect = [
+            [],
+            [{
+                "skillName": "typecraft-skills",
+                "sourceURL": URL,
+                "agentHosts": ["github-copilot"],
+                "scope": "project",
+                "path": str(destination),
+            }],
+        ]
+        run.return_value = SimpleNamespace(
+            returncode=0, stdout="github-copilot", stderr=""
+        )
+
+        result = execute_install(
+            REQUEST,
+            "github-copilot",
+            scope="project",
+            source=self.source,
+            registry=self.registry,
+            project_root=project,
+        )
+
+        self.assertEqual(
+            result.installation, "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
+        )
+        self.assertTrue(
+            all(call.kwargs.get("cwd") == project.resolve() for call in inventory.call_args_list)
+        )
+        self.assertTrue(
+            all(call.kwargs.get("cwd") == project.resolve() for call in run.call_args_list)
+        )
+
+    @unittest.skipUnless(shutil.which("gh"), "GitHub CLI is not installed")
+    def test_real_github_cli_installs_and_discovers_complete_skill_in_temp_project(self):
+        help_result = subprocess.run(
+            ["gh", "skill", "install", "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if help_result.returncode:
+            self.skipTest("Installed GitHub CLI has no Agent Skills support")
+
+        repository_root = Path(__file__).resolve().parents[1]
+        source = SKILL_SOURCE.resolve()
+        with tempfile.TemporaryDirectory(prefix="typecraft-gh-install-") as temp:
+            root = Path(temp)
+            project = root / "project"
+            config = root / "gh-config"
+            project.mkdir()
+            config.mkdir()
+            subprocess.run(
+                ["git", "init", "--quiet", str(project)],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            environment = os.environ.copy()
+            environment["GH_CONFIG_DIR"] = str(config)
+            environment.pop("GH_TOKEN", None)
+            environment.pop("GITHUB_TOKEN", None)
+            command = [
+                "gh", "skill", "install", str(repository_root), "typecraft-skills",
+                "--from-local", "--agent", "github-copilot", "--scope", "project",
+            ]
+            installed = subprocess.run(
+                command,
+                cwd=project,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(
+                installed.returncode,
+                0,
+                installed.stderr or installed.stdout,
+            )
+
+            listing = subprocess.run(
+                [
+                    "gh", "skill", "list", "--scope", "project", "--json",
+                    "skillName,sourceURL,agentHosts,path,version,scope",
+                ],
+                cwd=project,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(listing.returncode, 0, listing.stderr)
+            rows = json.loads(listing.stdout or "[]")
+            row = next(
+                (
+                    item for item in rows
+                    if item.get("skillName") == "typecraft-skills"
+                    and item.get("scope") == "project"
+                    and "github-copilot" in (item.get("agentHosts") or [])
+                ),
+                None,
+            )
+            self.assertIsNotNone(row, "GitHub CLI did not discover the installed skill")
+            self.assertEqual(
+                row["sourceURL"],
+                str(source),
+            )
+            self.assertTrue(
+                _verify_cli_files(source, row, metadata_source=str(source))
+            )
+            self.assertEqual(
+                len(list((Path(row["path"]) / "references").rglob("*.md"))),
+                20,
+            )
+
+            repeated = subprocess.run(
+                command,
+                cwd=project,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertNotEqual(repeated.returncode, 0)
+            self.assertIn("already installed", repeated.stderr.lower())
 
     @patch("scripts.install_url.subprocess.run")
     @patch("scripts.install_url.shutil.which", return_value="/usr/bin/gh")
@@ -750,7 +965,7 @@ class UniversalInstallTests(unittest.TestCase):
             if command[-1] == "--help":
                 return SimpleNamespace(
                     returncode=0,
-                    stdout="--path PATH --scope user|workspace",
+                    stdout="--scope user|workspace",
                     stderr="",
                 )
             if "install" in command:
@@ -775,8 +990,17 @@ class UniversalInstallTests(unittest.TestCase):
             for call in run.call_args_list
             if "install" in call.args[0] and call.args[0][-1] != "--help"
         )
-        self.assertIn("skills/typecraft-skills", install_command)
-        self.assertIn("user", install_command)
+        self.assertEqual(
+            install_command,
+            [
+                "/usr/bin/gemini",
+                "skills",
+                "install",
+                str(self.source.resolve()),
+                "--scope",
+                "user",
+            ],
+        )
         self.assertNotIn("--consent", install_command)
 
 

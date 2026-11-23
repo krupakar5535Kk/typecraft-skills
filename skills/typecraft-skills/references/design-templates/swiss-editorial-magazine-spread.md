@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A structured magazine layout using grids, clear information hierarchy, deliberate image placement, and consistent editorial spacing.
 domains:
   - editorial

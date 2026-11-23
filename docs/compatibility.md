@@ -20,6 +20,13 @@ The registry documents the date checked for official sources. The platform
 matrix below is intentionally conservative; it does not claim that every
 surface sharing a product name uses the same skill directory.
 
+Each platform record includes its documentation review date and verification
+environment. For unverified surfaces, that environment explicitly means
+documentation review only—not a product install or runtime test. The Copilot
+record preserves the separate historical runtime environment and evidence.
+Installation, native discovery, and actual skill invocation are distinct
+verification stages; a successful skill listing does not establish invocation.
+
 ## Platform verification matrix
 
 | Platform surface | Status | Documented install | File verification | Runtime discovery |
@@ -31,11 +38,11 @@ surface sharing a product name uses the same skill directory.
 | GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
 | GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
 | Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
-| Gemini CLI | compatible | Native `gemini skills install`; user or workspace scope | Not tested on the real CLI | Router can query `gemini skills list --all`; positive mocked tests are not runtime evidence. |
+| Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI 0.70.0; no model invocation |
 | Google Antigravity App | compatible | `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
 | Antigravity CLI | research_required | GitHub CLI preview fallback only if the installed CLI advertises the host | Not tested | Not tested; official App path is not assumed to be the CLI path |
 | OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested; OpenCode has additional native locations that should be checked for duplicates |
-| ChatGPT Skills | compatible | ZIP upload in the product UI | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
+| ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
 | Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
 | Other GitHub CLI host IDs | research_required unless separately documented above | Preview `gh skill install` only when the installed CLI explicitly lists the ID | Installer preview only | Not verified for TypeCraft |
 
@@ -55,6 +62,16 @@ This evidence applies only to the named VS Code + Codespaces environment. It
 does not verify Copilot CLI, the Copilot app, cloud agent, other editors, or
 other install scopes. It is historical evidence for TypeCraft 1.1.0; the
 current repository registry version is `1.1.0-dev`.
+
+### Actual Gemini CLI evidence
+
+Gemini CLI 0.70.0 installed the canonical local skill into an isolated
+user-scope directory on Ubuntu, then listed `typecraft-skills` with
+`gemini skills list --all`. SHA-256 tree verification confirmed the manifest and all 20 reference files.
+The Ubuntu CI job is configured to repeat the check without account
+credentials or a model session. Gemini CLI's native consent option was used
+only in the isolated test. Workspace discovery was not claimed because the
+CLI requires project trust; actual skill invocation was not attempted.
 
 ### User-reported Claude Code observation
 
@@ -76,8 +93,10 @@ Codespaces environment cannot inspect the user's Mac home directory.
 - **Cursor:** a local user skill is not automatically synced to Cloud Agents;
   project skills and Cloud Agent synchronization are separate.
 - **Gemini CLI:** supports native `gemini skills install`, user/workspace scope,
-  discovery listing, and consent on activation. The router uses the native
-  command only when the installed CLI advertises the documented options.
+  discovery listing, and consent during installation. The router uses the native
+  command only when the installed CLI advertises scoped installation. User
+  scope has automated file and discovery evidence; workspace discovery and
+  model invocation remain unverified.
 - **Antigravity:** the current official skills page describes App locations.
   It does not establish a CLI-specific path, so the registry leaves the CLI
   route to a checked GitHub CLI preview rather than guessing.
@@ -98,5 +117,5 @@ that TypeCraft was installed, discovered, or invoked in the target agent.
 
 Run an actual installation and fresh-session discovery test for each compatible
 surface. Capture the precise product version, operating system, scope, path,
-full source-file comparison, native discovery evidence, reference use, and
-remaining user action before changing any registry status to `verified`.
+full source-file comparison, native discovery evidence, any actual invocation,
+and remaining user action before changing a registry status.

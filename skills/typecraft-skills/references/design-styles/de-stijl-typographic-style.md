@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A geometric typographic approach inspired by De Stijl, using horizontal and vertical structures, rectangular forms, asymmetrical balance, and restrained color relationships.
 domains:
   - static_graphics
@@ -97,6 +97,12 @@ Useful contemporary font directions include:
 Select typefaces with clear letterforms, suitable language support, and appropriate licensing.
 
 Do not force a modern font to imitate historical lettering if doing so weakens readability or the composition.
+
+### Practical Pairing
+
+- Pair Futura for short geometric headlines with Source Sans 3 for longer supporting text and captions.
+- Keep both families subordinate to the grid and use readable sizes for essential information.
+- This is a contemporary example, not a mandatory historical pairing; confirm availability and licensing.
 
 ## Color Direction
 

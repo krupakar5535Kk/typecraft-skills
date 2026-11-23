@@ -1,6 +1,6 @@
 # TypeCraft Skills
 
-**One library. Every creative developer. Beautiful typography without boundaries.**
+**ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**
 
 TypeCraft Skills is an open-source AI Agent Skill for typography, visual design direction, and creative composition.
 
@@ -25,8 +25,8 @@ The current fixed library contains exactly 20 resources:
 - **10 design templates**
 
 There is one canonical installable Agent Skill at `skills/typecraft-skills/`.
-The resource lifecycle includes draft and review entries; inclusion does not
-mean approval.
+All 20 library resources have been editorially reviewed and are approved for
+production use.
 
 ### Typography Styles
 
@@ -58,7 +58,7 @@ mean approval.
 | TCS-TEMPLATE-009 | Social Media Campaign Carousel Layout |
 | TCS-TEMPLATE-010 | Data Visualization and Infographic Storytelling Layout |
 
-**Resource lifecycle:** The current collection contains draft and review resources. Inclusion in the library does not imply production approval.
+**Resource lifecycle:** All 10 typography styles and 10 design templates are approved production resources.
 
 ## Creative Domains
 
@@ -98,7 +98,7 @@ is:
 **Platform notes:**
 
 - Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App have documentation-backed routes. The Antigravity CLI path remains unestablished; do not assume the App path applies.
-- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. Only VS Code Agent in GitHub Codespaces has recorded TypeCraft runtime verification.
+- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. VS Code Agent in GitHub Codespaces and Gemini CLI user-scope installation/discovery have recorded evidence; actual skill invocation is recorded separately.
 - GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been installed or discovered in every host.
 - ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.
 - Windsurf's former skills documentation URL redirects to Devin documentation; the current Windsurf-specific route remains unverified.

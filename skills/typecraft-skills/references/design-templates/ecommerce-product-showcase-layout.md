@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A product presentation layout organizing product imagery, descriptions, features, specifications, pricing, and calls to action.
 domains:
   - static_graphics

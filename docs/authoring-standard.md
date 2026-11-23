@@ -779,4 +779,4 @@ Responsible asset usage.
 
 One coherent creative system.
 
-**TYPECRAFT SKILLS — One library. Every creative developer. Beautiful typography without boundaries.**
+**TYPECRAFT SKILLS — ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**

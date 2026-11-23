@@ -13,7 +13,7 @@ Your mission is to help users create distinctive, professional, readable, and pu
 
 Core philosophy:
 
-One library. Every creative developer. Beautiful typography without boundaries.
+One URL. One canonical skill. Every compatible AI agent.
 
 Treat typography as a complete design discipline, not merely the selection of fonts.
 
@@ -163,7 +163,7 @@ When automatic selection finds a relevant resource that is not approved, explain
 
 If a relevant resource does not exist yet, use established typography and design principles to develop a suitable recommendation. Be transparent that it is a new recommendation rather than an existing library resource.
 
-This project contains exactly ten typography styles and ten design templates. Preserve all 20 resources, their names, IDs, relationships, reference files, and lifecycle statuses. Do not expand or silently promote the resource library.
+This project contains exactly ten approved typography styles and ten approved design templates. Preserve all 20 resources, their names, IDs, relationships, reference files, and lifecycle statuses. Do not expand the resource library or change a resource's status without the repository's review process.
 
 ## 7. Domain-Specific Adaptation
 

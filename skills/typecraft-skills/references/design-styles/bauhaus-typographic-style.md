@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A functional and experimental typographic approach influenced by the Bauhaus, combining geometric construction, asymmetrical composition, expressive hierarchy, and purposeful integration of typography and graphic forms.
 domains:
   - static_graphics
@@ -129,6 +129,12 @@ Contemporary alternatives may include:
 Select typefaces according to the actual design objective, language support, availability, licensing, and readability.
 
 Do not claim that every contemporary geometric sans-serif is historically a Bauhaus typeface.
+
+### Practical Pairing
+
+- Pair Futura for geometric display headlines with IBM Plex Sans for supporting copy and labels.
+- Keep the display treatment concise and use the supporting family for longer reading.
+- This is a contemporary pairing, not a claim about a single historical Bauhaus type system; verify availability and licensing.
 
 ## Color Direction
 

@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: An event promotion layout organizing event identity, dates, venue, speakers, schedules, registration details, and supporting visuals.
 domains:
   - static_graphics
