@@ -40,8 +40,8 @@ class UniversalInstallTests(unittest.TestCase):
         self.root = Path(self.temp_dir.name)
         self.source = self.root / "canonical" / "typecraft-skills"
         (self.source / "references" / "design-styles").mkdir(parents=True)
-        (self.source / "references" / "design-styles" / "style.md").write_text(
-            "canonical reference\n", encoding="utf-8"
+        (self.source / "references" / "design-styles" / "style.md").write_bytes(
+            b"canonical reference\n"
         )
         (self.source / "SKILL.md").write_text(
             "---\nname: typecraft-skills\ndescription: TypeCraft\n---\n"
