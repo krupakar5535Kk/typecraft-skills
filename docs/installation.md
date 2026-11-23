@@ -1,111 +1,109 @@
 # TypeCraft Skills — Installation
 
-The only canonical TypeCraft implementation is `skills/typecraft-skills/`.
-Install or package that complete directory, including every file under
-`references/`.
+## One URL, one canonical skill
 
-## URL request behavior
+Paste this URL alone into a compatible agent:
 
-Treat either
-`https://github.com/krupakar5535Kk/typecraft-skills` or its `.git` form as an
-installation request when the URL is the whole user message, or is followed by
-an explicit request such as “Install this skill.” If the user asks a different
-question about the URL, answer that question instead.
+`https://github.com/krupakar5535Kk/typecraft-skills.git`
 
-Read [INSTALL.md](../INSTALL.md), identify the actual active platform, and use
-its documented route. Never infer the platform from the repository, operating
-system, browser, or installed applications.
+The URL alone is an installation request. The same applies to the canonical URL
+without `.git`, including ordinary Markdown links and trailing punctuation.
+Questions about the repository are not installation requests.
 
-## Local agents
+The agent must inspect [INSTALL.md](../INSTALL.md), identify its actual runtime,
+and install only `skills/typecraft-skills/`. Do not infer the product from the
+operating system, browser, repository name, or installed applications. If the
+active agent cannot supply its exact supported host ID, ask which platform to
+target; do not install to a guessed location.
 
-TypeCraft ships native directory adapters for platforms with documented
-Agent Skills paths:
+There is exactly one TypeCraft implementation, with 10 typography styles and
+10 design templates. Install or package its full directory, including
+`SKILL.md` and every reference. Do not execute scripts in the downloaded skill.
 
-| Platform | User location | Project location |
+## Platform routes
+
+The [compatibility registry](../registry/agents.yaml) records documentation
+URLs, current route, scopes, file checks, runtime checks, and outstanding user
+actions. `compatible` means the official documentation supports a route;
+`verified` requires TypeCraft installation and runtime discovery evidence.
+
+| Surface | Documented route and scope | Discovery and limits |
 |---|---|---|
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
-| OpenAI Codex | `~/.agents/skills/` | `.agents/skills/` |
-| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
-| Gemini CLI | `~/.gemini/skills/` | `.gemini/skills/` |
-| OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` |
-| Google Antigravity App | `~/.gemini/config/skills/` | `.agents/skills/` |
-| Antigravity CLI | `~/.gemini/antigravity-cli/skills/` | `.agents/skills/` |
+| Claude Code, local | Native personal `~/.claude/skills/` or project `.claude/skills/` | Check `/skills`. A local personal install does not automatically reach Cowork or remote cloud sessions. |
+| OpenAI Codex | `$skill-installer` or native `~/.agents/skills/` / project `.agents/skills/` | Check `/skills` or invoke `$typecraft-skills`; restart if needed. |
+| Cursor local Agent | Native shared `~/.agents/skills/` or project `.agents/skills/` | Check Cursor's skill picker. Personal local skills are not automatically synced to Cloud Agents. |
+| GitHub Copilot in VS Code | `gh skill install` or native project/personal skills | The only TypeCraft runtime-verified environment is VS Code in GitHub Codespaces; see the compatibility guide. |
+| GitHub Copilot CLI | Router copies to the documented `~/.copilot/skills/` or `.github/skills/` directory; `copilot skill add <DIRECTORY>` registers an alternate location | Check `copilot skill list` or `/skills info typecraft-skills`; this surface is not TypeCraft-tested. |
+| GitHub Copilot app | Use skills configured for a repository or Copilot CLI; manage in **Customize → Skills** | App discovery and installation are not the same as VS Code or CLI verification. |
+| GitHub Copilot cloud agent/code review | Add a project skill to the repository's documented skills directory | A personal local copy is not cloud persistence. Test a fresh cloud task separately. |
+| Gemini CLI | Prefer `gemini skills install <repo> --path skills/typecraft-skills --scope user\|workspace`; safe directory copy if the installed CLI lacks those options | The router checks `gemini skills list --all`. Gemini may request consent on activation. |
+| Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Check discovery in the App. The registry does not claim TypeCraft runtime testing. |
+| Antigravity CLI | GitHub CLI preview fallback only when that installed CLI advertises `antigravity-cli` | Official documentation names the CLI surface but does not establish a CLI-specific directory here; no path is guessed. |
+| OpenCode | Shared native `~/.agents/skills/` or `.agents/skills/` | OpenCode also reads its own directories. The shared path avoids installing a duplicate when possible; inspect all active sources. |
+| ChatGPT Skills | Create a ZIP, then use **Skills → Create → Upload from your computer** | ZIP creation is not installation. The user must upload, wait for scanning, and confirm availability. |
+| Windsurf | No route is advertised by this project yet | The former skills documentation URL redirects to Devin documentation. Current Windsurf-specific behavior needs verification. |
 
-These are supported file locations, not claims that TypeCraft has been
-independently tested in every runtime. Check the target agent's own skill list
-after installing. The Gemini CLI router can run `gemini skills list --all`;
-other native adapters report discovery as `NOT_VERIFIED` until the host itself
-confirms it. Antigravity CLI also reads the shared global
-`~/.gemini/config/skills/` and `~/.gemini/skills/` paths. Gemini may request
-consent when the skill is activated.
+Other `gh skill` host IDs are installer integrations only. At the time of this
+registry check, GitHub CLI 2.103.3 advertised 48 host IDs. That proves only the
+installed CLI's host list, not the platform's TypeCraft compatibility or
+runtime discovery. The router checks the actual CLI help before using it.
 
-GitHub CLI offers a preview `gh skill install` adapter for its documented
-agent-host list. The registry tracks those installer targets separately from
-platform compatibility and runtime discovery. The router uses that route only
-when no TypeCraft native directory adapter exists and the host is registered.
+## Optional local router
 
-### Optional local router
-
-Run this from a checkout after reviewing the script:
+From a reviewed repository checkout, with Python and the pinned dependency
+installed:
 
 ```bash
+python -m pip install -r requirements-installer.txt
 python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
-  --agent codex \
+  --agent <HOST_ID> \
   --scope user
 ```
 
-For `--agent auto`, the active runtime must set `TYPECRAFT_AGENT` to its exact
-registered host ID. If it is unset or unknown, the router stops rather than
-guessing. A project-scope install requires `--scope project`.
+Use `--agent auto` only when the active runtime sets `TYPECRAFT_AGENT` to its
+exact host ID. An explicit `--agent <HOST_ID>` is also supported. Unknown or
+missing identity fails closed. Use `--scope project` only when requested.
+`--json` emits the same report as machine-readable JSON.
 
-The router compares existing installs before writing. Identical installations
-are left unchanged. Different or incomplete installations are never replaced
-without explicit user approval and `--force`.
+The router compares complete source and destination trees by file SHA-256.
+Identical installs are left untouched. A different existing directory is never
+replaced without explicit approval (`--force`). Native directory updates stage
+and verify the replacement, preserve extra files, and restore the old directory
+if the replacement fails. Symlinks and unsafe paths are rejected. For
+GitHub-CLI-managed updates, the CLI's own update behavior applies; review the
+target and use `--force` only after authorizing replacement.
 
-## ChatGPT Skills
+The result reports project version, actual host ID, location, file verification,
+runtime discovery, and remaining user action independently. File equality,
+the GitHub CLI inventory, and successful ZIP creation are not runtime discovery.
 
-ChatGPT supports a distinct upload route for eligible accounts and workspaces.
-The router can create a ZIP with `typecraft-skills/` at its root:
+## ChatGPT package
+
+The router prepares the complete canonical skill with `typecraft-skills/` at
+the ZIP root:
 
 ```bash
 python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
   --agent chatgpt \
-  --package-output /tmp/typecraft-skills.zip
+  --package-output ./typecraft-skills.zip
 ```
 
-Packaging is not installation. The user must upload the ZIP under **Skills →
-Create → Upload from your computer**, then confirm the scan and installation in
-ChatGPT. Do not claim success or discovery until the product confirms it.
+It verifies ZIP integrity, exact file paths, and content hashes. The user must
+upload the archive, wait for ChatGPT's scan, and confirm installation. Account
+eligibility and workspace permissions may apply.
 
 ## Chat-only fallback
 
-If the current chat agent cannot persist files or install skills, report that
-persistent installation is unsupported. When it can read the entire canonical
-directory, it may use those instructions only for the current conversation.
-Otherwise, direct the user to a supported local agent or the ChatGPT upload
-flow.
-
-## Verification contract
-
-Report the following independently:
-
-1. **File installation:** destination exists, `SKILL.md` and every reference
-   are present, and the installed reference contents match the source.
-2. **Runtime discovery:** the platform itself lists or activates
-   `typecraft-skills`.
-3. **User action:** reload, new session, upload, approval, or confirmation still
-   required.
-
-An installer exit code, a host inventory record, or a ZIP file alone does not
-prove runtime discovery.
+When persistent installation is not supported, state that explicitly. If the
+agent can read the entire canonical directory, it may use it for the current
+conversation only. Never report that as a persistent install.
 
 ## Maintainer multi-target utility
 
-The registry-driven `scripts/install.py` remains a maintainer utility for
-intentionally installing to multiple GitHub CLI targets. Preview before using
-`--all`; it is not the URL-first, current-agent workflow:
+`scripts/install.py` is for maintainers intentionally targeting GitHub CLI
+hosts, not the URL-first current-agent flow. Preview before installing:
 
 ```bash
 python -m scripts.install --list

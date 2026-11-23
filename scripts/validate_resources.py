@@ -17,6 +17,7 @@ RESOURCE_VERSION = "1.0.0"
 
 errors = []
 resources = {}
+resource_names = {}
 
 def error(message):
     errors.append(message)
@@ -80,6 +81,14 @@ def scan(resource_type, folder):
             error(f"Duplicate resource ID: {resource_id}")
         else:
             resources[resource_id] = resource_type
+        resource_name = (resource_type, str(data["name"]).casefold())
+        if resource_name in resource_names:
+            error(
+                f"Duplicate resource name: {data['name']} "
+                f"({resource_names[resource_name]} and {path.name})"
+            )
+        else:
+            resource_names[resource_name] = path.name
 
 def main():
     scan(

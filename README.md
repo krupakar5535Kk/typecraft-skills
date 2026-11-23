@@ -19,7 +19,14 @@ A style controls how typography looks. A template controls how content is arrang
 
 ## Resource Library
 
-The initial library contains 20 resources.
+The current fixed library contains exactly 20 resources:
+
+- **10 typography styles**
+- **10 design templates**
+
+There is one canonical installable Agent Skill at `skills/typecraft-skills/`.
+The resource lifecycle includes draft and review entries; inclusion does not
+mean approval.
 
 ### Typography Styles
 
@@ -81,17 +88,20 @@ The URL by itself is an installation request. The same applies when it is follow
 
 The flow requires repository access and, for persistent local installation, filesystem access and permission to write to the documented skill location. ChatGPT requires a ZIP upload and user confirmation. Chat-only environments without persistent installation access can use the files in the current conversation only; they must not claim a persistent installation.
 
-When a repository checkout and local terminal are available, the tested installer router is:
+When a reviewed checkout and local terminal are available, the optional router
+is:
 
-`.venv/bin/python -m scripts.install_url --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." --agent auto`
+`python -m scripts.install_url --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." --agent auto`
 
 `--agent auto` uses `TYPECRAFT_AGENT` supplied by the active runtime. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. Use `--agent chatgpt --package-output /tmp/typecraft-skills.zip` to prepare a package for manual upload.
 
 **Platform notes:**
 
-- Claude Code, OpenAI Codex, Gemini CLI, Cursor, OpenCode, and the Antigravity App have documented native skill directories. The router uses only the paths listed in [INSTALL.md](INSTALL.md) and checks discovery separately.
-- GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been runtime-tested on every host.
+- Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App have documentation-backed routes. The Antigravity CLI path remains unestablished; do not assume the App path applies.
+- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. Only VS Code Agent in GitHub Codespaces has recorded TypeCraft runtime verification.
+- GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been installed or discovered in every host.
 - ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.
+- Windsurf's former skills documentation URL redirects to Devin documentation; the current Windsurf-specific route remains unverified.
 - Chat-only agents without persistent installation access can use the canonical files for the current conversation only.
 
 See [INSTALL.md](INSTALL.md) for host detection, installation, safety, and verification requirements.
@@ -158,16 +168,12 @@ See the [Installation Guide](docs/installation.md) for installation instructions
 
 TypeCraft uses a tool-independent architecture with tool-aware execution.
 
-Intended environments include:
-
-- Claude Code
-- OpenAI Codex
-- ChatGPT
-- Google Antigravity
-- Cursor
-- Windsurf
-
-Platform compatibility and installation behavior must be verified independently. Listing an environment as a target does not imply that its integration has been tested.
+Compatibility is surface-specific. Official documentation-backed routes are
+not the same as a tested installation, and neither a file copy nor installer
+inventory is proof of runtime discovery. The only recorded TypeCraft runtime
+verification is GitHub Copilot Agent mode in Visual Studio Code running in
+GitHub Codespaces. See the [Compatibility Guide](docs/compatibility.md) for
+statuses, evidence, and remaining work.
 
 See the [Compatibility Guide](docs/compatibility.md).
 

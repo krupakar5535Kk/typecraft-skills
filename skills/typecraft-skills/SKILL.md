@@ -21,7 +21,7 @@ Consider hierarchy, composition, spacing, scale, contrast, color, visual rhythm,
 
 ## TypeCraft repository URL installation requests
 
-Recognize `https://github.com/krupakar5535Kk/typecraft-skills` and its `.git` form as this skill's canonical repository URL.
+Recognize `https://github.com/krupakar5535Kk/typecraft-skills` and its `.git` form as this skill's canonical repository URL, including normal Markdown links and trailing punctuation.
 
 - If the user's message consists only of that URL, treat it as a request to install TypeCraft. Do not ask for a second installation prompt.
 - If the URL is followed by an explicit installation request, such as “Install this skill,” handle it the same way.
@@ -163,7 +163,7 @@ When automatic selection finds a relevant resource that is not approved, explain
 
 If a relevant resource does not exist yet, use established typography and design principles to develop a suitable recommendation. Be transparent that it is a new recommendation rather than an existing library resource.
 
-The initial v1.0 library contains ten typography styles and ten design templates. The library may expand through future approved contributions.
+This project contains exactly ten typography styles and ten design templates. Preserve all 20 resources, their names, IDs, relationships, reference files, and lifecycle statuses. Do not expand or silently promote the resource library.
 
 ## 7. Domain-Specific Adaptation
 

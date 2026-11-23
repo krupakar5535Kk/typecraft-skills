@@ -6,7 +6,13 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Installation and Compatibility
+
+- Added surface-specific platform records and source-checked installation routes.
+- Recorded GitHub Copilot VS Code runtime evidence and user-reported Claude Code discovery without conflating them.
+- Added identity-safe URL routing, native Gemini CLI installation, SHA-256 file verification, safe staged updates, and verified ZIP packaging.
+- Added JSON installation reports and cross-platform installer regression tests.
+- Preserved the fixed library of 10 typography styles and 10 design templates.
 
 ## [1.0.0] - 2026-11-19
 

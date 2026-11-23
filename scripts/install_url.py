@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -9,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from strictyaml import load
@@ -17,15 +18,22 @@ from strictyaml import load
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = ROOT / "registry" / "agents.yaml"
 SKILL_SOURCE = ROOT / "skills" / "typecraft-skills"
+INSTALL_GUIDE = ROOT / "INSTALL.md"
 SKILL_NAME = "typecraft-skills"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
+PROJECT_VERSION = "1.1.0-dev"
 
 URL_PATTERN = re.compile(
-    r"https?://github\.com/krupakar5535Kk/typecraft-skills(?:\.git)?/?"
+    r"https://github\.com/krupakar5535Kk/typecraft-skills(?:\.git)?/?"
     r"(?=$|[\s)\]>,'\"!?]|\.(?:$|\s))",
     re.IGNORECASE,
 )
 URL_ONLY_PUNCTUATION = re.compile(r"""^[\s\[\]()<>"'`.,:;!?…-]*$""")
+MARKDOWN_CANONICAL_LINK = re.compile(
+    r"""\[[^\]]*\]\(\s*<?(https://github\.com/"""
+    r"""krupakar5535Kk/typecraft-skills(?:\.git)?/?)>?\s*\)""",
+    re.IGNORECASE,
+)
 INSTALL_INTENT = re.compile(
     r"\b(?:install|add|set\s+up|setup)\b[\w\s'-]{0,40}"
     r"\b(?:this|the|typecraft|skill|repo|repository)\b|"
@@ -62,6 +70,7 @@ class InstallResult:
     skill_discovery: str
     user_action_remaining: str
     message: str = ""
+    version: str = PROJECT_VERSION
 
 
 def load_registry():
@@ -70,8 +79,22 @@ def load_registry():
     return load(REGISTRY_PATH.read_text(encoding="utf-8")).data
 
 
+def inspect_installation_guide():
+    if not INSTALL_GUIDE.is_file():
+        raise InstallationError(f"Installation guide not found: {INSTALL_GUIDE}")
+    try:
+        contents = INSTALL_GUIDE.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise InstallationError(f"Could not inspect {INSTALL_GUIDE}: {exc}") from exc
+    if "skills/typecraft-skills/" not in contents:
+        raise InstallationError(
+            "INSTALL.md does not identify the canonical TypeCraft skill directory."
+        )
+
+
 def is_install_request(message):
-    if not URL_PATTERN.search(message or ""):
+    message = MARKDOWN_CANONICAL_LINK.sub(r"\1", message or "")
+    if not URL_PATTERN.search(message):
         return False
 
     remainder = URL_PATTERN.sub("", message).strip()
@@ -105,7 +128,10 @@ def get_route(platform, registry):
 
 
 def _skill_files(source):
-    source = Path(source).resolve(strict=True)
+    source = Path(source).expanduser()
+    if source.is_symlink():
+        raise InstallationError(f"Skill source cannot be a symlink: {source}")
+    source = source.resolve(strict=True)
     if not source.is_dir() or not (source / "SKILL.md").is_file():
         raise InstallationError(f"Not a complete Agent Skill directory: {source}")
 
@@ -118,7 +144,15 @@ def _skill_files(source):
     return source, files
 
 
-def verify_skill_tree(source, destination):
+def _sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 128), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify_skill_tree(source, destination, allow_extra_files=False):
     source, source_files = _skill_files(source)
     destination = Path(destination)
     if not destination.is_dir() or destination.is_symlink():
@@ -131,13 +165,56 @@ def verify_skill_tree(source, destination):
         if path.is_file():
             destination_files.add(path.relative_to(destination))
     expected_files = {path.relative_to(source) for path in source_files}
-    if destination_files != expected_files:
+    if (
+        expected_files - destination_files
+        or (not allow_extra_files and destination_files != expected_files)
+    ):
         return False
 
     return all(
-        (destination / relative).read_bytes() == (source / relative).read_bytes()
+        _sha256(destination / relative) == _sha256(source / relative)
         for relative in expected_files
     )
+
+
+def _is_typecraft_copy(path):
+    manifest = Path(path) / "SKILL.md"
+    if not manifest.is_file() or manifest.is_symlink():
+        return False
+    try:
+        text = manifest.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return False
+    signature = _manifest_signature(text)
+    return bool(
+        signature
+        and signature[0] == SKILL_NAME
+        and "# TypeCraft Skills" in signature[-1][:1000]
+    )
+
+
+def _verify_zip_archive(archive_path, source, source_files):
+    expected = {
+        (Path(SKILL_NAME) / path.relative_to(source)).as_posix()
+        for path in source_files
+    }
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            if archive.testzip() is not None:
+                return False
+            if set(archive.namelist()) != expected:
+                return False
+            return all(
+                hashlib.sha256(
+                    archive.read(
+                        (Path(SKILL_NAME) / path.relative_to(source)).as_posix()
+                    )
+                ).hexdigest()
+                == _sha256(path)
+                for path in source_files
+            )
+    except (OSError, zipfile.BadZipFile, RuntimeError):
+        return False
 
 
 def _replace_directory(source, destination, overwrite):
@@ -159,6 +236,12 @@ def _replace_directory(source, destination, overwrite):
         if verify_skill_tree(source, destination):
             return "ALREADY_INSTALLED"
         if not overwrite:
+            if _is_typecraft_copy(destination):
+                raise ExistingInstallationError(
+                    f"A TypeCraft copy at {destination} differs from the current "
+                    "source (update available). Review it, then use --force to "
+                    "merge the update; extra files will be preserved."
+                )
             raise ExistingInstallationError(
                 f"Different or incomplete skill already exists at {destination}; "
                 "request explicit overwrite approval before using --force."
@@ -168,18 +251,34 @@ def _replace_directory(source, destination, overwrite):
                 f"Installation target exists and is not a directory: {destination}"
             )
 
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    stage_root = Path(
-        tempfile.mkdtemp(prefix=f".{SKILL_NAME}-install-", dir=destination.parent)
-    )
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        stage_root = Path(
+            tempfile.mkdtemp(prefix=f".{SKILL_NAME}-install-", dir=destination.parent)
+        )
+    except OSError as exc:
+        raise InstallationError(
+            f"Could not prepare installation destination {destination}: {exc}"
+        ) from exc
     staged_skill = stage_root / SKILL_NAME
     backup = None
+    existing = destination.exists()
+    known_typecraft = existing and _is_typecraft_copy(destination)
     try:
-        shutil.copytree(source, staged_skill)
-        if not verify_skill_tree(source, staged_skill):
+        if existing:
+            for path in destination.rglob("*"):
+                if path.is_symlink():
+                    raise InstallationError(
+                        f"Refusing to update an installation containing a symlink: {path}"
+                    )
+            shutil.copytree(destination, staged_skill)
+            shutil.copytree(source, staged_skill, dirs_exist_ok=True)
+        else:
+            shutil.copytree(source, staged_skill)
+        if not verify_skill_tree(source, staged_skill, allow_extra_files=existing):
             raise InstallationError("Staged skill failed complete-file verification.")
 
-        if destination.exists():
+        if existing:
             backup = Path(
                 tempfile.mkdtemp(prefix=f".{SKILL_NAME}-backup-", dir=destination.parent)
             )
@@ -187,10 +286,22 @@ def _replace_directory(source, destination, overwrite):
             os.replace(destination, backup)
         try:
             os.replace(staged_skill, destination)
-        except OSError:
+            if not verify_skill_tree(
+                source, destination, allow_extra_files=existing
+            ):
+                raise InstallationError(
+                    f"Installed skill failed file verification: {destination}"
+                )
+        except (OSError, InstallationError) as exc:
+            if destination.exists():
+                shutil.rmtree(destination)
             if backup is not None and backup.exists():
                 os.replace(backup, destination)
                 backup = None
+            if isinstance(exc, OSError):
+                raise InstallationError(
+                    f"Installation failed and the previous directory was restored: {exc}"
+                ) from exc
             raise
 
         if backup is not None:
@@ -199,34 +310,66 @@ def _replace_directory(source, destination, overwrite):
     finally:
         shutil.rmtree(stage_root)
 
-    if not verify_skill_tree(source, destination):
+    if not verify_skill_tree(source, destination, allow_extra_files=existing):
         raise InstallationError(f"Installed skill failed file verification: {destination}")
+    if known_typecraft:
+        return "UPDATED"
     return "SUCCESS"
+
+
+def _resolve_scope_path(path_value, project_root=None, home=None):
+    home_path = (Path.home() if home is None else Path(home)).resolve(strict=False)
+    project = (
+        Path.cwd() if project_root is None else Path(project_root)
+    ).resolve(strict=False)
+    if path_value.startswith("~/"):
+        root = home_path
+        relative = Path(path_value[2:])
+    else:
+        root = project
+        relative = Path(path_value)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise InstallationError(f"Unsafe installation path in registry: {path_value}")
+
+    parent = root
+    for part in relative.parts:
+        parent = parent / part
+        if parent.is_symlink():
+            raise InstallationError(f"Refusing a symlinked installation directory: {parent}")
+    return parent / SKILL_NAME
+
+
+def resolve_native_destinations(
+    platform, scope, registry, project_root=None, home=None
+):
+    adapter = registry.get("native_adapters", {}).get(platform)
+    if adapter is None:
+        raise InstallationError(f"No verified native directory adapter for {platform}.")
+
+    path_values = [adapter.get("scope_paths", {}).get(scope)]
+    path_values.extend(adapter.get("alternate_scope_paths", {}).get(scope, []))
+    if not path_values[0]:
+        raise InstallationError(
+            f"No documented {scope}-scope location for {platform}."
+        )
+
+    destinations = []
+    seen = set()
+    for path_value in path_values:
+        destination = _resolve_scope_path(path_value, project_root, home)
+        key = os.path.normcase(str(destination))
+        if key not in seen:
+            destinations.append(destination)
+            seen.add(key)
+    return destinations
 
 
 def resolve_native_destination(
     platform, scope, registry, project_root=None, home=None
 ):
-    adapters = registry.get("native_adapters", {})
-    adapter = adapters.get(platform)
-    if adapter is None:
-        raise InstallationError(f"No verified native directory adapter for {platform}.")
-
-    paths = adapter.get("scope_paths", {})
-    path_value = paths.get(scope)
-    if not path_value:
-        raise InstallationError(
-            f"No documented {scope}-scope location for {platform}."
-        )
-
-    home_path = Path.home() if home is None else Path(home)
-    project = Path.cwd() if project_root is None else Path(project_root)
-    expanded = Path(path_value).expanduser() if "~" in path_value else Path(path_value)
-    if path_value.startswith("~/") and home is not None:
-        expanded = home_path / path_value[2:]
-    elif not expanded.is_absolute():
-        expanded = project / expanded
-    return expanded.resolve(strict=False) / SKILL_NAME
+    return resolve_native_destinations(
+        platform, scope, registry, project_root=project_root, home=home
+    )[0]
 
 
 def package_skill(source, output, overwrite=False):
@@ -254,15 +397,13 @@ def package_skill(source, output, overwrite=False):
         with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for path in files:
                 archive.write(path, (Path(SKILL_NAME) / path.relative_to(source)).as_posix())
-        with zipfile.ZipFile(temporary) as archive:
-            names = set(archive.namelist())
-            expected = {
-                (Path(SKILL_NAME) / path.relative_to(source)).as_posix()
-                for path in files
-            }
-            if names != expected:
-                raise InstallationError("ZIP package failed complete-file verification.")
+        if not _verify_zip_archive(temporary, source, files):
+            raise InstallationError(
+                "ZIP package failed integrity, completeness, or content verification."
+            )
         os.replace(temporary, output)
+    except (OSError, zipfile.BadZipFile, RuntimeError) as exc:
+        raise InstallationError(f"Could not create or verify ZIP package: {exc}") from exc
     finally:
         temporary.unlink(missing_ok=True)
     return output, len(files)
@@ -351,7 +492,7 @@ def _manifest_signature(text):
     return tuple(values) + (parts[2],)
 
 
-def _install_with_github_cli(platform, scope, source, overwrite):
+def _install_with_github_cli(platform, scope, source, overwrite, version):
     if not shutil.which("gh"):
         raise InstallationError(
             f"No verified native directory adapter for {platform}, and GitHub CLI is unavailable."
@@ -376,15 +517,17 @@ def _install_with_github_cli(platform, scope, source, overwrite):
         current = next((row for row in existing if _is_typecraft_source(row)), None)
         if current and not overwrite:
             if not _verify_cli_files(source, current):
-                raise InstallationError(
-                    "GitHub CLI reports TypeCraft installed, but complete file "
-                    "verification failed."
+                raise ExistingInstallationError(
+                    "A known TypeCraft copy is present, but its files differ from "
+                    "the current source (update available). Review the target and "
+                    "rerun with --force only after authorizing the GitHub CLI update."
                 )
             return InstallResult(
                 platform, "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED",
                 current.get("path", ""),
                 "SUCCESS", "NOT_VERIFIED", "Check the platform's own skill list.",
                 "The GitHub CLI inventory and files match TypeCraft.",
+                version,
             )
         if not overwrite:
             raise ExistingInstallationError(
@@ -422,10 +565,11 @@ def _install_with_github_cli(platform, scope, source, overwrite):
         installed.get("path", ""),
         "SUCCESS", "NOT_VERIFIED", "Check the platform's own skill list.",
         "The CLI inventory and complete reference-file set were verified.",
+        version,
     )
 
 
-def _verify_native_discovery(platform):
+def _verify_native_discovery(platform, cwd=None):
     if platform != "gemini-cli":
         return "NOT_VERIFIED", "Confirm discovery in the platform's own skill list or UI."
 
@@ -438,6 +582,7 @@ def _verify_native_discovery(platform):
         capture_output=True,
         text=True,
         check=False,
+        cwd=cwd,
     )
     if result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
@@ -447,6 +592,116 @@ def _verify_native_discovery(platform):
     if re.search(r"\btypecraft-skills\b", result.stdout, re.IGNORECASE):
         return "VERIFIED", "Gemini CLI listed typecraft-skills."
     return "NOT_VERIFIED", "Gemini CLI did not list typecraft-skills."
+
+
+def _gemini_native_installer_supported(executable):
+    result = subprocess.run(
+        [executable, "skills", "install", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    help_text = f"{result.stdout}\n{result.stderr}"
+    return (
+        result.returncode == 0
+        and "--path" in help_text
+        and "--scope" in help_text
+    )
+
+
+def _install_with_gemini_cli(
+    source, destination, scope, overwrite, version, executable, project_root
+):
+    if destination.exists():
+        status = _replace_directory(source, destination, overwrite)
+        discovery, message = _verify_native_discovery(
+            "gemini-cli", cwd=project_root if scope == "project" else None
+        )
+        installation = (
+            "ALREADY_INSTALLED"
+            if status == "ALREADY_INSTALLED" and discovery == "VERIFIED"
+            else "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED"
+            if status == "ALREADY_INSTALLED"
+            else "UPDATED"
+            if status == "UPDATED" and discovery == "VERIFIED"
+            else "FILES_UPDATED_DISCOVERY_UNVERIFIED"
+            if status == "UPDATED"
+            else "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
+        )
+        return InstallResult(
+            "gemini-cli",
+            installation,
+            str(destination),
+            "SUCCESS",
+            discovery,
+            "Review Gemini's consent prompt when activating the skill."
+            if discovery == "VERIFIED"
+            else "Inspect Gemini CLI's skill list and reload if needed.",
+            message,
+            version,
+        )
+
+    native_scope = "user" if scope == "user" else "workspace"
+    command = [
+        executable,
+        "skills",
+        "install",
+        f"https://github.com/{REPOSITORY}.git",
+        "--path",
+        "skills/typecraft-skills",
+        "--scope",
+        native_scope,
+    ]
+    result = subprocess.run(
+        command,
+        check=False,
+        cwd=project_root if scope == "project" else None,
+    )
+    if not verify_skill_tree(source, destination):
+        return InstallResult(
+            "gemini-cli",
+            "PARTIAL_INSTALLATION" if destination.exists() else "FAILED",
+            str(destination),
+            "FAILED",
+            "NOT_VERIFIED",
+            "Inspect the destination and resolve any partial native install.",
+            (
+                "Gemini CLI exited successfully but the canonical file tree "
+                "could not be verified."
+                if result.returncode == 0
+                else f"Gemini CLI installation failed with exit code {result.returncode}."
+            ),
+            version,
+        )
+
+    discovery, message = _verify_native_discovery(
+        "gemini-cli", cwd=project_root if scope == "project" else None
+    )
+    if result.returncode:
+        installation = "FILES_INSTALLED_NATIVE_COMMAND_FAILED"
+        message = (
+            f"Gemini CLI returned exit code {result.returncode}, but complete files "
+            f"were verified. {message}"
+        )
+    else:
+        installation = "SUCCESS" if discovery == "VERIFIED" else (
+            "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
+        )
+    action = (
+        "Review Gemini's consent prompt when activating the skill."
+        if discovery == "VERIFIED"
+        else "Inspect Gemini CLI's skill list and reload if needed."
+    )
+    return InstallResult(
+        "gemini-cli",
+        installation,
+        str(destination),
+        "SUCCESS",
+        discovery,
+        action,
+        message,
+        version,
+    )
 
 
 def execute_install(
@@ -465,7 +720,9 @@ def execute_install(
         raise InstallationError(
             "The request does not contain the canonical TypeCraft URL as an install request."
         )
+    inspect_installation_guide()
     registry = load_registry() if registry is None else registry
+    version = registry.get("project_version", PROJECT_VERSION)
     if platform == "auto":
         platform = detect_platform(env)
     if not platform:
@@ -487,6 +744,7 @@ def execute_install(
             f"SUCCESS ({count} files)", "NOT_VERIFIED",
             "Upload the ZIP in ChatGPT Skills and confirm installation.",
             "Packaging is not an installation.",
+            version,
         )
     if route == "session_only":
         fallback = registry["fallbacks"][platform]
@@ -495,15 +753,33 @@ def execute_install(
             "NOT_APPLICABLE", "NOT_SUPPORTED",
             fallback.get("user_action", "Use the skill only in this conversation."),
             fallback.get("notes", ""),
+            version,
         )
     if route == "unsupported":
         raise InstallationError(f"Unsupported platform ID: {platform}")
     if route == "native_directory":
-        destination = resolve_native_destination(
+        destinations = resolve_native_destinations(
             platform, scope, registry, project_root=project_root, home=home
         )
+        destination = next(
+            (path for path in destinations if path.exists() or path.is_symlink()),
+            destinations[0],
+        )
+        gemini = shutil.which("gemini") if platform == "gemini-cli" else None
+        if gemini and _gemini_native_installer_supported(gemini):
+            return _install_with_gemini_cli(
+                source,
+                destination,
+                scope,
+                overwrite,
+                version,
+                gemini,
+                project_root,
+            )
         status = _replace_directory(source, destination, overwrite)
-        discovery, message = _verify_native_discovery(platform)
+        discovery, message = _verify_native_discovery(
+            platform, cwd=project_root if scope == "project" else None
+        )
         if discovery == "VERIFIED" and platform == "gemini-cli":
             action = (
                 "Gemini may request consent when the skill is activated."
@@ -514,22 +790,33 @@ def execute_install(
             action = "Reload or inspect the platform's own skill list."
         if discovery == "VERIFIED":
             installation = (
-                "ALREADY_INSTALLED" if status == "ALREADY_INSTALLED" else "SUCCESS"
+                "ALREADY_INSTALLED"
+                if status == "ALREADY_INSTALLED"
+                else "UPDATED"
+                if status == "UPDATED"
+                else "SUCCESS"
             )
         elif status == "ALREADY_INSTALLED":
             installation = "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED"
+        elif status == "UPDATED":
+            installation = "FILES_UPDATED_DISCOVERY_UNVERIFIED"
         else:
             installation = "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
         return InstallResult(
             platform, installation, str(destination), "SUCCESS", discovery, action,
             message,
+            version,
         )
-    return _install_with_github_cli(platform, scope, source, overwrite)
+    return _install_with_github_cli(platform, scope, source, overwrite, version)
 
 
-def print_result(result):
+def print_result(result, json_output=False):
+    if json_output:
+        print(json.dumps(asdict(result), indent=2))
+        return
     print("TypeCraft Skills installation report")
     print(f"Platform: {result.platform}")
+    print(f"Version: {result.version}")
     print(f"Installation: {result.installation}")
     print(f"Location: {result.location or 'not applicable'}")
     print(f"File verification: {result.file_verification}")
@@ -552,6 +839,10 @@ def main(argv=None):
         "--force", action="store_true",
         help="Replace an existing installation or package after explicit approval.",
     )
+    parser.add_argument(
+        "--json", action="store_true",
+        help="Print the installation result as machine-readable JSON.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -567,7 +858,7 @@ def main(argv=None):
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print_result(result)
+    print_result(result, json_output=args.json)
     return 0
 
 

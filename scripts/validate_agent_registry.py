@@ -17,6 +17,8 @@ CANONICAL_REFERENCES = (
     / "references"
 )
 REFERENCE_FILE_COUNT = len(list(CANONICAL_REFERENCES.rglob("*.md")))
+STYLE_FILE_COUNT = len(list((CANONICAL_REFERENCES / "design-styles").glob("*.md")))
+TEMPLATE_FILE_COUNT = len(list((CANONICAL_REFERENCES / "design-templates").glob("*.md")))
 
 def fail(message):
     print(f"ERROR: {message}")
@@ -75,8 +77,48 @@ for key, platform in platforms.items():
     if status not in ALLOWED_STATUSES:
         fail(f"{key}: invalid compatibility status {status}")
 
-    if not platform.get("display_name"):
-        fail(f"{key}: missing display_name")
+    for field in (
+        "display_name",
+        "product_surface",
+        "documentation_checked",
+        "native_installer_available",
+        "file_installation_verification",
+        "runtime_discovery_verification",
+    ):
+        if not platform.get(field):
+            fail(f"{key}: missing {field}")
+        if platform.get("native_installer_available") not in {"true", "false", "unknown"}:
+            fail(f"{key}: invalid native installer availability")
+    documentation_url = platform.get("official_documentation_url")
+    if status in {"compatible", "verified"} and not (
+        isinstance(documentation_url, str)
+        and documentation_url.startswith("https://")
+    ):
+        fail(f"{key}: {status} requires an official documentation URL")
+    if status == "research_required" and documentation_url not in (None, "null") and not (
+        isinstance(documentation_url, str)
+        and documentation_url.startswith("https://")
+    ):
+        fail(f"{key}: invalid official documentation URL")
+    installation = platform.get("installation", {})
+    discovery = platform.get("discovery", {})
+    if not installation.get("method"):
+        fail(f"{key}: missing installation method")
+    for field in ("user_scope_directory", "project_scope_directory"):
+        if field not in installation:
+            fail(f"{key}: missing installation.{field}")
+    if not discovery.get("mechanism") or not discovery.get("user_action"):
+        fail(f"{key}: missing discovery mechanism or remaining user action")
+
+    file_status = platform.get("file_installation_verification")
+    discovery_status = platform.get("runtime_discovery_verification")
+    if file_status not in {"verified", "not_tested", "failed", "not_applicable"}:
+        fail(f"{key}: invalid file installation verification status")
+    if discovery_status not in {
+        "verified", "not_tested", "failed", "not_supported"
+    }:
+        fail(f"{key}: invalid runtime discovery verification status")
+
     if status == "verified":
         verification = platform.get("runtime_verification", {})
         environment = verification.get("environment", {})
@@ -112,10 +154,48 @@ for key, platform in platforms.items():
             and catalog_entry
             and catalog_entry.get("installation_verified") == "true"
             and catalog_entry.get("skill_discovery_verified") == "true"
+            and file_status == "verified"
+            and discovery_status == "verified"
         ):
             fail(
                 f"{key}: verified compatibility requires complete runtime evidence "
                 "and matching verified catalog flags"
+            )
+    elif file_status == "verified" or discovery_status == "verified":
+        fail(f"{key}: verification statuses require compatibility: verified")
+
+    user_report = platform.get("user_reported_runtime_verification")
+    if user_report:
+        if (
+            status == "verified"
+            or user_report.get("source") != "user_report"
+            or user_report.get("installation_tested") != "false"
+            or user_report.get("exact_source_match") != "not_tested"
+            or user_report.get("installed_version") != "not_established"
+            or not user_report.get("reported_at")
+            or not user_report.get("reported_location")
+            or user_report.get("skill_listed") != "true"
+            or user_report.get("skill_manifest_read") != "true"
+            or user_report.get("reported_style_count") != str(STYLE_FILE_COUNT)
+            or user_report.get("reported_template_count") != str(TEMPLATE_FILE_COUNT)
+        ):
+            fail(f"{key}: user-reported evidence must not imply a verified installation")
+
+for entry in catalog:
+    if (
+        entry.get("installation_verified") == "true"
+        or entry.get("skill_discovery_verified") == "true"
+    ):
+        verified_platform = any(
+            platform.get("compatibility") == "verified"
+            and platform.get("runtime_verification", {}).get("agent_id")
+            == entry.get("agent_id")
+            for platform in platforms.values()
+        )
+        if not verified_platform:
+            fail(
+                f"{entry['agent_id']}: catalog verification flags require "
+                "matching platform runtime evidence"
             )
 
 for agent_id, adapter in native_adapters.items():
@@ -130,17 +210,35 @@ for agent_id, adapter in native_adapters.items():
         fail(f"{agent_id}: native adapter contains an empty installation path")
     if not adapter.get("evidence"):
         fail(f"{agent_id}: native adapter is missing official documentation evidence")
-
-app_paths = native_adapters.get("antigravity", {}).get("scope_paths", {})
-cli_paths = native_adapters.get("antigravity-cli", {}).get("scope_paths", {})
-if not app_paths or not cli_paths:
-    fail("Antigravity App and CLI must have separate native adapters.")
-if app_paths.get("user") == cli_paths.get("user"):
-    fail("Antigravity App and CLI user-scope paths must remain separate.")
-if app_paths.get("project") != cli_paths.get("project"):
-    fail("Antigravity App and CLI must use the documented shared workspace path.")
-if cli_paths.get("user") != "~/.gemini/antigravity-cli/skills":
-    fail("Antigravity CLI user-scope path must match official documentation.")
+    user_path = Path(scope_paths["user"])
+    project_path = Path(scope_paths["project"])
+    if (
+        not scope_paths["user"].startswith("~/")
+        or project_path.is_absolute()
+        or ".." in project_path.parts
+        or ".." in user_path.parts
+    ):
+        fail(f"{agent_id}: native adapter contains an unsafe scope path")
+    platform_installation = platforms[platform_id].get("installation", {})
+    if (
+        platform_installation.get("user_scope_directory") != scope_paths["user"]
+        or platform_installation.get("project_scope_directory")
+        != scope_paths["project"]
+    ):
+        fail(f"{agent_id}: adapter paths contradict the platform record")
+    for scope, paths in adapter.get("alternate_scope_paths", {}).items():
+        if scope not in {"user", "project"} or not isinstance(paths, list):
+            fail(f"{agent_id}: invalid alternate scope paths")
+        for value in paths:
+            if not isinstance(value, str) or not value:
+                fail(f"{agent_id}: unsafe alternate installation path {value}")
+            path = Path(value)
+            if (
+                (scope == "user" and not value.startswith("~/"))
+                or (scope == "project" and path.is_absolute())
+                or ".." in path.parts
+            ):
+                fail(f"{agent_id}: unsafe alternate installation path {value}")
 
 for agent_id, fallback in fallbacks.items():
     if fallback.get("persistent_installation") != "unsupported":

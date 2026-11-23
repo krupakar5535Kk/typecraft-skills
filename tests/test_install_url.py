@@ -1,9 +1,12 @@
+import io
+import json
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -19,9 +22,11 @@ from scripts.install_url import (
     load_registry,
     package_skill,
     resolve_native_destination,
+    print_result,
     verify_skill_tree,
     _verify_cli_files,
     _verify_native_discovery,
+    _verify_zip_archive,
 )
 
 
@@ -52,13 +57,34 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertTrue(is_install_request(URL))
         self.assertTrue(is_install_request(URL.removesuffix(".git")))
         self.assertTrue(is_install_request(f"[{URL}]({URL})"))
+        self.assertTrue(
+            is_install_request(f"[TypeCraft skills]({URL.removesuffix('.git')})")
+        )
+        self.assertTrue(is_install_request(f"<{URL}>"))
+        self.assertTrue(is_install_request(f"[Install]({URL})"))
         self.assertTrue(is_install_request(REQUEST))
         self.assertTrue(is_install_request(f"{URL}."))
+        self.assertTrue(is_install_request(f"{URL},"))
+        self.assertTrue(is_install_request(f"{URL}!"))
         self.assertFalse(is_install_request(f"What is in this repository? {URL}"))
+        self.assertFalse(is_install_request(f"Can you explain this URL? {URL}"))
         self.assertFalse(is_install_request(f"How do I install this? {URL}"))
         self.assertFalse(is_install_request(f"Do not install this skill: {URL}"))
         self.assertFalse(
             is_install_request("https://github.com/krupakar5535Kk/typecraft-skills.evil")
+        )
+        self.assertFalse(
+            is_install_request(
+                "https://github.com.evil.example/krupakar5535Kk/typecraft-skills"
+            )
+        )
+        self.assertFalse(
+            is_install_request(
+                "https://github.com@evil.example/krupakar5535Kk/typecraft-skills"
+            )
+        )
+        self.assertFalse(
+            is_install_request("http://github.com/krupakar5535Kk/typecraft-skills")
         )
         self.assertFalse(is_install_request("https://github.com/example/other"))
 
@@ -77,6 +103,19 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(get_route("github-copilot", self.registry), "github_cli")
         self.assertEqual(get_route("unknown-agent", self.registry), "unsupported")
 
+    def test_routes_every_advertised_github_cli_host_and_registered_native_adapter(self):
+        for agent_id in self.registry["installers"]["github_cli"]["supported_agents"]:
+            with self.subTest(agent_id=agent_id):
+                route = (
+                    "native_directory"
+                    if agent_id in self.registry["native_adapters"]
+                    else "github_cli"
+                )
+                self.assertEqual(get_route(agent_id, self.registry), route)
+        for agent_id in self.registry["native_adapters"]:
+            with self.subTest(agent_id=agent_id):
+                self.assertEqual(get_route(agent_id, self.registry), "native_directory")
+
     def test_resolves_documented_native_destinations(self):
         destination = resolve_native_destination(
             "codex",
@@ -90,23 +129,33 @@ class UniversalInstallTests(unittest.TestCase):
             (self.root / "home" / ".agents" / "skills" / "typecraft-skills"),
         )
 
-    def test_antigravity_app_and_cli_use_separate_user_paths(self):
+    def test_rejects_registry_path_traversal(self):
+        unsafe_registry = dict(self.registry)
+        unsafe_adapter = dict(self.registry["native_adapters"]["codex"])
+        unsafe_adapter["scope_paths"] = {
+            "user": "~/.agents/skills",
+            "project": "../outside",
+        }
+        unsafe_registry["native_adapters"] = {
+            **self.registry["native_adapters"],
+            "codex": unsafe_adapter,
+        }
+        with self.assertRaisesRegex(InstallationError, "Unsafe installation path"):
+            resolve_native_destination(
+                "codex",
+                "project",
+                unsafe_registry,
+                project_root=self.root / "project",
+            )
+
+    def test_antigravity_app_path_is_documented_but_cli_path_is_not_assumed(self):
         project = self.root / "project"
         home = self.root / "home"
         self.assertEqual(get_route("antigravity", self.registry), "native_directory")
-        self.assertEqual(
-            get_route("antigravity-cli", self.registry), "native_directory"
-        )
+        self.assertEqual(get_route("antigravity-cli", self.registry), "github_cli")
 
         app_destination = resolve_native_destination(
             "antigravity",
-            "user",
-            self.registry,
-            project_root=project,
-            home=home,
-        )
-        cli_destination = resolve_native_destination(
-            "antigravity-cli",
             "user",
             self.registry,
             project_root=project,
@@ -116,15 +165,6 @@ class UniversalInstallTests(unittest.TestCase):
             app_destination,
             home / ".gemini" / "config" / "skills" / "typecraft-skills",
         )
-        self.assertEqual(
-            cli_destination,
-            home
-            / ".gemini"
-            / "antigravity-cli"
-            / "skills"
-            / "typecraft-skills",
-        )
-        self.assertNotEqual(app_destination, cli_destination)
 
         app_project_destination = resolve_native_destination(
             "antigravity",
@@ -133,31 +173,22 @@ class UniversalInstallTests(unittest.TestCase):
             project_root=project,
             home=home,
         )
-        cli_project_destination = resolve_native_destination(
-            "antigravity-cli",
-            "project",
-            self.registry,
-            project_root=project,
-            home=home,
-        )
-        self.assertEqual(app_project_destination, cli_project_destination)
         self.assertEqual(
-            cli_project_destination,
+            app_project_destination,
             project / ".agents" / "skills" / "typecraft-skills",
         )
 
-        for platform in ("antigravity", "antigravity_cli"):
-            self.assertEqual(
-                self.registry["platforms"][platform]["compatibility"],
-                "compatible",
-            )
-        cli_catalog = next(
-            entry
-            for entry in self.registry["agent_catalog"]
-            if entry["agent_id"] == "antigravity-cli"
+        self.assertEqual(
+            self.registry["platforms"]["antigravity"]["compatibility"], "compatible"
         )
-        self.assertEqual(cli_catalog["installation_verified"], "false")
-        self.assertEqual(cli_catalog["skill_discovery_verified"], "false")
+        self.assertEqual(
+            self.registry["platforms"]["antigravity_cli"]["compatibility"],
+            "research_required",
+        )
+        self.assertNotIn("antigravity-cli", self.registry["native_adapters"])
+        self.assertEqual(
+            get_route("github-copilot-cli", self.registry), "native_directory"
+        )
 
     def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
@@ -310,6 +341,46 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(
             repeated.installation, "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED"
         )
+        self.assertEqual(result.version, self.registry["project_version"])
+
+        output = io.StringIO()
+        with redirect_stdout(output):
+            print_result(result, json_output=True)
+        report = json.loads(output.getvalue())
+        self.assertEqual(report["platform"], "codex")
+        self.assertEqual(report["version"], self.registry["project_version"])
+        self.assertEqual(report["file_verification"], "SUCCESS")
+        self.assertEqual(report["skill_discovery"], "NOT_VERIFIED")
+
+    def test_file_verification_detects_missing_and_modified_reference_files(self):
+        destination = self.root / "installed"
+        shutil.copytree(self.source, destination)
+        self.assertTrue(verify_skill_tree(self.source, destination))
+        reference = destination / "references" / "design-styles" / "style.md"
+        reference.unlink()
+        self.assertFalse(verify_skill_tree(self.source, destination))
+        reference.parent.mkdir(parents=True, exist_ok=True)
+        reference.write_text("changed reference\n", encoding="utf-8")
+        self.assertFalse(verify_skill_tree(self.source, destination))
+
+    def test_existing_shared_alias_prevents_duplicate_installation(self):
+        alias = self.root / "home" / ".cursor" / "skills" / "typecraft-skills"
+        alias.parent.mkdir(parents=True)
+        shutil.copytree(self.source, alias)
+        result = execute_install(
+            REQUEST,
+            "cursor",
+            source=self.source,
+            registry=self.registry,
+            home=self.root / "home",
+        )
+        self.assertEqual(
+            result.installation, "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED"
+        )
+        self.assertEqual(Path(result.location), alias)
+        self.assertFalse(
+            (self.root / "home" / ".agents" / "skills" / "typecraft-skills").exists()
+        )
 
     def test_native_install_requires_explicit_approval_to_replace_different_skill(self):
         destination = resolve_native_destination(
@@ -339,8 +410,92 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(
             result.installation, "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
         )
-        self.assertFalse((destination / "custom.txt").exists())
-        self.assertTrue(verify_skill_tree(self.source, destination))
+        self.assertTrue((destination / "custom.txt").exists())
+        self.assertTrue(
+            verify_skill_tree(self.source, destination, allow_extra_files=True)
+        )
+
+    def test_explicit_update_preserves_extra_files_in_a_known_typecraft_copy(self):
+        destination = resolve_native_destination(
+            "codex", "user", self.registry, home=self.root / "home"
+        )
+        destination.mkdir(parents=True)
+        shutil.copy2(self.source / "SKILL.md", destination / "SKILL.md")
+        (destination / "user-notes.txt").write_text("keep me", encoding="utf-8")
+        (destination / "references").mkdir()
+
+        with self.assertRaisesRegex(ExistingInstallationError, "update available"):
+            execute_install(
+                REQUEST,
+                "codex",
+                source=self.source,
+                registry=self.registry,
+                home=self.root / "home",
+            )
+
+        result = execute_install(
+            REQUEST,
+            "codex",
+            source=self.source,
+            registry=self.registry,
+            home=self.root / "home",
+            overwrite=True,
+        )
+        self.assertEqual(result.installation, "FILES_UPDATED_DISCOVERY_UNVERIFIED")
+        self.assertEqual((destination / "user-notes.txt").read_text(), "keep me")
+        self.assertTrue(verify_skill_tree(self.source, destination, allow_extra_files=True))
+
+    def test_refuses_symlinked_source_and_destination(self):
+        source_link = self.root / "linked-source"
+        home = self.root / "home"
+        destination = home / ".agents" / "skills" / "typecraft-skills"
+        try:
+            source_link.symlink_to(self.source, target_is_directory=True)
+            destination.parent.mkdir(parents=True)
+            destination.symlink_to(self.root / "outside", target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("Directory symlinks are unavailable on this platform")
+
+        with self.assertRaisesRegex(InstallationError, "source cannot be a symlink"):
+            verify_skill_tree(source_link, self.root / "unused")
+        with self.assertRaisesRegex(InstallationError, "Refusing to replace a symlink"):
+            execute_install(
+                REQUEST,
+                "codex",
+                source=self.source,
+                registry=self.registry,
+                home=home,
+            )
+
+    def test_failed_atomic_replace_restores_existing_directory(self):
+        destination = resolve_native_destination(
+            "codex", "user", self.registry, home=self.root / "home"
+        )
+        destination.mkdir(parents=True)
+        shutil.copytree(self.source, destination, dirs_exist_ok=True)
+        (destination / "user-notes.txt").write_text("preserve", encoding="utf-8")
+        real_replace = __import__("os").replace
+        replacements = 0
+
+        def fail_install(source, target):
+            nonlocal replacements
+            replacements += 1
+            if replacements == 2:
+                raise OSError("simulated rename failure")
+            return real_replace(source, target)
+
+        with patch("scripts.install_url.os.replace", side_effect=fail_install):
+            with self.assertRaisesRegex(InstallationError, "previous directory was restored"):
+                execute_install(
+                    REQUEST,
+                    "codex",
+                    source=self.source,
+                    registry=self.registry,
+                    home=self.root / "home",
+                    overwrite=True,
+                )
+        self.assertTrue((destination / "user-notes.txt").exists())
+        self.assertTrue(verify_skill_tree(self.source, destination, allow_extra_files=True))
 
     def test_zip_contains_entire_canonical_skill_and_requires_manual_upload(self):
         output = self.root / "typecraft-skills.zip"
@@ -392,6 +547,17 @@ class UniversalInstallTests(unittest.TestCase):
         with zipfile.ZipFile(package) as archive:
             self.assertEqual(set(archive.namelist()), expected)
         self.assertEqual(count, len(expected))
+        references = [name for name in expected if name.startswith("typecraft-skills/references/")]
+        self.assertEqual(len(references), 20)
+        self.assertEqual(len([name for name in references if "/design-styles/" in name]), 10)
+        self.assertEqual(len([name for name in references if "/design-templates/" in name]), 10)
+        self.assertTrue(
+            _verify_zip_archive(
+                package,
+                SKILL_SOURCE.resolve(),
+                [path for path in SKILL_SOURCE.rglob("*") if path.is_file()],
+            )
+        )
 
     def test_package_does_not_replace_an_existing_archive_without_approval(self):
         output = self.root / "typecraft-skills.zip"
@@ -399,6 +565,16 @@ class UniversalInstallTests(unittest.TestCase):
         with self.assertRaises(ExistingInstallationError):
             package_skill(self.source, output)
         self.assertEqual(output.read_bytes(), b"existing package")
+
+    def test_zip_verification_detects_corrupt_archive_bytes(self):
+        output = self.root / "typecraft-skills.zip"
+        package, _ = package_skill(self.source, output)
+
+        source_files = sorted(path for path in self.source.rglob("*") if path.is_file())
+        self.assertTrue(_verify_zip_archive(package, self.source.resolve(), source_files))
+        with zipfile.ZipFile(output, "w") as archive:
+            archive.writestr("typecraft-skills/SKILL.md", "modified")
+        self.assertFalse(_verify_zip_archive(output, self.source.resolve(), source_files))
 
     def test_chat_only_fallback_never_claims_persistent_installation(self):
         result = execute_install(
@@ -560,6 +736,48 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(result.installation, "SUCCESS")
         self.assertEqual(result.skill_discovery, "VERIFIED")
         self.assertIn("consent", result.user_action_remaining)
+
+    @patch("scripts.install_url.subprocess.run")
+    @patch("scripts.install_url.shutil.which", return_value="/usr/bin/gemini")
+    def test_gemini_prefers_its_native_installer_without_skipping_consent(
+        self, _which, run
+    ):
+        destination = (
+            self.root / "gemini-home" / ".gemini" / "skills" / "typecraft-skills"
+        )
+
+        def fake_gemini(command, **_kwargs):
+            if command[-1] == "--help":
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="--path PATH --scope user|workspace",
+                    stderr="",
+                )
+            if "install" in command:
+                shutil.copytree(self.source, destination)
+                return SimpleNamespace(returncode=0, stdout="", stderr="")
+            return SimpleNamespace(
+                returncode=0, stdout="typecraft-skills\n", stderr=""
+            )
+
+        run.side_effect = fake_gemini
+        result = execute_install(
+            REQUEST,
+            "gemini-cli",
+            source=self.source,
+            registry=self.registry,
+            home=self.root / "gemini-home",
+        )
+        self.assertEqual(result.installation, "SUCCESS")
+        self.assertEqual(result.skill_discovery, "VERIFIED")
+        install_command = next(
+            call.args[0]
+            for call in run.call_args_list
+            if "install" in call.args[0] and call.args[0][-1] != "--help"
+        )
+        self.assertIn("skills/typecraft-skills", install_command)
+        self.assertIn("user", install_command)
+        self.assertNotIn("--consent", install_command)
 
 
 if __name__ == "__main__":

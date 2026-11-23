@@ -1,93 +1,102 @@
 # TypeCraft Skills — Platform Compatibility
 
-## Status definitions
+## What the status means
 
-The registry separates installer support from platform compatibility and
-runtime discovery:
+The [compatibility registry](../registry/agents.yaml) is the source of truth
+for official documentation, installation method and scope, native installer
+availability, file verification, runtime discovery, evidence, limitations, and
+remaining user action.
 
-- **Compatible:** current official platform documentation describes Agent
-  Skills support and a documented installation route. This is not a TypeCraft
-  end-to-end test.
-- **Verified:** TypeCraft installation and runtime discovery were actually
-  tested on the named platform and version.
-- **Research required:** TypeCraft has not established a safe supported route
-  for that platform.
-- **Unsupported:** no persistent skill installation mechanism is available.
+- **verified** — TypeCraft files were installed and the platform itself
+  discovered the skill in the recorded environment.
+- **compatible** — current official product documentation establishes a
+  supported Agent Skills format and route; TypeCraft end-to-end testing is
+  incomplete.
+- **research_required** — product support, installation paths, or runtime
+  behavior is uncertain. An installer host ID is not a compatibility result.
+- **unsupported** — no persistent installation route is supported.
 
-No platform is marked `verified` merely because a directory exists or an
-installer returned success.
+The registry documents the date checked for official sources. The platform
+matrix below is intentionally conservative; it does not claim that every
+surface sharing a product name uses the same skill directory.
 
-## Supported installation routes
+## Platform verification matrix
 
-| Platform | Route | What can be verified by the TypeCraft router |
-|---|---|---|
-| Claude Code | Native `~/.claude/skills/` or `.claude/skills/` | File tree; runtime discovery must be checked with `/skills` |
-| OpenAI Codex | Native `~/.agents/skills/` or `.agents/skills/` | File tree; runtime discovery must be checked in Codex |
-| Cursor | Native `~/.cursor/skills/` or `.cursor/skills/` | File tree; runtime discovery must be checked in Cursor |
-| Gemini CLI | Native `~/.gemini/skills/` or `.gemini/skills/` | File tree and, when available, `gemini skills list --all` |
-| OpenCode | Native `~/.config/opencode/skills/` or `.opencode/skills/` | File tree; runtime discovery must be checked in OpenCode |
-| Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | File tree; runtime discovery must be checked in the App |
-| Antigravity CLI | Native CLI-specific global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/` | File tree; runtime discovery must be checked in the CLI |
-| GitHub CLI registered hosts | GitHub CLI preview `gh skill install` adapter | CLI inventory and reference files; not runtime discovery |
-| ChatGPT Skills | ZIP upload in the product UI | ZIP contents only; upload, scan, and installation require user action |
-| Chat-only environment | Current-conversation use, if all files are readable | No persistent installation or discovery |
+| Platform surface | Status | Documented install | File verification | Runtime discovery |
+|---|---|---|---|---|
+| Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Not tested in this environment | Not tested. A user reported that an existing local copy was listed and its full `SKILL.md` read; source equality and version were not checked. |
+| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested |
+| GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session |
+| GitHub Copilot CLI | compatible | Documented `~/.copilot/skills/` or `.github/skills/` directory; `copilot skill add <DIRECTORY>` registers an alternate location | Not tested | Not tested |
+| GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
+| GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
+| Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
+| Gemini CLI | compatible | Native `gemini skills install`; user or workspace scope | Not tested on the real CLI | Router can query `gemini skills list --all`; positive mocked tests are not runtime evidence. |
+| Google Antigravity App | compatible | `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
+| Antigravity CLI | research_required | GitHub CLI preview fallback only if the installed CLI advertises the host | Not tested | Not tested; official App path is not assumed to be the CLI path |
+| OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested; OpenCode has additional native locations that should be checked for duplicates |
+| ChatGPT Skills | compatible | ZIP upload in the product UI | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
+| Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
+| Other GitHub CLI host IDs | research_required unless separately documented above | Preview `gh skill install` only when the installed CLI explicitly lists the ID | Installer preview only | Not verified for TypeCraft |
 
-The native paths are sourced from the platform documentation linked in
-[`registry/agents.yaml`](../registry/agents.yaml). Antigravity App and
-Antigravity CLI are separate targets. Both use `.agents/skills/` for workspace
-skills. The CLI also supports the App's shared global
-`~/.gemini/config/skills/` directory, plus `~/.gemini/skills/`; the TypeCraft
-CLI adapter uses the CLI-specific `~/.gemini/antigravity-cli/skills/` directory
-to keep user-scope installations distinct.
+### Actual GitHub Copilot evidence
 
-GitHub CLI currently documents 48 supported host IDs. That list means the
-installer can route a skill to those host integrations; it does not mean each
-host has been independently tested with TypeCraft. The registry keeps
-`installation_verified` and `skill_discovery_verified` false until an actual
-test is performed.
+On November 23, 2026, TypeCraft **1.1.0** was installed at user scope in
+GitHub Copilot for Visual Studio Code running in GitHub Codespaces:
 
-### GitHub Copilot runtime verification
+`/home/codespace/.copilot/skills/typecraft-skills/`
 
-TypeCraft 1.1.0 was verified on **November 23, 2026** in GitHub Copilot for
-Visual Studio Code running in GitHub Codespaces. The user-scope installation
-succeeded at
-`/home/codespace/.copilot/skills/typecraft-skills/`; `SKILL.md` and all 20
-reference files were present. In a fresh Copilot Agent session, Copilot
-discovered the skill, read `SKILL.md`, and exercised these references while
-producing a typography recommendation:
+The fresh Agent session discovered the skill, read `SKILL.md`, and exercised
+four references: Art Deco Typographic Style, Swiss International Typographic
+Style, E-commerce Product Showcase Layout, and Cinematic Title Poster. The
+installation record reports all 20 reference files present.
 
-- Art Deco Typographic Style
-- Swiss International Typographic Style
-- E-commerce Product Showcase Layout
-- Cinematic Title Poster
+This evidence applies only to the named VS Code + Codespaces environment. It
+does not verify Copilot CLI, the Copilot app, cloud agent, other editors, or
+other install scopes. It is historical evidence for TypeCraft 1.1.0; the
+current repository registry version is `1.1.0-dev`.
 
-This verifies only the tested GitHub Copilot + VS Code + Codespaces
-environment. It does not establish verification for other Copilot versions,
-editors, installation scopes, or environments.
+### User-reported Claude Code observation
 
-## Platforms requiring further research
+The user reported that local Claude Code listed
+`~/.claude/skills/typecraft-skills`, loaded its complete `SKILL.md`, and
+identified 10 styles and 10 templates. Claude had inspected the existing copy
+only. No fresh installation, comparison with the current GitHub tree, exact
+file equality, or installed version was established. The registry records this
+as user-reported discovery, not as `verified` platform evidence. The separate
+Codespaces environment cannot inspect the user's Mac home directory.
 
-Windsurf, Zed, Aider, custom agent frameworks, and any host without a documented
-TypeCraft adapter remain `research_required` in the registry. Do not copy to an
-assumed path or claim compatibility based on a shared skill format alone.
+## Product-surface distinctions
 
-## Tool-aware execution
+- **Claude Code:** local `~/.claude/skills/` is not automatically equivalent
+  to Cowork, claude.ai account skills, or remote cloud-session skills.
+- **GitHub Copilot:** VS Code, CLI, app, and cloud agent/code review have
+  different management and persistence behavior. The verified VS Code
+  observation is not transferable to the other surfaces.
+- **Cursor:** a local user skill is not automatically synced to Cloud Agents;
+  project skills and Cloud Agent synchronization are separate.
+- **Gemini CLI:** supports native `gemini skills install`, user/workspace scope,
+  discovery listing, and consent on activation. The router uses the native
+  command only when the installed CLI advertises the documented options.
+- **Antigravity:** the current official skills page describes App locations.
+  It does not establish a CLI-specific path, so the registry leaves the CLI
+  route to a checked GitHub CLI preview rather than guessing.
+- **OpenCode:** discovers multiple compatible directories. Use one shared
+  skill source and inspect all active locations to avoid duplicate IDs.
+- **ChatGPT Skills:** creating a ZIP is only packaging. The user must upload,
+  wait for scanning, and confirm product installation.
+- **Windsurf:** its former documentation URL redirects to Devin docs, which
+  mention legacy Windsurf paths. This alone does not establish present
+  Windsurf-specific TypeCraft support.
 
-TypeCraft provides design direction and structured resources. Rendering images,
-video, animation, or production-ready web interfaces depends on the tools
-available in the active environment.
+GitHub CLI currently advertises 48 host IDs in the locally inspected
+`gh 2.103.3` preview command. CI's `--dry-run` and registry checks exercise
+installer routing; neither an installer preview nor an inventory item proves
+that TypeCraft was installed, discovered, or invoked in the target agent.
 
-## Verification report
+## Remaining verification
 
-For each real platform test, record:
-
-- Agent, version, operating system, and installation scope.
-- Adapter and resulting destination.
-- Complete source-file and reference verification.
-- Platform-native skill discovery result.
-- Core workflow and reference access result.
-- User action, reload requirement, and limitations.
-- Verification date.
-
-Until that evidence exists, report file installation and runtime discovery as
-separate results.
+Run an actual installation and fresh-session discovery test for each compatible
+surface. Capture the precise product version, operating system, scope, path,
+full source-file comparison, native discovery evidence, reference use, and
+remaining user action before changing any registry status to `verified`.
