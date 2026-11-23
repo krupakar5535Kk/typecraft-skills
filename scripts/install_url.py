@@ -194,11 +194,13 @@ def _is_typecraft_copy(path):
 
 
 def _verify_zip_archive(archive_path, source, source_files):
-    expected = {
-        (Path(SKILL_NAME) / path.relative_to(source)).as_posix()
-        for path in source_files
-    }
     try:
+        source = Path(source).resolve(strict=True)
+        source_files = [Path(path).resolve(strict=True) for path in source_files]
+        expected = {
+            (Path(SKILL_NAME) / path.relative_to(source)).as_posix()
+            for path in source_files
+        }
         with zipfile.ZipFile(archive_path) as archive:
             if archive.testzip() is not None:
                 return False
@@ -213,7 +215,7 @@ def _verify_zip_archive(archive_path, source, source_files):
                 == _sha256(path)
                 for path in source_files
             )
-    except (OSError, zipfile.BadZipFile, RuntimeError):
+    except (OSError, ValueError, zipfile.BadZipFile, RuntimeError):
         return False
 
 

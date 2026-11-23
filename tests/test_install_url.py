@@ -126,7 +126,7 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(
             destination,
-            (self.root / "home" / ".agents" / "skills" / "typecraft-skills"),
+            (self.root / "home" / ".agents" / "skills" / "typecraft-skills").resolve(),
         )
 
     def test_rejects_registry_path_traversal(self):
@@ -163,7 +163,7 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(
             app_destination,
-            home / ".gemini" / "config" / "skills" / "typecraft-skills",
+            (home / ".gemini" / "config" / "skills" / "typecraft-skills").resolve(),
         )
 
         app_project_destination = resolve_native_destination(
@@ -175,7 +175,7 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(
             app_project_destination,
-            project / ".agents" / "skills" / "typecraft-skills",
+            (project / ".agents" / "skills" / "typecraft-skills").resolve(),
         )
 
         self.assertEqual(
@@ -377,7 +377,7 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(
             result.installation, "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED"
         )
-        self.assertEqual(Path(result.location), alias)
+        self.assertEqual(Path(result.location), alias.resolve())
         self.assertFalse(
             (self.root / "home" / ".agents" / "skills" / "typecraft-skills").exists()
         )
@@ -500,7 +500,7 @@ class UniversalInstallTests(unittest.TestCase):
     def test_zip_contains_entire_canonical_skill_and_requires_manual_upload(self):
         output = self.root / "typecraft-skills.zip"
         package, count = package_skill(self.source, output)
-        self.assertEqual(package, output)
+        self.assertEqual(package, output.resolve())
         self.assertEqual(count, 2)
         with zipfile.ZipFile(output) as archive:
             self.assertEqual(
