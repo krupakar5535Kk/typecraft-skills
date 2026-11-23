@@ -29,12 +29,15 @@ Agent Skills paths:
 | Gemini CLI | `~/.gemini/skills/` | `.gemini/skills/` |
 | OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` |
 | Google Antigravity App | `~/.gemini/config/skills/` | `.agents/skills/` |
+| Antigravity CLI | `~/.gemini/antigravity-cli/skills/` | `.agents/skills/` |
 
 These are supported file locations, not claims that TypeCraft has been
 independently tested in every runtime. Check the target agent's own skill list
 after installing. The Gemini CLI router can run `gemini skills list --all`;
 other native adapters report discovery as `NOT_VERIFIED` until the host itself
-confirms it. Gemini may request consent when the skill is activated.
+confirms it. Antigravity CLI also reads the shared global
+`~/.gemini/config/skills/` and `~/.gemini/skills/` paths. Gemini may request
+consent when the skill is activated.
 
 GitHub CLI offers a preview `gh skill install` adapter for its documented
 agent-host list. The registry tracks those installer targets separately from

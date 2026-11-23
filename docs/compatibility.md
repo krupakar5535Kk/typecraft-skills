@@ -26,14 +26,19 @@ installer returned success.
 | Cursor | Native `~/.cursor/skills/` or `.cursor/skills/` | File tree; runtime discovery must be checked in Cursor |
 | Gemini CLI | Native `~/.gemini/skills/` or `.gemini/skills/` | File tree and, when available, `gemini skills list --all` |
 | OpenCode | Native `~/.config/opencode/skills/` or `.opencode/skills/` | File tree; runtime discovery must be checked in OpenCode |
-| Google Antigravity App | Native `~/.gemini/config/skills/` or `.agents/skills/` | File tree; runtime discovery must be checked in the App |
+| Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | File tree; runtime discovery must be checked in the App |
+| Antigravity CLI | Native CLI-specific global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/` | File tree; runtime discovery must be checked in the CLI |
 | GitHub CLI registered hosts | GitHub CLI preview `gh skill install` adapter | CLI inventory and reference files; not runtime discovery |
 | ChatGPT Skills | ZIP upload in the product UI | ZIP contents only; upload, scan, and installation require user action |
 | Chat-only environment | Current-conversation use, if all files are readable | No persistent installation or discovery |
 
 The native paths are sourced from the platform documentation linked in
 [`registry/agents.yaml`](../registry/agents.yaml). Antigravity App and
-Antigravity CLI are separate hosts; no CLI-specific path is asserted here.
+Antigravity CLI are separate targets. Both use `.agents/skills/` for workspace
+skills. The CLI also supports the App's shared global
+`~/.gemini/config/skills/` directory, plus `~/.gemini/skills/`; the TypeCraft
+CLI adapter uses the CLI-specific `~/.gemini/antigravity-cli/skills/` directory
+to keep user-scope installations distinct.
 
 GitHub CLI currently documents 48 supported host IDs. That list means the
 installer can route a skill to those host integrations; it does not mean each

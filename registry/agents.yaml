@@ -85,7 +85,7 @@ installers:
 
 platforms:
   antigravity:
-    display_name: Google Antigravity
+    display_name: Google Antigravity App
     category: ai_ide_and_agent
     skill_format: agentskills
     compatibility: compatible
@@ -101,19 +101,21 @@ platforms:
         - user_permission
     evidence:
       - https://antigravity.google/docs/skills
-    notes: "Verified locations are for the Antigravity App. Do not infer CLI paths from App paths."
+    notes: "The App uses .agents/skills for workspace skills and ~/.gemini/config/skills globally. TypeCraft runtime discovery has not been tested."
 
   antigravity_cli:
     display_name: Antigravity CLI
     category: coding_agent
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     installer: github_cli
     installation:
-      method: needs_platform_documentation
+      method: native_directory
+      project_path: .agents/skills
+      user_path: ~/.gemini/antigravity-cli/skills
     evidence:
       - https://antigravity.google/docs/skills
-    notes: "The App documentation does not establish a CLI-specific directory or runtime discovery route."
+    notes: "The CLI uses .agents/skills for workspace skills and also reads ~/.gemini/config/skills (shared with the App) and ~/.gemini/skills. The TypeCraft adapter uses the CLI-specific ~/.gemini/antigravity-cli/skills user path. TypeCraft runtime discovery has not been tested."
 
   github_copilot:
     display_name: GitHub Copilot
@@ -326,6 +328,12 @@ native_adapters:
       user: ~/.gemini/config/skills
       project: .agents/skills
     evidence: https://antigravity.google/docs/skills
+  antigravity-cli:
+    platform: antigravity_cli
+    scope_paths:
+      user: ~/.gemini/antigravity-cli/skills
+      project: .agents/skills
+    evidence: https://antigravity.google/docs/skills
 
 runtime_detection:
   environment_variable: TYPECRAFT_AGENT
@@ -381,7 +389,7 @@ agent_catalog:
   - agent_id: antigravity-cli
     display_name: "Antigravity CLI"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: antigravity2.0

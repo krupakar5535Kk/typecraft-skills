@@ -35,6 +35,7 @@ Documented native user-scope locations:
 | Gemini CLI | `gemini-cli` | `~/.gemini/skills/` |
 | OpenCode | `opencode` | `~/.config/opencode/skills/` |
 | Google Antigravity App | `antigravity` | `~/.gemini/config/skills/` |
+| Antigravity CLI | `antigravity-cli` | `~/.gemini/antigravity-cli/skills/` |
 
 Use user scope by default. Use project scope only when requested or required. Project paths are declared in `registry/agents.yaml`.
 
@@ -44,12 +45,26 @@ Use the native skill directory for a platform listed above. The router copies th
 
 For other hosts, GitHub CLI's Agent Skills installer is the fallback only when that host ID appears in `gh skill install --help`. Its 48 host targets indicate installer support, not independent TypeCraft runtime verification. Check the current CLI before using it; it is a preview interface.
 
-When this repository is checked out locally, run:
+When using a fresh local checkout, create an isolated Python environment and
+install the router's dependencies before running it. From the repository root:
 
 ```bash
-python -m scripts.install_url \
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements-installer.txt
+.venv/bin/python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
   --agent <HOST_ID> \
+  --scope user
+```
+
+On Windows PowerShell, use the virtual environment's Windows interpreter:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-installer.txt
+.venv\Scripts\python.exe -m scripts.install_url `
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." `
+  --agent <HOST_ID> `
   --scope user
 ```
 
@@ -62,7 +77,8 @@ Platform discovery checks:
 - **Gemini CLI:** run `gemini skills list --all`. The router can query this command when available. Gemini may ask for consent when activating a skill.
 - **Cursor:** inspect the Agent skill list. Cursor also reads `.agents/skills/`.
 - **OpenCode:** inspect the active session's skills; its user directory is `~/.config/opencode/skills/`.
-- **Antigravity App:** inspect the App's skill list. Do not reuse the App directory for Antigravity CLI; no CLI path is asserted here.
+- **Antigravity App:** workspace skills use `.agents/skills/`; its global skills use `~/.gemini/config/skills/`. Check skill discovery in the App.
+- **Antigravity CLI:** workspace skills use `.agents/skills/`; use `~/.gemini/antigravity-cli/skills/` for CLI-only user installs. The CLI also reads `~/.gemini/config/skills/` (shared with the App), `~/.gemini/skills/`, and parent-workspace `.agents/skills/` directories. Check discovery in the CLI; a successful file copy is not runtime verification.
 
 ## 5. ChatGPT ZIP upload
 

@@ -54,6 +54,14 @@ for entry in catalog:
                   "skill_discovery_verified"):
         if field not in entry:
             fail(f"{entry.get('agent_id')}: missing {field}")
+    for field in ("installation_verified", "skill_discovery_verified"):
+        if entry[field] not in {"true", "false"}:
+            fail(f"{entry.get('agent_id')}: {field} must be true or false")
+    if (
+        entry["skill_discovery_verified"] == "true"
+        and entry["installation_verified"] != "true"
+    ):
+        fail(f"{entry['agent_id']}: discovery cannot be verified without installation")
 
 for key, platform in platforms.items():
     status = platform.get("compatibility")
@@ -62,6 +70,17 @@ for key, platform in platforms.items():
 
     if not platform.get("display_name"):
         fail(f"{key}: missing display_name")
+    if status == "verified":
+        verification = platform.get("runtime_verification", {})
+        if not (
+            verification.get("installation_tested") == "true"
+            and verification.get("skill_discovery_tested") == "true"
+            and verification.get("tested_at")
+        ):
+            fail(
+                f"{key}: verified compatibility requires recorded installation "
+                "and skill-discovery test evidence"
+            )
 
 for agent_id, adapter in native_adapters.items():
     platform_id = adapter.get("platform")
@@ -75,6 +94,17 @@ for agent_id, adapter in native_adapters.items():
         fail(f"{agent_id}: native adapter contains an empty installation path")
     if not adapter.get("evidence"):
         fail(f"{agent_id}: native adapter is missing official documentation evidence")
+
+app_paths = native_adapters.get("antigravity", {}).get("scope_paths", {})
+cli_paths = native_adapters.get("antigravity-cli", {}).get("scope_paths", {})
+if not app_paths or not cli_paths:
+    fail("Antigravity App and CLI must have separate native adapters.")
+if app_paths.get("user") == cli_paths.get("user"):
+    fail("Antigravity App and CLI user-scope paths must remain separate.")
+if app_paths.get("project") != cli_paths.get("project"):
+    fail("Antigravity App and CLI must use the documented shared workspace path.")
+if cli_paths.get("user") != "~/.gemini/antigravity-cli/skills":
+    fail("Antigravity CLI user-scope path must match official documentation.")
 
 for agent_id, fallback in fallbacks.items():
     if fallback.get("persistent_installation") != "unsupported":

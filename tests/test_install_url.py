@@ -1,4 +1,6 @@
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -86,6 +88,105 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(
             destination,
             (self.root / "home" / ".agents" / "skills" / "typecraft-skills"),
+        )
+
+    def test_antigravity_app_and_cli_use_separate_user_paths(self):
+        project = self.root / "project"
+        home = self.root / "home"
+        self.assertEqual(get_route("antigravity", self.registry), "native_directory")
+        self.assertEqual(
+            get_route("antigravity-cli", self.registry), "native_directory"
+        )
+
+        app_destination = resolve_native_destination(
+            "antigravity",
+            "user",
+            self.registry,
+            project_root=project,
+            home=home,
+        )
+        cli_destination = resolve_native_destination(
+            "antigravity-cli",
+            "user",
+            self.registry,
+            project_root=project,
+            home=home,
+        )
+        self.assertEqual(
+            app_destination,
+            home / ".gemini" / "config" / "skills" / "typecraft-skills",
+        )
+        self.assertEqual(
+            cli_destination,
+            home
+            / ".gemini"
+            / "antigravity-cli"
+            / "skills"
+            / "typecraft-skills",
+        )
+        self.assertNotEqual(app_destination, cli_destination)
+
+        app_project_destination = resolve_native_destination(
+            "antigravity",
+            "project",
+            self.registry,
+            project_root=project,
+            home=home,
+        )
+        cli_project_destination = resolve_native_destination(
+            "antigravity-cli",
+            "project",
+            self.registry,
+            project_root=project,
+            home=home,
+        )
+        self.assertEqual(app_project_destination, cli_project_destination)
+        self.assertEqual(
+            cli_project_destination,
+            project / ".agents" / "skills" / "typecraft-skills",
+        )
+
+        for platform in ("antigravity", "antigravity_cli"):
+            self.assertEqual(
+                self.registry["platforms"][platform]["compatibility"],
+                "compatible",
+            )
+        cli_catalog = next(
+            entry
+            for entry in self.registry["agent_catalog"]
+            if entry["agent_id"] == "antigravity-cli"
+        )
+        self.assertEqual(cli_catalog["installation_verified"], "false")
+        self.assertEqual(cli_catalog["skill_discovery_verified"], "false")
+
+    def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        registry_text = (
+            repository_root / "registry" / "agents.yaml"
+        ).read_text(encoding="utf-8")
+        unverified_claim = registry_text.replace(
+            "    compatibility: compatible",
+            "    compatibility: verified",
+            1,
+        )
+        self.assertNotEqual(unverified_claim, registry_text)
+
+        registry = self.root / "registry"
+        registry.mkdir()
+        (registry / "agents.yaml").write_text(
+            unverified_claim, encoding="utf-8"
+        )
+        result = subprocess.run(
+            [sys.executable, str(repository_root / "scripts" / "validate_agent_registry.py")],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "verified compatibility requires recorded installation and skill-discovery test evidence",
+            result.stdout,
         )
 
     def test_native_install_copies_complete_skill_and_does_not_replace_identical_copy(self):
