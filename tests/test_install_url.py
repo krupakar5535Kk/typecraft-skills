@@ -185,7 +185,100 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
-            "verified compatibility requires recorded installation and skill-discovery test evidence",
+            "verified compatibility requires complete runtime evidence",
+            result.stdout,
+        )
+
+    def test_copilot_runtime_verification_records_tested_environment_and_references(self):
+        platforms = self.registry["platforms"]
+        verified = [
+            platform_id
+            for platform_id, platform in platforms.items()
+            if platform["compatibility"] == "verified"
+        ]
+        self.assertEqual(verified, ["github_copilot"])
+
+        verification = platforms["github_copilot"]["runtime_verification"]
+        self.assertEqual(verification["tested_at"], "2026-11-23")
+        self.assertEqual(verification["skill_version"], "1.1.0")
+        self.assertEqual(
+            verification["environment"],
+            {
+                "product": "GitHub Copilot",
+                "editor": "Visual Studio Code",
+                "host": "GitHub Codespaces",
+                "session": "Fresh Copilot Agent session",
+            },
+        )
+        self.assertEqual(
+            verification["installation"],
+            {
+                "tested": "true",
+                "scope": "user",
+                "method": "github_cli_managed",
+                "path": "/home/codespace/.copilot/skills/typecraft-skills/",
+                "skill_manifest_present": "true",
+                "reference_files_present": "20",
+            },
+        )
+        self.assertEqual(
+            verification["skill_discovery"]["references_exercised"],
+            [
+                "Art Deco Typographic Style",
+                "Swiss International Typographic Style",
+                "E-commerce Product Showcase Layout",
+                "Cinematic Title Poster",
+            ],
+        )
+        copilot = next(
+            entry
+            for entry in self.registry["agent_catalog"]
+            if entry["agent_id"] == "github-copilot"
+        )
+        self.assertEqual(copilot["installation_verified"], "true")
+        self.assertEqual(copilot["skill_discovery_verified"], "true")
+        self.assertTrue(
+            all(
+                entry["installation_verified"] == "false"
+                and entry["skill_discovery_verified"] == "false"
+                for entry in self.registry["agent_catalog"]
+                if entry["agent_id"] != "github-copilot"
+            )
+        )
+
+    def test_registry_rejects_verified_platform_without_matching_catalog_flags(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        registry_text = (
+            repository_root / "registry" / "agents.yaml"
+        ).read_text(encoding="utf-8")
+        invalid_registry = registry_text.replace(
+            "    installation_verified: true\n"
+            "    skill_discovery_verified: true\n",
+            "    installation_verified: false\n"
+            "    skill_discovery_verified: false\n",
+            1,
+        )
+        self.assertNotEqual(invalid_registry, registry_text)
+
+        registry = self.root / "registry"
+        registry.mkdir()
+        (registry / "agents.yaml").write_text(
+            invalid_registry, encoding="utf-8"
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(repository_root / "scripts" / "validate_agent_registry.py"),
+            ],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "verified compatibility requires complete runtime evidence "
+            "and matching verified catalog flags",
             result.stdout,
         )
 

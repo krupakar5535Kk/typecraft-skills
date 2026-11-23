@@ -10,6 +10,13 @@ ALLOWED_STATUSES = {
     "research_required",
     "unsupported",
 }
+CANONICAL_REFERENCES = (
+    Path(__file__).resolve().parents[1]
+    / "skills"
+    / "typecraft-skills"
+    / "references"
+)
+REFERENCE_FILE_COUNT = len(list(CANONICAL_REFERENCES.rglob("*.md")))
 
 def fail(message):
     print(f"ERROR: {message}")
@@ -72,14 +79,43 @@ for key, platform in platforms.items():
         fail(f"{key}: missing display_name")
     if status == "verified":
         verification = platform.get("runtime_verification", {})
+        environment = verification.get("environment", {})
+        installation = verification.get("installation", {})
+        discovery = verification.get("skill_discovery", {})
+        references = discovery.get("references_exercised", [])
+        agent_id = verification.get("agent_id")
+        catalog_entry = next(
+            (entry for entry in catalog if entry.get("agent_id") == agent_id),
+            None,
+        )
         if not (
-            verification.get("installation_tested") == "true"
-            and verification.get("skill_discovery_tested") == "true"
+            agent_id
             and verification.get("tested_at")
+            and verification.get("skill_version")
+            and all(
+                environment.get(field)
+                for field in ("product", "editor", "host", "session")
+            )
+            and installation.get("tested") == "true"
+            and installation.get("scope") in {"user", "project"}
+            and installation.get("method")
+            and installation.get("path")
+            and installation.get("skill_manifest_present") == "true"
+            and installation.get("reference_files_present")
+            == str(REFERENCE_FILE_COUNT)
+            and discovery.get("tested") == "true"
+            and discovery.get("result") == "confirmed"
+            and discovery.get("skill_read") == "true"
+            and isinstance(references, list)
+            and references
+            and all(isinstance(reference, str) and reference for reference in references)
+            and catalog_entry
+            and catalog_entry.get("installation_verified") == "true"
+            and catalog_entry.get("skill_discovery_verified") == "true"
         ):
             fail(
-                f"{key}: verified compatibility requires recorded installation "
-                "and skill-discovery test evidence"
+                f"{key}: verified compatibility requires complete runtime evidence "
+                "and matching verified catalog flags"
             )
 
 for agent_id, adapter in native_adapters.items():

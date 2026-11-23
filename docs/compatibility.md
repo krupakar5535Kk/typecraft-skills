@@ -46,6 +46,25 @@ host has been independently tested with TypeCraft. The registry keeps
 `installation_verified` and `skill_discovery_verified` false until an actual
 test is performed.
 
+### GitHub Copilot runtime verification
+
+TypeCraft 1.1.0 was verified on **November 23, 2026** in GitHub Copilot for
+Visual Studio Code running in GitHub Codespaces. The user-scope installation
+succeeded at
+`/home/codespace/.copilot/skills/typecraft-skills/`; `SKILL.md` and all 20
+reference files were present. In a fresh Copilot Agent session, Copilot
+discovered the skill, read `SKILL.md`, and exercised these references while
+producing a typography recommendation:
+
+- Art Deco Typographic Style
+- Swiss International Typographic Style
+- E-commerce Product Showcase Layout
+- Cinematic Title Poster
+
+This verifies only the tested GitHub Copilot + VS Code + Codespaces
+environment. It does not establish verification for other Copilot versions,
+editors, installation scopes, or environments.
+
 ## Platforms requiring further research
 
 Windsurf, Zed, Aider, custom agent frameworks, and any host without a documented

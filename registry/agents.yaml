@@ -121,13 +121,38 @@ platforms:
     display_name: GitHub Copilot
     category: coding_agent
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     installer: github_cli
     installation:
       method: github_cli_managed
+    runtime_verification:
+      agent_id: github-copilot
+      tested_at: "2026-11-23"
+      skill_version: "1.1.0"
+      environment:
+        product: GitHub Copilot
+        editor: Visual Studio Code
+        host: GitHub Codespaces
+        session: "Fresh Copilot Agent session"
+      installation:
+        tested: true
+        scope: user
+        method: github_cli_managed
+        path: /home/codespace/.copilot/skills/typecraft-skills/
+        skill_manifest_present: true
+        reference_files_present: 20
+      skill_discovery:
+        tested: true
+        result: confirmed
+        skill_read: true
+        references_exercised:
+          - Art Deco Typographic Style
+          - Swiss International Typographic Style
+          - E-commerce Product Showcase Layout
+          - Cinematic Title Poster
     evidence:
       - https://cli.github.com/manual/gh_skill_install
-    notes: "GitHub CLI supports this target; TypeCraft runtime discovery has not been independently tested."
+    notes: "Runtime verification covers GitHub Copilot in VS Code in GitHub Codespaces only; it does not verify other Copilot environments."
 
   chatgpt:
     display_name: ChatGPT
@@ -354,8 +379,8 @@ agent_catalog:
     display_name: "GitHub Copilot"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: claude-code
     display_name: "Claude Code"
     installer: github_cli
