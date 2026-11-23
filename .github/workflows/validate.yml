@@ -23,6 +23,8 @@ jobs:
           - macos-latest
           - windows-latest
     runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
 
     steps:
       - name: Checkout repository
