@@ -235,7 +235,10 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(result.file_verification, "SUCCESS")
         self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
-        self.assertIn("/.gemini/antigravity-cli/skills/", result.location)
+        self.assertEqual(
+            Path(result.location).parts[-4:],
+            (".gemini", "antigravity-cli", "skills", "typecraft-skills"),
+        )
         self.assertIn("/skills reload", result.user_action_remaining)
 
     def test_copilot_cli_discovery_requires_the_exact_installed_path(self):
@@ -270,13 +273,21 @@ class UniversalInstallTests(unittest.TestCase):
         )
 
         other_path = destination.parent / "other-skill"
+        other_inventory = json.dumps([
+            {
+                "name": "typecraft-skills",
+                "path": str(other_path),
+                "source": "project",
+                "enabled": True,
+            }
+        ])
         with (
             patch("scripts.install_url.shutil.which", return_value="/usr/bin/copilot"),
             patch(
                 "scripts.install_url.subprocess.run",
                 return_value=subprocess.CompletedProcess(
                     args=[], returncode=0,
-                    stdout=inventory.replace(str(destination), str(other_path)),
+                    stdout=other_inventory,
                     stderr="",
                 ),
             ),
