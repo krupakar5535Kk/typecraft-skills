@@ -133,12 +133,21 @@ class UniversalInstallTests(unittest.TestCase):
                 )
                 self.assertEqual(
                     project_path,
-                    project / project_directory / "skills" / "typecraft-skills",
+                    (
+                        project
+                        / project_directory
+                        / "skills"
+                        / "typecraft-skills"
+                    ).resolve(strict=False),
                 )
                 self.assertEqual(
                     user_path,
-                    home / user_directory.removeprefix("~/") / "skills"
-                    / "typecraft-skills",
+                    (
+                        home
+                        / user_directory.removeprefix("~/")
+                        / "skills"
+                        / "typecraft-skills"
+                    ).resolve(strict=False),
                 )
                 self.assertEqual(
                     self.registry["platforms"][platform]["compatibility"],
