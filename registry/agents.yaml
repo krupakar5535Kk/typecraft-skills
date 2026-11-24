@@ -200,15 +200,16 @@ platforms:
     category: coding_agent
     product_surface: Copilot CLI
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
-      kind: documentation_review
-      environment: "Official documentation reviewed; Copilot CLI was not run and TypeCraft was not installed."
+      kind: automated_runtime_test
+      environment: "Linux GitHub Codespaces; GitHub Copilot CLI 1.0.105; isolated project and HOME; no credentials for install/discovery; a separate one-shot authenticated invocation exercised both named references."
     native_installer_available: true
-    file_installation_verification: not_tested
-    runtime_discovery_verification: not_tested
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: verified
     installation:
       method: documented_skill_directory
       optional_cli_command: "copilot skill add <DIRECTORY> registers an alternate skill location"
@@ -216,8 +217,36 @@ platforms:
       project_scope_directory: .github/skills
     discovery:
       mechanism: "copilot skill list or interactive /skills list"
-      user_action: "Confirm the skill in the CLI skill list; reload or restart if needed."
-    notes: "Documented CLI commands are distinct from gh skill. TypeCraft has not been installed or discovered in this surface."
+      user_action: "No further action for the tested CLI 1.0.105; reload or restart a running session after installation."
+    runtime_verification:
+      agent_id: github-copilot-cli
+      tested_at: "2026-11-24"
+      skill_version: "1.2.0"
+      environment:
+        product: GitHub Copilot CLI
+        host: Linux GitHub Codespaces
+        session: "Isolated project/user installation and discovery; separate one-shot model invocation."
+        cli_version: "1.0.105"
+      installation:
+        tested: true
+        scope: project
+        method: TypeCraft router native directory adapter
+        path: "$PROJECT/.github/skills/typecraft-skills/"
+        skill_manifest_present: true
+        reference_files_present: 20
+        sha256_tree_match: true
+      skill_discovery:
+        tested: true
+        result: confirmed
+        command: "copilot --no-auto-update skill list --json"
+        exact_install_path_matched: true
+      invocation:
+        tested: true
+        result: confirmed
+        references_exercised:
+          - Swiss International Typographic Style
+          - Cinematic Title Poster
+    notes: "Automated installation and native discovery passed at both project and user scope. A separate bounded CLI session explicitly invoked /typecraft-skills and correctly used the Swiss style and five-zone poster template. No credentials were used for installation/discovery; invocation used the configured Copilot account."
 
   github_copilot_app:
     display_name: GitHub Copilot app
@@ -841,7 +870,8 @@ fallbacks:
 
 # Individual GitHub CLI agent catalog.
 # GitHub CLI owns the host-specific installation paths.
-# These entries do not imply independent installation testing.
+# Catalog entries are installer targets only unless their platform record
+# contains matching runtime evidence.
 agent_catalog:
   - agent_id: github-copilot
     display_name: "GitHub Copilot"

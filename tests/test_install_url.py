@@ -238,6 +238,57 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertIn("/.gemini/antigravity-cli/skills/", result.location)
         self.assertIn("/skills reload", result.user_action_remaining)
 
+    def test_copilot_cli_discovery_requires_the_exact_installed_path(self):
+        destination = self.root / "project" / ".github" / "skills" / "typecraft-skills"
+        inventory = json.dumps([
+            {
+                "name": "typecraft-skills",
+                "path": str(destination),
+                "source": "project",
+                "enabled": True,
+            }
+        ])
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/copilot"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout=inventory, stderr=""
+                ),
+            ) as run,
+        ):
+            status, message = _verify_native_discovery(
+                "github-copilot-cli",
+                cwd=destination.parents[2],
+                destination=destination,
+            )
+        self.assertEqual(status, "VERIFIED")
+        self.assertIn("at the installed location", message)
+        self.assertEqual(
+            run.call_args.args[0],
+            ["/usr/bin/copilot", "skill", "list", "--json"],
+        )
+
+        other_path = destination.parent / "other-skill"
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/copilot"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0,
+                    stdout=inventory.replace(str(destination), str(other_path)),
+                    stderr="",
+                ),
+            ),
+        ):
+            status, message = _verify_native_discovery(
+                "github-copilot-cli",
+                cwd=destination.parents[2],
+                destination=destination,
+            )
+        self.assertEqual(status, "NOT_VERIFIED")
+        self.assertIn("did not list", message)
+
     def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
         registry_text = (
@@ -283,7 +334,9 @@ class UniversalInstallTests(unittest.TestCase):
             for platform_id, platform in platforms.items()
             if platform["compatibility"] == "verified"
         ]
-        self.assertEqual(verified, ["github_copilot", "gemini_cli"])
+        self.assertEqual(
+            verified, ["github_copilot", "github_copilot_cli", "gemini_cli"]
+        )
 
         verification = platforms["github_copilot"]["runtime_verification"]
         self.assertEqual(verification["tested_at"], "2026-11-23")
@@ -317,6 +370,27 @@ class UniversalInstallTests(unittest.TestCase):
                 "Cinematic Title Poster",
             ],
         )
+        copilot_cli = platforms["github_copilot_cli"]
+        self.assertEqual(copilot_cli["runtime_verification"]["skill_version"], "1.2.0")
+        self.assertEqual(
+            copilot_cli["runtime_verification"]["environment"]["cli_version"],
+            "1.0.105",
+        )
+        self.assertEqual(
+            copilot_cli["runtime_verification"]["installation"]["scope"], "project"
+        )
+        self.assertEqual(
+            copilot_cli["runtime_verification"]["installation"]["reference_files_present"],
+            "20",
+        )
+        self.assertEqual(
+            copilot_cli["runtime_verification"]["skill_discovery"]["result"],
+            "confirmed",
+        )
+        self.assertEqual(
+            copilot_cli["runtime_verification"]["invocation"]["references_exercised"],
+            ["Swiss International Typographic Style", "Cinematic Title Poster"],
+        )
         copilot = next(
             entry
             for entry in self.registry["agent_catalog"]
@@ -344,11 +418,12 @@ class UniversalInstallTests(unittest.TestCase):
                 entry["installation_verified"] == "false"
                 and entry["skill_discovery_verified"] == "false"
                 for entry in self.registry["agent_catalog"]
-                if entry["agent_id"] not in {"github-copilot", "gemini-cli"}
+                if entry["agent_id"]
+                not in {"github-copilot", "github-copilot-cli", "gemini-cli"}
             )
         )
 
-    def test_registry_rejects_verified_platform_without_matching_catalog_flags(self):
+    def test_registry_rejects_verified_platform_without_matching_installer_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
         registry_text = (
             repository_root / "registry" / "agents.yaml"
@@ -380,9 +455,25 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
             "verified compatibility requires complete runtime evidence "
-            "and matching verified catalog flags",
+            "and matching verified installer metadata",
             result.stdout,
         )
+
+    def test_compatibility_matrix_covers_every_github_cli_host_id(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        contents = (
+            repository_root / "docs" / "compatibility.md"
+        ).read_text(encoding="utf-8")
+        documented_ids = [
+            line.split("|", 2)[1].strip().strip("`")
+            for line in contents.splitlines()
+            if line.startswith("| `")
+        ]
+        catalog_ids = [
+            entry["agent_id"] for entry in self.registry["agent_catalog"]
+        ]
+        self.assertEqual(len(documented_ids), len(set(documented_ids)))
+        self.assertCountEqual(documented_ids, catalog_ids)
 
     def test_native_install_copies_complete_skill_and_does_not_replace_identical_copy(self):
         result = execute_install(

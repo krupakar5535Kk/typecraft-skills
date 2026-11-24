@@ -166,6 +166,17 @@ for key, platform in platforms.items():
             (entry for entry in catalog if entry.get("agent_id") == agent_id),
             None,
         )
+        catalog_verification_matches = (
+            catalog_entry is not None
+            and catalog_entry.get("installation_verified") == "true"
+            and catalog_entry.get("skill_discovery_verified") == "true"
+        )
+        native_adapter = native_adapters.get(agent_id)
+        native_adapter_matches = (
+            agent_id not in target_set
+            and native_adapter is not None
+            and native_adapter.get("platform") == key
+        )
         if not (
             agent_id
             and verification.get("tested_at")
@@ -187,15 +198,13 @@ for key, platform in platforms.items():
             and (
                 invocation.get("tested") == "true"
             ) == (invocation_status == "verified")
-            and catalog_entry
-            and catalog_entry.get("installation_verified") == "true"
-            and catalog_entry.get("skill_discovery_verified") == "true"
+            and (catalog_verification_matches or native_adapter_matches)
             and file_status == "verified"
             and discovery_status == "verified"
         ):
             fail(
                 f"{key}: verified compatibility requires complete runtime evidence "
-                "and matching verified catalog flags"
+                "and matching verified installer metadata"
             )
         if invocation.get("tested") == "true" and not (
             invocation.get("result") == "confirmed"

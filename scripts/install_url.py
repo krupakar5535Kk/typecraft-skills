@@ -625,7 +625,63 @@ def _install_with_github_cli(
     )
 
 
-def _verify_native_discovery(platform, cwd=None):
+def _verify_native_discovery(platform, cwd=None, destination=None):
+    if platform == "github-copilot-cli":
+        executable = shutil.which("copilot")
+        if not executable:
+            return (
+                "NOT_VERIFIED",
+                "GitHub Copilot CLI is unavailable for a discovery check.",
+            )
+        if destination is None:
+            return (
+                "NOT_VERIFIED",
+                "The installed skill location is required to verify Copilot discovery.",
+            )
+
+        try:
+            result = subprocess.run(
+                [executable, "skill", "list", "--json"],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=cwd,
+            )
+        except OSError as exc:
+            return (
+                "NOT_VERIFIED",
+                f"Could not run GitHub Copilot CLI discovery: {exc}",
+            )
+        if result.returncode:
+            detail = result.stderr.strip() or result.stdout.strip()
+            return "NOT_VERIFIED", (
+                "GitHub Copilot CLI discovery failed: "
+                f"{detail or result.returncode}"
+            )
+        try:
+            skills = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            return "NOT_VERIFIED", f"Invalid JSON from copilot skill list: {exc}"
+        if not isinstance(skills, list):
+            return "NOT_VERIFIED", "Unexpected GitHub Copilot CLI skill inventory."
+
+        expected = Path(destination).resolve(strict=False)
+        if any(
+            isinstance(skill, dict)
+            and skill.get("name") == SKILL_NAME
+            and isinstance(skill.get("path"), str)
+            and Path(skill["path"]).resolve(strict=False) == expected
+            for skill in skills
+        ):
+            return (
+                "VERIFIED",
+                "GitHub Copilot CLI listed typecraft-skills at the installed location.",
+            )
+        return (
+            "NOT_VERIFIED",
+            "GitHub Copilot CLI did not list typecraft-skills at the installed location.",
+        )
+
     if platform != "gemini-cli":
         return "NOT_VERIFIED", "Confirm discovery in the platform's own skill list or UI."
 
@@ -670,7 +726,9 @@ def _install_with_gemini_cli(
     if destination.exists():
         status = _replace_directory(source, destination, overwrite)
         discovery, message = _verify_native_discovery(
-            "gemini-cli", cwd=project_root if scope == "project" else None
+            "gemini-cli",
+            cwd=project_root if scope == "project" else None,
+            destination=destination,
         )
         installation = (
             "ALREADY_INSTALLED"
@@ -836,7 +894,9 @@ def execute_install(
             )
         status = _replace_directory(source, destination, overwrite)
         discovery, message = _verify_native_discovery(
-            platform, cwd=project_root if scope == "project" else None
+            platform,
+            cwd=project_root if scope == "project" else None,
+            destination=destination,
         )
         if discovery == "VERIFIED" and platform == "gemini-cli":
             action = (
