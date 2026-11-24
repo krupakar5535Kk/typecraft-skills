@@ -1,3 +1,4 @@
+import json
 from datetime import date
 from pathlib import Path
 from strictyaml import load, YAMLValidationError
@@ -298,25 +299,65 @@ for agent_id, adapter in native_adapters.items():
 
 app = platforms.get("antigravity", {})
 cli = platforms.get("antigravity_cli", {})
+ide = platforms.get("antigravity_ide", {})
 app_adapter = native_adapters.get("antigravity", {})
 cli_adapter = native_adapters.get("antigravity-cli", {})
+ide_adapter = native_adapters.get("antigravity-ide", {})
 if (
     app.get("product_surface") != "Antigravity App"
     or cli.get("product_surface") != "Antigravity CLI"
+    or ide.get("product_surface") != "Antigravity standalone IDE"
 ):
-    fail("Antigravity App and CLI must be registered as separate product surfaces.")
-if not app_adapter or not cli_adapter:
-    fail("Antigravity App and CLI must have separate native adapters.")
+    fail("Antigravity App, CLI, and IDE must be separate product surfaces.")
+if not app_adapter or not cli_adapter or not ide_adapter:
+    fail("Antigravity App, CLI, and IDE must have separate native adapters.")
 app_paths = app_adapter.get("scope_paths", {})
 cli_paths = cli_adapter.get("scope_paths", {})
+ide_paths = ide_adapter.get("scope_paths", {})
 if (
     app_paths.get("user") == cli_paths.get("user")
     or app_paths.get("project") != cli_paths.get("project")
     or cli_paths.get("user") != "~/.gemini/antigravity-cli/skills"
+    or ide_paths.get("user") != "~/.gemini/config/skills"
+    or ide_paths.get("project") != ".agents/skills"
 ):
-    fail("Antigravity adapter paths do not match the documented surface scopes.")
+    fail("Antigravity adapters do not match the documented surface scopes.")
 if cli.get("compatibility") == "verified":
     fail("Antigravity CLI cannot be runtime-verified without recorded test evidence.")
+
+repository_root = Path(__file__).resolve().parents[1]
+plugin_path = repository_root / "plugin.json"
+marketplace_path = repository_root / ".agents" / "plugins" / "marketplace.json"
+try:
+    plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
+    marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    fail(f"Invalid OpenAI plugin or marketplace metadata: {exc}")
+if not isinstance(plugin, dict) or not isinstance(marketplace, dict):
+    fail("OpenAI plugin and marketplace metadata must be JSON objects.")
+plugin_entries = marketplace.get("plugins", [])
+if not isinstance(plugin_entries, list) or len(plugin_entries) != 1:
+    fail("The OpenAI marketplace must expose exactly one TypeCraft plugin.")
+if not isinstance(plugin_entries[0], dict):
+    fail("The OpenAI marketplace plugin entry must be a JSON object.")
+plugin_policy = plugin_entries[0].get("policy")
+if not isinstance(plugin_policy, dict):
+    fail("The OpenAI marketplace plugin entry must contain a policy object.")
+if (
+    plugin.get("name") != "typecraft-skills"
+    or plugin.get("version") != data.get("project_version")
+    or plugin_entries[0].get("name") != "typecraft-skills"
+    or plugin_entries[0].get("source")
+    != {"source": "local", "path": "./"}
+    or plugin_policy.get("installation") != "AVAILABLE"
+    or not (
+        repository_root
+        / "skills"
+        / "typecraft-skills"
+        / "SKILL.md"
+    ).is_file()
+):
+    fail("OpenAI plugin marketplace must target the versioned canonical skill.")
 
 for agent_id, fallback in fallbacks.items():
     if fallback.get("persistent_installation") != "unsupported":

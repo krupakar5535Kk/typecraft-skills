@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "typecraft-skills",
+  "version": "1.2.0",
+  "description": "Professional typography and visual design workflows for ChatGPT and Codex.",
+  "repository": "https://github.com/krupakar5535Kk/typecraft-skills",
+  "keywords": [
+    "typography",
+    "visual-design",
+    "agent-skills"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "TypeCraft Skills",
+        "shortDescription": "Professional typography and visual design guidance",
+        "longDescription": "A canonical creative skill covering ten typography styles, ten design templates, and five creative domains.",
+        "category": "Design",
+        "websiteURL": "https://github.com/krupakar5535Kk/typecraft-skills"
+      }
+    }
+  }
+}

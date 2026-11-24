@@ -32,23 +32,26 @@ verification stages; a successful skill listing does not establish invocation.
 | Platform surface | Status | Documented install | File verification | Runtime discovery |
 |---|---|---|---|---|
 | Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Not tested in this environment | Not tested. A user reported that an existing local copy was listed and its full `SKILL.md` read; source equality and version were not checked. |
-| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested |
+| OpenAI Codex CLI | verified | Codex plugin marketplace from this repository or `$skill-installer` / native directories | Codex CLI 0.172.0 installed the repo plugin in isolated `CODEX_HOME`; complete tree SHA-256 matched | `codex plugin list --json` confirmed it installed and enabled; model invocation not tested |
+| OpenAI Codex IDE extension | compatible | Native `~/.agents/skills/` or project `.agents/skills/` | Not tested with the IDE extension | Not tested |
 | GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session |
 | GitHub Copilot CLI | verified | `~/.copilot/skills/` or project `.github/skills/` | Verified at both scopes; 20 reference files match the canonical tree | Verified with `copilot skill list --json`; one actual CLI invocation exercised Swiss International Typographic Style and Cinematic Title Poster |
 | GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
 | GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
 | Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
 | Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI 0.70.0; no model invocation |
-| Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; no Claude upload test | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. |
+| Claude.ai | compatible | Upload ZIP through **Plugins → Skills → Create → Upload from your computer**; **Create with chat** is another official route | Package integrity tests pass locally; no Claude upload test | Not verified; user must upload and enable. Free plans support custom skills when file creation is enabled. |
 | Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; no Cowork upload test | Not verified; paid-plan and rollout requirements apply. |
 | Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
+| Google Antigravity IDE | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/`; legacy `~/.gemini/antigravity/skills/` | Not tested | Not tested; official docs name the Customizations menu in the agent side panel |
 | Antigravity CLI | compatible | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; it also reads `~/.gemini/config/skills/` and `~/.gemini/skills/` | Not tested | Not tested; CLI supports skill slash commands and `/skills reload` |
 | OpenCode | verified | Shared `~/.agents/skills/` or `.agents/skills/` | Verified: 1.2.0 manifest and all 20 references matched by SHA-256 | Verified with `opencode --pure debug skill` in OpenCode 1.19.6; pure mode skips external project plugins; invocation not tested without provider authentication |
 | Cline | compatible | Native `~/.cline/skills/` or `.cline/skills/` | Not tested | Not tested; confirm the skill in the Skills panel and a fresh chat |
 | Roo Code | compatible | Native `~/.roo/skills/` or `.roo/skills/` | Not tested | Not tested; official docs also support the shared `.agents/skills/` path |
 | Kilo Code | compatible | Native `~/.kilo/skills/` or `.kilo/skills/` | Not tested | Not tested; official docs also support the shared `.agents/skills/` path |
 | Continue CLI | research_required | No Agent Skills install route established | Not tested | CLI exists, but official Agent Skills installation and native discovery were not established |
-| ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
+| ChatGPT Skills (web) | compatible | **Plugins → Skills → Create → Upload from your computer**; **Create with chat** is also documented | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and install/enable confirmation require the user and an eligible workspace |
+| ChatGPT desktop app | compatible | Repo-local OpenAI plugin marketplace in this repository; plugin points at the canonical skill directory | Manifest and marketplace structure validated locally; no desktop app install test | Not verified; if the app exposes local/repo marketplaces, user must add the marketplace and install from Plugins |
 | Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
 
 ### GitHub CLI host catalog (48 IDs)
@@ -165,6 +168,17 @@ confirms it is not executed during discovery. Invocation was not attempted:
 the isolated environment had no provider account or credential. This verifies
 installation and discovery only, not model invocation.
 
+### Actual Codex CLI evidence
+
+Codex CLI 0.172.0 added the repository's local plugin marketplace, listed
+`typecraft-skills@typecraft-skills` as available, installed the plugin in a
+temporary isolated `CODEX_HOME`, and listed it as installed and enabled.
+SHA-256 tree verification confirmed the installed plugin's canonical
+`skills/typecraft-skills/` directory, including `SKILL.md` and all 20
+references, matches the repository exactly. No OpenAI credential or model
+session was used; invocation remains untested. This verifies Codex CLI only,
+not the separate Codex IDE extension or ChatGPT desktop app.
+
 ### User-reported Claude Code observation
 
 The user reported that local Claude Code listed
@@ -199,12 +213,13 @@ Codespaces environment cannot inspect the user's Mac home directory.
   command only when the installed CLI advertises scoped installation. User
   scope has automated file and discovery evidence; workspace discovery and
   model invocation remain unverified.
-- **Antigravity App and CLI:** the official skills page documents separate
-  product surfaces. Both read workspace `.agents/skills/`; the App global
-  directory is `~/.gemini/config/skills/`. The CLI additionally reads
+- **Antigravity App, standalone IDE, and CLI:** the official skills page
+  documents three separate product surfaces. All read workspace
+  `.agents/skills/`; the App and IDE global directory is
+  `~/.gemini/config/skills/`. The CLI additionally reads
   `~/.gemini/antigravity-cli/skills/` and `~/.gemini/skills/`. Its `/skills
   reload` command refreshes skill slash commands. TypeCraft installation,
-  discovery, and invocation have not been tested in either Antigravity surface.
+  discovery, and invocation have not been tested in any Antigravity surface.
 - **OpenCode:** discovers its own and shared skill directories. TypeCraft's
   tested project install uses `.agents/skills/`; `opencode --pure debug skill`
   confirmed discovery without loading external project plugins. Restart
@@ -219,6 +234,11 @@ Codespaces environment cannot inspect the user's Mac home directory.
   remains `research_required`; no directory is guessed.
 - **ChatGPT Skills:** creating a ZIP is only packaging. The user must upload,
   wait for scanning, and confirm product installation.
+- **OpenAI plugin marketplace:** this repository contains a portable
+  `plugin.json` and `.agents/plugins/marketplace.json` that point to the
+  existing canonical skill, without another `SKILL.md` copy. Codex CLI
+  installation/discovery was tested. ChatGPT desktop local-marketplace UI and
+  ChatGPT web persistent upload/activation remain separate, untested actions.
 - **Windsurf:** its former documentation URL redirects to Devin docs, which
   mention legacy Windsurf paths. This alone does not establish present
   Windsurf-specific TypeCraft support.
@@ -237,10 +257,16 @@ available to this run:
   upload the generated ZIP, confirm the product's scan/install step, enable the
   skill, and verify it in a fresh session. Packaging tests are not product
   installation tests.
-- **Claude Code, Codex, Cursor, Antigravity App, and Antigravity CLI:** their
-  native runtimes were not installed in this environment. Their documented
-  directory install paths were exercised by isolated file-integrity tests,
-  but product-native discovery and invocation remain untested.
+- **Claude Code, Codex IDE, Cursor, Antigravity App, Antigravity IDE, and
+  Antigravity CLI:** their native runtimes were not installed in this
+  environment. Their documented directory install paths were exercised by
+  isolated file-integrity tests, but product-native discovery and invocation
+  remain untested.
+- **Codex CLI invocation:** native installation and discovery passed; no
+  authenticated model session was available for an actual design prompt.
+- **ChatGPT desktop app:** the repo marketplace was validated and Codex
+  consumed its plugin structure, but the desktop app UI was unavailable for
+  native installation or discovery testing.
 - **OpenCode:** installation integrity and native discovery passed on CLI
   1.19.6. A provider-authenticated skill invocation remains untested.
 - **Cline, Roo Code, and Kilo Code:** official routes and isolated adapter

@@ -44,8 +44,22 @@ its documented skill directory. The registry records surface-specific details.
   Claude.ai Skills are available on supported plans including Free when Code
   execution and file creation is enabled; Cowork requires an eligible paid
   plan. Organization policies may restrict uploads.
-- **Codex:** use its `$skill-installer` when available, or
-  `~/.agents/skills/` / project `.agents/skills/`.
+- **Codex CLI:** the native skill directory is `~/.agents/skills/` or project
+  `.agents/skills/`. For the repository's OpenAI plugin route, install the
+  marketplace from the URL, install the plugin, then check native inventory:
+
+  ```bash
+  codex plugin marketplace add krupakar5535Kk/typecraft-skills
+  codex plugin add typecraft-skills@typecraft-skills
+  codex plugin list --json
+  ```
+
+  Codex CLI 0.172.0 installation and discovery passed in an isolated
+  `CODEX_HOME`, with complete SHA-256 verification. The plugin uses the
+  canonical `skills/typecraft-skills/` directory; it does not duplicate it.
+- **Codex IDE extension:** the documented native directories are
+  `~/.agents/skills/` and project `.agents/skills/`. The IDE extension's
+  discovery and invocation are not runtime-tested.
 - **Cursor local:** use the documented shared `.agents/skills` location.
   Local personal skills do not automatically sync to Cloud Agents.
 - **Copilot VS Code, CLI, app, and cloud agent:** treat these as separate
@@ -59,6 +73,10 @@ its documented skill directory. The registry records surface-specific details.
   the documented native directory.
 - **Antigravity App:** global `~/.gemini/config/skills/` and workspace
   `.agents/skills/`.
+- **Antigravity IDE:** global `~/.gemini/config/skills/` and workspace
+  `.agents/skills/`. The standalone IDE also supports the legacy global
+  `~/.gemini/antigravity/skills/` location; inspect the **Customizations** menu
+  in the agent side panel after installation.
 - **Antigravity CLI:** CLI-specific global `~/.gemini/antigravity-cli/skills/`
   and workspace `.agents/skills/`. The CLI also reads
   `~/.gemini/config/skills/` (shared with the App) and `~/.gemini/skills/`.
@@ -82,11 +100,18 @@ its documented skill directory. The registry records surface-specific details.
   runtime discovery is not tested.
 - **Continue:** a Continue CLI exists, but this guide has not established an
   official Agent Skills installation route. Do not guess a directory.
-- **ChatGPT Skills:** prepare a ZIP, then have the user open
-  **Plugins → Plugin Directory → Skills → Create → Upload from your computer**,
-  wait for scanning, and confirm installation. Availability is subject to
-  eligible workspace plan and administrator settings. Packaging is not
-  installation.
+- **ChatGPT web Skills:** the official interface is **Plugins → Skills →
+  Create → Upload from your computer**. Uploading requires the user's ChatGPT
+  account, the platform's scan, and the user's install/enable confirmation.
+  ChatGPT also offers **Create with chat**, but that is not a verified import
+  of the canonical repository tree. Availability is subject to eligible plan
+  and workspace settings. Packaging is not installation.
+- **ChatGPT desktop app:** this repository contains an OpenAI plugin manifest
+  and a repo-local marketplace pointing at the canonical skill. Add the
+  marketplace and install the plugin from the app's Plugins Directory if that
+  app surface exposes local/repo marketplaces. Marketplace availability may
+  vary by product surface. The desktop app UI was not available for a runtime
+  installation test. This does not install a skill into ChatGPT web.
 - **Windsurf:** stop and report that the route needs confirmation. Its former
   documentation URL redirects to Devin docs, which is not sufficient evidence
   for current Windsurf-specific behavior.

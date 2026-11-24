@@ -23,6 +23,17 @@ This project follows Semantic Versioning.
 - Added native directory adapters for Cline, Roo Code, and Kilo Code based on
   their current official Agent Skills documentation; runtime discovery remains
   unverified for those surfaces.
+- Added a Codex plugin package and local marketplace referencing the single
+  canonical skill directory, plus a separate Codex IDE registry surface.
+- Tested Codex CLI 0.172.0 plugin installation, complete SHA-256 integrity,
+  and native plugin discovery in an isolated `CODEX_HOME`; model invocation
+  and Codex IDE discovery remain untested.
+- Added ChatGPT desktop app as a separate registry surface without claiming
+  product installation, and added Antigravity standalone IDE independently
+  from the App and CLI.
+- Updated ChatGPT web instructions to the current **Plugins → Skills → Create
+  → Upload from your computer** workflow; account upload and enablement remain
+  user actions.
 - Reclassified GitHub CLI host IDs without established platform routes as
   `research_required` instead of implying compatibility.
 - Clarified virtual-environment setup and dependency installation for fresh
