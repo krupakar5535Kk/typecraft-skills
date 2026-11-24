@@ -116,11 +116,11 @@ out of scope.
 Platform integrations are recorded by product surface in
 [`registry/agents.yaml`](../registry/agents.yaml). A documented route is not
 proof that TypeCraft has been installed; file verification is not runtime
-discovery, and discovery is not skill invocation. Runtime discovery evidence
-exists for GitHub Copilot Agent mode in Visual Studio Code running in GitHub
-Codespaces, GitHub Copilot CLI project/user scopes, and Gemini CLI user scope.
-Copilot VS Code Agent and CLI each have separate runtime evidence; both include
-actual skill-invocation evidence. Copilot app and cloud agent remain separate
+discovery, and discovery is not skill invocation. TypeCraft install and native
+discovery evidence exists for GitHub Copilot Agent mode in Visual Studio Code,
+GitHub Copilot CLI, Gemini CLI, and OpenCode. OpenCode's invocation was not
+tested because provider authentication was unavailable; Gemini CLI invocation
+was likewise not tested. Copilot app and cloud agent remain separate
 unverified surfaces. Claude Code local sessions are not equivalent to Cowork
 or remote cloud sessions. Windsurf and both Antigravity surfaces remain
 unverified.

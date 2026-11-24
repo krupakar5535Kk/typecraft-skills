@@ -16,6 +16,15 @@ This project follows Semantic Versioning.
   current plan and account-policy prerequisites.
 - Added Copilot CLI native discovery verification and real project/user
   installation plus invocation evidence for TypeCraft 1.2.0.
+- Added OpenCode CLI native `--pure debug skill` discovery verification,
+  preventing project plugins from executing during installer verification,
+  with full-tree SHA-256 evidence and a pinned Linux regression test.
+  Invocation remains untested without provider authentication.
+- Added native directory adapters for Cline, Roo Code, and Kilo Code based on
+  their current official Agent Skills documentation; runtime discovery remains
+  unverified for those surfaces.
+- Reclassified GitHub CLI host IDs without established platform routes as
+  `research_required` instead of implying compatibility.
 - Clarified virtual-environment setup and dependency installation for fresh
   local router checkouts.
 

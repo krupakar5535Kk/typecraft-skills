@@ -66,8 +66,22 @@ its documented skill directory. The registry records surface-specific details.
   for the `/typecraft-skills` command. TypeCraft runtime discovery is not yet
   tested on this platform.
 - **OpenCode:** it supports several skill directories. The router prefers the
-  shared `.agents/skills` location; check other active directories first to
-  avoid duplicate skill IDs.
+  shared `.agents/skills` location; `opencode --pure debug skill` confirmed a
+  TypeCraft 1.2.0 install with OpenCode 1.19.6 while skipping external project
+  plugins. Invocation was not tested without provider authentication. Restart
+  already-running sessions after installation.
+- **Cline:** the documented native locations are `~/.cline/skills/` and
+  project `.cline/skills/`. Confirm the skill in Cline's Skills panel and a
+  fresh session; TypeCraft runtime discovery is not tested.
+- **Roo Code:** the documented native locations are `~/.roo/skills/` and
+  project `.roo/skills/`; shared `.agents/skills/` is also supported. Confirm
+  discovery in a fresh Roo Code session; TypeCraft runtime discovery is not
+  tested.
+- **Kilo Code:** the documented native locations are `~/.kilo/skills/` and
+  project `.kilo/skills/`; shared `.agents/skills/` is also supported. TypeCraft
+  runtime discovery is not tested.
+- **Continue:** a Continue CLI exists, but this guide has not established an
+  official Agent Skills installation route. Do not guess a directory.
 - **ChatGPT Skills:** prepare a ZIP, then have the user open
   **Plugins → Plugin Directory → Skills → Create → Upload from your computer**,
   wait for scanning, and confirm installation. Availability is subject to

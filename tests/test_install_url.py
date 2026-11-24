@@ -106,6 +106,51 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(get_route("github-copilot", self.registry), "github_cli")
         self.assertEqual(get_route("unknown-agent", self.registry), "unsupported")
 
+    def test_routes_cline_roo_and_kilo_to_their_native_directories(self):
+        project = self.root / "project"
+        home = self.root / "home"
+        expected = {
+            "cline": (".cline", "~/.cline"),
+            "roo": (".roo", "~/.roo"),
+            "kilo": (".kilo", "~/.kilo"),
+        }
+        for platform, (project_directory, user_directory) in expected.items():
+            with self.subTest(platform=platform):
+                self.assertEqual(get_route(platform, self.registry), "native_directory")
+                project_path = resolve_native_destination(
+                    platform,
+                    "project",
+                    self.registry,
+                    project_root=project,
+                    home=home,
+                )
+                user_path = resolve_native_destination(
+                    platform,
+                    "user",
+                    self.registry,
+                    project_root=project,
+                    home=home,
+                )
+                self.assertEqual(
+                    project_path,
+                    project / project_directory / "skills" / "typecraft-skills",
+                )
+                self.assertEqual(
+                    user_path,
+                    home / user_directory.removeprefix("~/") / "skills"
+                    / "typecraft-skills",
+                )
+                self.assertEqual(
+                    self.registry["platforms"][platform]["compatibility"],
+                    "compatible",
+                )
+                self.assertEqual(
+                    self.registry["platforms"][platform][
+                        "runtime_discovery_verification"
+                    ],
+                    "not_tested",
+                )
+
     def test_routes_every_advertised_github_cli_host_and_registered_native_adapter(self):
         for agent_id in self.registry["installers"]["github_cli"]["supported_agents"]:
             with self.subTest(agent_id=agent_id):
@@ -300,6 +345,56 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(status, "NOT_VERIFIED")
         self.assertIn("did not list", message)
 
+    def test_opencode_discovery_requires_the_exact_installed_manifest(self):
+        destination = self.root / "project" / ".agents" / "skills" / "typecraft-skills"
+        inventory = json.dumps([
+            {
+                "name": "typecraft-skills",
+                "location": str(destination / "SKILL.md"),
+            }
+        ])
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/opencode"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout=inventory, stderr=""
+                ),
+            ) as run,
+        ):
+            status, message = _verify_native_discovery(
+                "opencode",
+                cwd=destination.parents[3],
+                destination=destination,
+            )
+        self.assertEqual(status, "VERIFIED")
+        self.assertIn("at the installed location", message)
+        self.assertEqual(
+            run.call_args.args[0],
+            ["/usr/bin/opencode", "--pure", "debug", "skill"],
+        )
+
+        other_path = destination.parent / "other-skill" / "SKILL.md"
+        other_inventory = json.dumps([
+            {"name": "typecraft-skills", "location": str(other_path)}
+        ])
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/opencode"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout=other_inventory, stderr=""
+                ),
+            ),
+        ):
+            status, message = _verify_native_discovery(
+                "opencode",
+                cwd=destination.parents[3],
+                destination=destination,
+            )
+        self.assertEqual(status, "NOT_VERIFIED")
+        self.assertIn("did not list", message)
+
     def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
         registry_text = (
@@ -346,7 +441,25 @@ class UniversalInstallTests(unittest.TestCase):
             if platform["compatibility"] == "verified"
         ]
         self.assertEqual(
-            verified, ["github_copilot", "github_copilot_cli", "gemini_cli"]
+            verified,
+            [
+                "github_copilot",
+                "github_copilot_cli",
+                "opencode",
+                "gemini_cli",
+            ],
+        )
+        opencode = platforms["opencode"]
+        self.assertEqual(
+            opencode["runtime_verification"]["installation"]["sha256_tree_match"],
+            "true",
+        )
+        self.assertEqual(
+            opencode["runtime_verification"]["skill_discovery"]["command"],
+            "opencode --pure debug skill",
+        )
+        self.assertEqual(
+            opencode["skill_invocation_verification"], "not_tested"
         )
 
         verification = platforms["github_copilot"]["runtime_verification"]
@@ -430,7 +543,12 @@ class UniversalInstallTests(unittest.TestCase):
                 and entry["skill_discovery_verified"] == "false"
                 for entry in self.registry["agent_catalog"]
                 if entry["agent_id"]
-                not in {"github-copilot", "github-copilot-cli", "gemini-cli"}
+                not in {
+                    "github-copilot",
+                    "github-copilot-cli",
+                    "gemini-cli",
+                    "opencode",
+                }
             )
         )
 
@@ -480,11 +598,23 @@ class UniversalInstallTests(unittest.TestCase):
             for line in contents.splitlines()
             if line.startswith("| `")
         ]
+        allowed_statuses = {
+            "verified",
+            "compatible",
+            "research_required",
+            "unsupported",
+        }
+        matrix_statuses = [
+            line.split("|")[3].strip()
+            for line in contents.splitlines()
+            if line.startswith("| `")
+        ]
         catalog_ids = [
             entry["agent_id"] for entry in self.registry["agent_catalog"]
         ]
         self.assertEqual(len(documented_ids), len(set(documented_ids)))
         self.assertCountEqual(documented_ids, catalog_ids)
+        self.assertTrue(set(matrix_statuses).issubset(allowed_statuses))
 
     def test_native_install_copies_complete_skill_and_does_not_replace_identical_copy(self):
         result = execute_install(
