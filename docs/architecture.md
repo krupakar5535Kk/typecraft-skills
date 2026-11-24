@@ -118,10 +118,12 @@ Platform integrations are recorded by product surface in
 proof that TypeCraft has been installed; file verification is not runtime
 discovery, and discovery is not skill invocation. Runtime discovery evidence
 exists for GitHub Copilot Agent mode in Visual Studio Code running in GitHub
-Codespaces and Gemini CLI user scope. Only the Copilot record includes actual
-skill-invocation evidence. Copilot CLI, app, and cloud agent are separate
-surfaces. Claude Code local sessions are not equivalent to Cowork or remote
-cloud sessions. Windsurf and Antigravity CLI remain unverified.
+Codespaces, GitHub Copilot CLI project/user scopes, and Gemini CLI user scope.
+Copilot VS Code Agent and CLI each have separate runtime evidence; both include
+actual skill-invocation evidence. Copilot app and cloud agent remain separate
+unverified surfaces. Claude Code local sessions are not equivalent to Cowork
+or remote cloud sessions. Windsurf and both Antigravity surfaces remain
+unverified.
 
 Platform-specific installation instructions must accurately describe the requirements and limitations of each environment.
 

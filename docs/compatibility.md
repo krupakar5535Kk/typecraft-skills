@@ -34,17 +34,77 @@ verification stages; a successful skill listing does not establish invocation.
 | Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Not tested in this environment | Not tested. A user reported that an existing local copy was listed and its full `SKILL.md` read; source equality and version were not checked. |
 | OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested |
 | GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session |
-| GitHub Copilot CLI | compatible | Documented `~/.copilot/skills/` or `.github/skills/` directory; `copilot skill add <DIRECTORY>` registers an alternate location | Not tested | Not tested |
+| GitHub Copilot CLI | verified | `~/.copilot/skills/` or project `.github/skills/` | Verified at both scopes; 20 reference files match the canonical tree | Verified with `copilot skill list --json`; one actual CLI invocation exercised Swiss International Typographic Style and Cinematic Title Poster |
 | GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
 | GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
 | Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
 | Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI 0.70.0; no model invocation |
-| Google Antigravity App | compatible | `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
-| Antigravity CLI | research_required | GitHub CLI preview fallback only if the installed CLI advertises the host | Not tested | Not tested; official App path is not assumed to be the CLI path |
+| Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; no Claude upload test | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. |
+| Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; no Cowork upload test | Not verified; paid-plan and rollout requirements apply. |
+| Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
+| Antigravity CLI | compatible | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; it also reads `~/.gemini/config/skills/` and `~/.gemini/skills/` | Not tested | Not tested; CLI supports skill slash commands and `/skills reload` |
 | OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested; OpenCode has additional native locations that should be checked for duplicates |
 | ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
 | Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
-| Other GitHub CLI host IDs | research_required unless separately documented above | Preview `gh skill install` only when the installed CLI explicitly lists the ID | Installer preview only | Not verified for TypeCraft |
+
+### GitHub CLI host catalog (48 IDs)
+
+`gh skill install --help` on GitHub CLI 2.103.3 advertises the host IDs below.
+This confirms installer targeting only. It does not establish that each host
+supports Agent Skills or that TypeCraft has been installed or discovered.
+Native-directory rows have isolated complete-file installer tests; only rows
+explicitly marked **verified** have TypeCraft runtime discovery evidence.
+
+| Host ID | Agent | TypeCraft status | Installer route / test | Evidence |
+|---|---|---|---|---|
+| `github-copilot` | GitHub Copilot | verified | GitHub CLI-managed route; actual installation tested | VS Code Agent in Codespaces; see evidence below |
+| `claude-code` | Claude Code | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `cursor` | Cursor | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `codex` | OpenAI Codex | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `gemini-cli` | Gemini CLI | verified | Native CLI; isolated installer/file-integrity test | Native installation and discovery; see evidence below |
+| `antigravity` | Google Antigravity App | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `antigravity-cli` | Antigravity CLI | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `antigravity2.0` | Antigravity 2.0 | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `adal` | AdaL | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `amp` | Amp | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `augment` | Augment | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `bob` | IBM Bob | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `cline` | Cline | research_required | GitHub CLI target; preview only | Native route/compatibility not confirmed |
+| `codebuddy` | CodeBuddy | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `command-code` | Command Code | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `continue` | Continue | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `cortex` | Cortex Code | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `crush` | Crush | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `deepagents` | Deep Agents | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `devin` | Devin | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `droid` | Droid | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `firebender` | Firebender | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `goose` | Goose | research_required | GitHub CLI target; preview only | Native route/compatibility not confirmed |
+| `grok` | Grok | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `iflow-cli` | iFlow CLI | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `junie` | Junie | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `kilo` | Kilo Code | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `kimi-cli` | Kimi Code CLI | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `kiro-cli` | Kiro CLI | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `kode` | Kode | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `mcpjam` | MCPJam | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `mistral-vibe` | Mistral Vibe | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `mux` | Mux | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `neovate` | Neovate | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `openclaw` | OpenClaw | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `opencode` | OpenCode | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `openhands` | OpenHands | research_required | GitHub CLI target; preview only | Native route/compatibility not confirmed |
+| `pi` | Pi | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `pochi` | Pochi | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `qoder` | Qoder | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `qwen-code` | Qwen Code | research_required | GitHub CLI target; preview only | Native route/compatibility not confirmed |
+| `replit` | Replit | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `roo` | Roo Code | research_required | GitHub CLI target; preview only | Native route/compatibility not confirmed |
+| `trae` | Trae | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `trae-cn` | Trae CN | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `universal` | Universal | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `warp` | Warp | not assessed | GitHub CLI target; preview only | Installer host ID only |
+| `zencoder` | Zencoder | not assessed | GitHub CLI target; preview only | Installer host ID only |
 
 ### Actual GitHub Copilot evidence
 
@@ -59,9 +119,21 @@ Style, E-commerce Product Showcase Layout, and Cinematic Title Poster. The
 installation record reports all 20 reference files present.
 
 This evidence applies only to the named VS Code + Codespaces environment. It
-does not verify Copilot CLI, the Copilot app, cloud agent, other editors, or
-other install scopes. It is historical evidence for TypeCraft 1.1.0; the
-current repository registry version is `1.2.0`.
+does not verify the Copilot app, cloud agent, other editors, or other install
+scopes. It is historical evidence for TypeCraft 1.1.0; the current repository
+registry version is `1.2.0`.
+
+### Actual GitHub Copilot CLI evidence
+
+GitHub Copilot CLI 1.0.105 installed TypeCraft 1.2.0 through the router in an
+isolated Linux project and user directory. Both installs matched the canonical
+manifest and all 20 reference files, and `copilot skill list --json` returned
+the skill at the exact installed path in each scope. The install/discovery test
+used no account credentials. In a separate bounded CLI session, the explicit
+`/typecraft-skills` invocation applied Swiss International Typographic Style
+and the Cinematic Title Poster reference, including its five information zones
+and no-invented-credits guidance. This proves only the Copilot CLI surface, not
+the Copilot app or cloud agent.
 
 ### Actual Gemini CLI evidence
 
@@ -86,10 +158,20 @@ Codespaces environment cannot inspect the user's Mac home directory.
 ## Product-surface distinctions
 
 - **Claude Code:** local `~/.claude/skills/` is not automatically equivalent
-  to Cowork, claude.ai account skills, or remote cloud-session skills.
+  to account-managed skills. Claude Code v2.1.273+ can sync enabled Claude.ai
+  skills for supported account sign-ins; that route is distinct from a local
+  directory install and does not mean TypeCraft was tested in Cowork.
+- **Claude.ai and Cowork:** the current help center documents ZIP upload via
+  Customize → Skills. Claude.ai lists Free, Pro, Max, Ultra, Team, and
+  Enterprise availability subject to Code execution/file creation and
+  organization policy; Cowork is available on eligible paid plans. The
+  TypeCraft package is verified locally, but neither platform upload nor
+  runtime discovery has been tested.
 - **GitHub Copilot:** VS Code, CLI, app, and cloud agent/code review have
-  different management and persistence behavior. The verified VS Code
-  observation is not transferable to the other surfaces.
+  different management and persistence behavior. VS Code Agent and CLI have
+  separate TypeCraft installation/discovery evidence; only the named surfaces
+  and versions above are verified. This evidence does not extend to the app or
+  cloud agent/code review.
 - **Cursor:** a local user skill is not automatically synced to Cloud Agents;
   project skills and Cloud Agent synchronization are separate.
 - **Gemini CLI:** supports native `gemini skills install`, user/workspace scope,
@@ -97,9 +179,12 @@ Codespaces environment cannot inspect the user's Mac home directory.
   command only when the installed CLI advertises scoped installation. User
   scope has automated file and discovery evidence; workspace discovery and
   model invocation remain unverified.
-- **Antigravity:** the current official skills page describes App locations.
-  It does not establish a CLI-specific path, so the registry leaves the CLI
-  route to a checked GitHub CLI preview rather than guessing.
+- **Antigravity App and CLI:** the official skills page documents separate
+  product surfaces. Both read workspace `.agents/skills/`; the App global
+  directory is `~/.gemini/config/skills/`. The CLI additionally reads
+  `~/.gemini/antigravity-cli/skills/` and `~/.gemini/skills/`. Its `/skills
+  reload` command refreshes skill slash commands. TypeCraft installation,
+  discovery, and invocation have not been tested in either Antigravity surface.
 - **OpenCode:** discovers multiple compatible directories. Use one shared
   skill source and inspect all active locations to avoid duplicate IDs.
 - **ChatGPT Skills:** creating a ZIP is only packaging. The user must upload,
@@ -115,7 +200,26 @@ that TypeCraft was installed, discovered, or invoked in the target agent.
 
 ## Remaining verification
 
-Run an actual installation and fresh-session discovery test for each compatible
-surface. Capture the precise product version, operating system, scope, path,
-full source-file comparison, native discovery evidence, any actual invocation,
-and remaining user action before changing a registry status.
+The following are explicitly blocked on environments or account actions not
+available to this run:
+
+- **Claude.ai, Cowork, and ChatGPT:** a user with an eligible account must
+  upload the generated ZIP, confirm the product's scan/install step, enable the
+  skill, and verify it in a fresh session. Packaging tests are not product
+  installation tests.
+- **Claude Code, Codex, Cursor, OpenCode, Antigravity App, and Antigravity
+  CLI:** their native runtimes were not installed in this environment. Their
+  documented directory install paths were exercised by isolated file-integrity
+  tests, but product-native discovery and invocation remain untested.
+- **Gemini CLI:** install and discovery run without account credentials; no
+  Gemini model invocation was attempted.
+- **GitHub Copilot app and cloud agent/code review:** these separate surfaces
+  need product UI/repository access and a fresh product session; CLI and VS
+  Code evidence does not transfer to them.
+- **Other GitHub CLI host IDs:** the installer preview passed, but these IDs
+  are not compatibility claims. Research and test each native runtime before
+  advertising support.
+
+Before upgrading any remaining surface to `verified`, capture its exact
+product/version, operating system, scope/path, complete source-file comparison,
+native discovery result, and actual invocation when the host permits one.

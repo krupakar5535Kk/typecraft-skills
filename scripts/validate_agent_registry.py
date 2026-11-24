@@ -133,6 +133,12 @@ for key, platform in platforms.items():
             fail(f"{key}: missing installation.{field}")
     if not discovery.get("mechanism") or not discovery.get("user_action"):
         fail(f"{key}: missing discovery mechanism or remaining user action")
+    if installation.get("method") == "zip_upload_with_user_confirmation":
+        if (
+            installation.get("package_required") != "true"
+            or installation.get("package_root") != "typecraft-skills/"
+        ):
+            fail(f"{key}: upload platforms must declare the canonical package root")
 
     file_status = platform.get("file_installation_verification")
     discovery_status = platform.get("runtime_discovery_verification")
@@ -160,6 +166,17 @@ for key, platform in platforms.items():
             (entry for entry in catalog if entry.get("agent_id") == agent_id),
             None,
         )
+        catalog_verification_matches = (
+            catalog_entry is not None
+            and catalog_entry.get("installation_verified") == "true"
+            and catalog_entry.get("skill_discovery_verified") == "true"
+        )
+        native_adapter = native_adapters.get(agent_id)
+        native_adapter_matches = (
+            agent_id not in target_set
+            and native_adapter is not None
+            and native_adapter.get("platform") == key
+        )
         if not (
             agent_id
             and verification.get("tested_at")
@@ -181,15 +198,13 @@ for key, platform in platforms.items():
             and (
                 invocation.get("tested") == "true"
             ) == (invocation_status == "verified")
-            and catalog_entry
-            and catalog_entry.get("installation_verified") == "true"
-            and catalog_entry.get("skill_discovery_verified") == "true"
+            and (catalog_verification_matches or native_adapter_matches)
             and file_status == "verified"
             and discovery_status == "verified"
         ):
             fail(
                 f"{key}: verified compatibility requires complete runtime evidence "
-                "and matching verified catalog flags"
+                "and matching verified installer metadata"
             )
         if invocation.get("tested") == "true" and not (
             invocation.get("result") == "confirmed"
@@ -280,6 +295,28 @@ for agent_id, adapter in native_adapters.items():
                 or ".." in path.parts
             ):
                 fail(f"{agent_id}: unsafe alternate installation path {value}")
+
+app = platforms.get("antigravity", {})
+cli = platforms.get("antigravity_cli", {})
+app_adapter = native_adapters.get("antigravity", {})
+cli_adapter = native_adapters.get("antigravity-cli", {})
+if (
+    app.get("product_surface") != "Antigravity App"
+    or cli.get("product_surface") != "Antigravity CLI"
+):
+    fail("Antigravity App and CLI must be registered as separate product surfaces.")
+if not app_adapter or not cli_adapter:
+    fail("Antigravity App and CLI must have separate native adapters.")
+app_paths = app_adapter.get("scope_paths", {})
+cli_paths = cli_adapter.get("scope_paths", {})
+if (
+    app_paths.get("user") == cli_paths.get("user")
+    or app_paths.get("project") != cli_paths.get("project")
+    or cli_paths.get("user") != "~/.gemini/antigravity-cli/skills"
+):
+    fail("Antigravity adapter paths do not match the documented surface scopes.")
+if cli.get("compatibility") == "verified":
+    fail("Antigravity CLI cannot be runtime-verified without recorded test evidence.")
 
 for agent_id, fallback in fallbacks.items():
     if fallback.get("persistent_installation") != "unsupported":

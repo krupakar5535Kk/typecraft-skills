@@ -54,7 +54,7 @@ jobs:
         run: |
           python -m py_compile scripts/install.py scripts/install_url.py
           python -m py_compile scripts/validate_agent_registry.py scripts/validate_resources.py scripts/validate_skill.py
-          python -m py_compile tests/test_gemini_cli_integration.py
+          python -m py_compile tests/test_gemini_cli_integration.py tests/test_copilot_cli_integration.py
 
       - name: Test agent listing
         run: python scripts/install.py --list
@@ -62,7 +62,7 @@ jobs:
       - name: Run complete unit suite
         run: python -m unittest discover -s tests -v
 
-      - name: Set up Node.js for Gemini CLI integration
+      - name: Set up Node.js for CLI integrations
         if: runner.os == 'Linux'
         uses: actions/setup-node@v4
         with:
@@ -71,6 +71,16 @@ jobs:
       - name: Test Gemini CLI installation and discovery
         if: runner.os == 'Linux'
         run: python tests/test_gemini_cli_integration.py
+
+      - name: Set up Copilot CLI for integration
+        if: runner.os == 'Linux'
+        run: npm install --prefix "$RUNNER_TEMP/copilot-cli" --no-save @github/copilot@1.0.114
+
+      - name: Test Copilot CLI installation and discovery
+        if: runner.os == 'Linux'
+        run: |
+          PATH="$RUNNER_TEMP/copilot-cli/node_modules/.bin:$PATH" \
+            python tests/test_copilot_cli_integration.py
 
       - name: Preview every advertised GitHub CLI host
         run: python scripts/install.py --all --dry-run

@@ -94,10 +94,10 @@ platforms:
     skill_format: agentskills
     compatibility: compatible
     official_documentation_url: https://antigravity.google/docs/skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
-      environment: "Official documentation reviewed; Antigravity App was not run and TypeCraft was not installed."
+      environment: "Official Antigravity skills documentation reviewed; Antigravity App was not run and TypeCraft was not installed."
     native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
@@ -114,31 +114,30 @@ platforms:
         - repository_access
         - filesystem_access
         - user_permission
-    notes: "Official documentation identifies these locations for the App. TypeCraft installation and runtime discovery have not been tested."
+    notes: "The App uses .agents/skills for workspace skills and ~/.gemini/config/skills globally. TypeCraft installation and runtime discovery have not been tested."
 
   antigravity_cli:
     display_name: Antigravity CLI
     category: coding_agent
     product_surface: Antigravity CLI
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     official_documentation_url: https://antigravity.google/docs/skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
-      environment: "Official skills documentation reviewed; no Antigravity CLI installation or runtime test was performed."
-    native_installer_available: unknown
+      environment: "Official Antigravity skills documentation reviewed; Antigravity CLI was not run and TypeCraft was not installed."
+    native_installer_available: false
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
-    installer: github_cli
     installation:
-      method: github_cli_preview_fallback
-      project_scope_directory: null
-      user_scope_directory: null
+      method: native_directory
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.gemini/antigravity-cli/skills
     discovery:
-      mechanism: "Not established for the CLI surface."
-      user_action: "Use the CLI's own skill listing after installation."
-    notes: "The official skills page names the CLI as a supported surface but documents concrete locations for the App only. Do not infer the CLI path from App or Gemini CLI locations."
+      mechanism: "Skills are converted to slash commands in the interactive TUI; run /skills reload after installing or adding a skill, then invoke /typecraft-skills."
+      user_action: "In Antigravity CLI, run /skills reload or start a new conversation and confirm /typecraft-skills is available."
+    notes: "Official docs list ~/.gemini/antigravity-cli/skills as CLI-only, ~/.gemini/skills as CLI-readable, and ~/.gemini/config/skills as shared with the App. The adapter prefers the CLI-only user path to keep surface installations distinct. TypeCraft installation and discovery have not been tested."
 
   github_copilot:
     display_name: GitHub Copilot
@@ -201,15 +200,16 @@ platforms:
     category: coding_agent
     product_surface: Copilot CLI
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
-      kind: documentation_review
-      environment: "Official documentation reviewed; Copilot CLI was not run and TypeCraft was not installed."
+      kind: automated_runtime_test
+      environment: "Linux GitHub Codespaces; GitHub Copilot CLI 1.0.105; isolated project and HOME; no credentials for install/discovery; a separate one-shot authenticated invocation exercised both named references."
     native_installer_available: true
-    file_installation_verification: not_tested
-    runtime_discovery_verification: not_tested
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: verified
     installation:
       method: documented_skill_directory
       optional_cli_command: "copilot skill add <DIRECTORY> registers an alternate skill location"
@@ -217,8 +217,36 @@ platforms:
       project_scope_directory: .github/skills
     discovery:
       mechanism: "copilot skill list or interactive /skills list"
-      user_action: "Confirm the skill in the CLI skill list; reload or restart if needed."
-    notes: "Documented CLI commands are distinct from gh skill. TypeCraft has not been installed or discovered in this surface."
+      user_action: "No further action for the tested CLI 1.0.105; reload or restart a running session after installation."
+    runtime_verification:
+      agent_id: github-copilot-cli
+      tested_at: "2026-11-24"
+      skill_version: "1.2.0"
+      environment:
+        product: GitHub Copilot CLI
+        host: Linux GitHub Codespaces
+        session: "Isolated project/user installation and discovery; separate one-shot model invocation."
+        cli_version: "1.0.105"
+      installation:
+        tested: true
+        scope: project
+        method: TypeCraft router native directory adapter
+        path: "$PROJECT/.github/skills/typecraft-skills/"
+        skill_manifest_present: true
+        reference_files_present: 20
+        sha256_tree_match: true
+      skill_discovery:
+        tested: true
+        result: confirmed
+        command: "copilot --no-auto-update skill list --json"
+        exact_install_path_matched: true
+      invocation:
+        tested: true
+        result: confirmed
+        references_exercised:
+          - Swiss International Typographic Style
+          - Cinematic Title Poster
+    notes: "Automated installation and native discovery passed at both project and user scope. A separate bounded CLI session explicitly invoked /typecraft-skills and correctly used the Swiss style and five-zone poster template. No credentials were used for installation/discovery; invocation used the configured Copilot account."
 
   github_copilot_app:
     display_name: GitHub Copilot app
@@ -273,7 +301,7 @@ platforms:
     skill_format: agentskills
     compatibility: compatible
     official_documentation_url: https://help.openai.com/en/articles/20001066-skills-in-chatgpt
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
       environment: "Official documentation reviewed; no eligible ChatGPT workspace was accessed and no upload was performed."
@@ -282,6 +310,7 @@ platforms:
     runtime_discovery_verification: not_tested
     installation:
       method: zip_upload_with_user_confirmation
+      package_root: typecraft-skills/
       user_action: "Plugins > Plugin Directory > Skills > Create > Upload from your computer; wait for scanning and confirmation"
       package_required: true
       persistent_installation_verified: false
@@ -293,10 +322,75 @@ platforms:
     chat_installation:
       possible: conditional
       requirements:
-        - eligible_account
+        - eligible_business_enterprise_healthcare_or_edu_account
         - skills_feature_available
         - upload_or_workspace_install_permission
-    notes: "The package can be prepared, but upload, scanning, and installation require the user's ChatGPT UI and workspace permissions."
+    notes: "Official documentation lists eligible Business, Enterprise, Healthcare, and Edu users, subject to workspace settings and rollout. The package can be prepared, but upload, scanning, and installation require the user's ChatGPT UI and permissions."
+
+  claude_ai:
+    display_name: Claude.ai
+    category: ai_chat_and_workspace
+    product_surface: Claude web and desktop chat
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://support.claude.com/en/articles/12512180-use-skills-in-claude
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official Claude Skills documentation reviewed; no Claude account was accessed and TypeCraft was not uploaded."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: zip_upload_with_user_confirmation
+      package_root: typecraft-skills/
+      package_required: true
+      persistent_installation_verified: false
+      user_scope_directory: not_applicable
+      project_scope_directory: not_applicable
+    discovery:
+      mechanism: "Customize > Skills; uploaded skills can be enabled or disabled there."
+      user_action: "Enable Code execution and file creation, open Customize > Skills, choose Create skill > Upload a skill, upload the ZIP, then enable TypeCraft."
+    chat_installation:
+      possible: conditional
+      requirements:
+        - claude_free_pro_max_ultra_team_or_enterprise_plan
+        - code_execution_and_file_creation_enabled
+        - organization_policy_allows_skill_upload
+    notes: "Official guidance lists Free, Pro, Max, Ultra, Team, and Enterprise plans, subject to code execution and file-creation capability and organization policy. Upload and enabling require user action."
+
+  claude_cowork:
+    display_name: Claude Cowork
+    category: ai_chat_and_workspace
+    product_surface: Claude Cowork
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://support.claude.com/en/articles/12512180-use-skills-in-claude
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official Claude Skills and Cowork documentation reviewed; Cowork was not run and TypeCraft was not uploaded."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: zip_upload_with_user_confirmation
+      package_root: typecraft-skills/
+      package_required: true
+      persistent_installation_verified: false
+      user_scope_directory: not_applicable
+      project_scope_directory: not_applicable
+    discovery:
+      mechanism: "Claude account Customize > Skills; uploaded account skills are available to supported Claude surfaces when enabled."
+      user_action: "Upload and enable TypeCraft in Customize > Skills, then check it is available in Cowork."
+    chat_installation:
+      possible: conditional
+      requirements:
+        - paid_claude_plan
+        - cowork_available_for_account
+        - code_execution_and_file_creation_enabled
+        - organization_policy_allows_skill_upload
+    notes: "Cowork is a distinct product surface with paid-plan and rollout requirements. Skills are managed through the Claude account; this does not establish a TypeCraft Cowork test."
 
   claude_code:
     display_name: Claude Code
@@ -305,7 +399,7 @@ platforms:
     skill_format: agentskills
     compatibility: compatible
     official_documentation_url: https://code.claude.com/docs/en/skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
       environment: "Official documentation reviewed; the user-reported local observation was not independently reproduced."
@@ -338,7 +432,7 @@ platforms:
         - repository_access
         - filesystem_access
         - user_permission
-    notes: "This documents local Claude Code only. Personal ~/.claude/skills copies are not automatically equivalent to Cowork or remote cloud-session skills."
+    notes: "This adapter documents local Claude Code directory installs. Current Claude Code also synchronizes enabled Claude.ai skills for supported account sign-ins (v2.1.273+); these distinct routes should not be conflated. The user's reported local discovery was not independently reproduced."
 
   codex:
     display_name: OpenAI Codex
@@ -741,6 +835,16 @@ native_adapters:
       user: ~/.gemini/config/skills
       project: .agents/skills
     evidence: https://antigravity.google/docs/skills
+  antigravity-cli:
+    platform: antigravity_cli
+    scope_paths:
+      user: ~/.gemini/antigravity-cli/skills
+      project: .agents/skills
+    alternate_scope_paths:
+      user:
+        - ~/.gemini/config/skills
+        - ~/.gemini/skills
+    evidence: https://antigravity.google/docs/skills
   github-copilot-cli:
     platform: github_copilot_cli
     scope_paths:
@@ -766,7 +870,8 @@ fallbacks:
 
 # Individual GitHub CLI agent catalog.
 # GitHub CLI owns the host-specific installation paths.
-# These entries do not imply independent installation testing.
+# Catalog entries are installer targets only unless their platform record
+# contains matching runtime evidence.
 agent_catalog:
   - agent_id: github-copilot
     display_name: "GitHub Copilot"
@@ -799,7 +904,7 @@ agent_catalog:
     installation_verified: true
     skill_discovery_verified: true
   - agent_id: antigravity
-    display_name: "Google Antigravity"
+    display_name: "Google Antigravity App"
     installer: github_cli
     installation_method: native_directory
     installation_verified: false

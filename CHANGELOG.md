@@ -6,6 +6,19 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
+### Installation and Compatibility
+
+- Added the documented Antigravity CLI native skill paths while keeping its
+  user-scope adapter distinct from the Antigravity App.
+- Documented CLI `/skills reload` discovery steps without claiming TypeCraft
+  runtime verification.
+- Added distinct Claude.ai and Claude Cowork ZIP-upload routes, including
+  current plan and account-policy prerequisites.
+- Added Copilot CLI native discovery verification and real project/user
+  installation plus invocation evidence for TypeCraft 1.2.0.
+- Clarified virtual-environment setup and dependency installation for fresh
+  local router checkouts.
+
 ## [1.2.0] - 2026-11-24
 
 ### Resource Quality and Approval
