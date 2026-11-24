@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: An expressive typographic approach using fluid lettering, optical distortion, vibrant colors, intricate patterns, surreal imagery, and experimental compositions.
 domains:
   - static_graphics
@@ -99,6 +99,12 @@ Useful contemporary font directions include:
 Historical lettering may be studied for its optical behavior, proportions, and relationship between letters.
 
 Do not reproduce a distinctive historical poster's lettering or composition without appropriate permission. Use original lettering or properly licensed typefaces.
+
+### Practical Pairing
+
+- Pair Righteous for a brief expressive headline with Manrope for supporting copy and essential details.
+- Keep optical distortion and decorative lettering away from long text, small labels, and interface controls.
+- This is a contemporary example, not a historical prescription; verify readability, glyph coverage, and licensing.
 
 ## Color Direction
 

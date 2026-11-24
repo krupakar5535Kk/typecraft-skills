@@ -1,13 +1,15 @@
 
 # TYPECRAFT SKILLS
 
-## Technical Architecture v1.0
+## Technical Architecture v1.1.0-dev
 
-**Status:** Proposed
+**Status:** Release candidate
 **Project Type:** Open-Source, Tool-Independent AI Agent Skill
 **License:** MIT
 
 ## 1. Product Vision
+
+**ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**
 
 TypeCraft Skills is a tool-independent AI typography and text-design skill for creative professionals.
 
@@ -18,8 +20,8 @@ Its goal is to make professional typography and visual design workflows more acc
 ## 2. Core Product
 
 - One installable AI Agent Skill.
-- 10 typography design styles in v1.0.
-- 10 ready-made design templates in v1.0.
+- Exactly 10 typography design styles.
+- Exactly 10 design templates.
 - Automatic, manual and mixed design selection.
 - Static and animated typography guidance.
 - Video and motion-graphics design guidance.
@@ -96,7 +98,9 @@ Examples and reusable resources belong in `examples/` and `assets/`.
 
 Supporting resources should be loaded only when relevant to the user's request.
 
-This keeps the primary skill focused while allowing the resource library to expand.
+This keeps the primary skill focused. This release candidate preserves the
+fixed resource scope of 10 styles and 10 templates; expanding that library is
+out of scope.
 
 ## 8. Technical Foundation
 
@@ -109,20 +113,15 @@ This keeps the primary skill focused while allowing the resource library to expa
 
 ## 9. AI Agent Compatibility
 
-Target environments include:
-
-- Claude Code
-- Gemini CLI
-- OpenAI Codex
-- ChatGPT
-- Cursor
-- Google Antigravity
-- GitHub Copilot
-- Windsurf
-
-These are intended target environments, not confirmed compatibility claims.
-
-Installation, skill discovery, reference access and workflow execution must be verified independently for each platform before compatibility is declared.
+Platform integrations are recorded by product surface in
+[`registry/agents.yaml`](../registry/agents.yaml). A documented route is not
+proof that TypeCraft has been installed; file verification is not runtime
+discovery, and discovery is not skill invocation. Runtime discovery evidence
+exists for GitHub Copilot Agent mode in Visual Studio Code running in GitHub
+Codespaces and Gemini CLI user scope. Only the Copilot record includes actual
+skill-invocation evidence. Copilot CLI, app, and cloud agent are separate
+surfaces. Claude Code local sessions are not equivalent to Cowork or remote
+cloud sessions. Windsurf and Antigravity CLI remain unverified.
 
 Platform-specific installation instructions must accurately describe the requirements and limitations of each environment.
 
@@ -173,9 +172,9 @@ One library.
 
 One installable skill.
 
-10 typography styles in v1.0.
+10 typography styles.
 
-10 design templates in v1.0.
+10 design templates.
 
 Multiple creative domains.
 
@@ -185,4 +184,4 @@ Independent and flexible design combinations.
 
 One consistent design philosophy.
 
-**TYPECRAFT SKILLS — One library. Every creative developer. Beautiful typography without boundaries.**
+**TYPECRAFT SKILLS — ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**

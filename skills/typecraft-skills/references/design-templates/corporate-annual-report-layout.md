@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A structured publication layout for presenting organizational performance, financial information, strategy, governance, and annual activities.
 domains:
   - editorial

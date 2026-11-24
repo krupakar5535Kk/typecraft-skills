@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A flexible editorial poster layout using a structured grid, clear information hierarchy, prominent typography, and a deliberate visual area.
 domains:
   - static_graphics

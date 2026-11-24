@@ -14,48 +14,67 @@ permissions:
 
 jobs:
   validate:
-    name: Validate Skill, Resources and Agent Installer
-    runs-on: ubuntu-latest
+    name: Validate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      - name: Create validation environment
-        run: python -m venv .venv
-
       - name: Install validation dependencies
         run: |
-          .venv/bin/python -m pip install --upgrade pip
-          .venv/bin/python -m pip install "git+https://github.com/agentskills/agentskills.git@83021e2be457a9b6679148719c1f6074f0ad975e#subdirectory=skills-ref"
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-installer.txt
+          python -m pip install "git+https://github.com/agentskills/agentskills.git@83021e2be457a9b6679148719c1f6074f0ad975e#subdirectory=skills-ref"
 
       - name: Validate resource library
-        run: .venv/bin/python scripts/validate_resources.py
+        run: python scripts/validate_resources.py
 
       - name: Validate Agent Skill
-        run: .venv/bin/python scripts/validate_skill.py
+        run: python scripts/validate_skill.py
 
       - name: Validate agent registry
-        run: .venv/bin/python scripts/validate_agent_registry.py
+        run: python scripts/validate_agent_registry.py
 
       - name: Check Python syntax
         run: |
-          .venv/bin/python -m py_compile scripts/install.py
-          .venv/bin/python -m py_compile scripts/validate_agent_registry.py scripts/validate_skill.py
+          python -m py_compile scripts/install.py scripts/install_url.py
+          python -m py_compile scripts/validate_agent_registry.py scripts/validate_resources.py scripts/validate_skill.py
+          python -m py_compile tests/test_gemini_cli_integration.py
 
       - name: Test agent listing
-        run: .venv/bin/python scripts/install.py --list
+        run: python scripts/install.py --list
 
-      - name: Test installer inventory matching
-        run: .venv/bin/python -m unittest discover -s tests -v
+      - name: Run complete unit suite
+        run: python -m unittest discover -s tests -v
 
-      - name: Test all 48 agent installation previews
-        run: .venv/bin/python scripts/install.py --all --dry-run
+      - name: Set up Node.js for Gemini CLI integration
+        if: runner.os == 'Linux'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Test Gemini CLI installation and discovery
+        if: runner.os == 'Linux'
+        run: python tests/test_gemini_cli_integration.py
+
+      - name: Preview every advertised GitHub CLI host
+        run: python scripts/install.py --all --dry-run
 
       - name: Check shell installer syntax
         run: bash -n scripts/install_all_agents.sh
+        if: runner.os != 'Windows'

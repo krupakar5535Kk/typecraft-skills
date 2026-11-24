@@ -5,7 +5,7 @@ resource_type: design_template
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A visual storytelling layout for presenting creative projects, their context, objectives, process, design decisions, deliverables, and outcomes.
 domains:
   - editorial

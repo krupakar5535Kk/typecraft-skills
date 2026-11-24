@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A dynamic typographic approach inspired by Constructivism, combining geometric structures, diagonal composition, bold lettering, photomontage, and purposeful visual communication.
 domains:
   - static_graphics
@@ -98,6 +98,12 @@ Useful contemporary font directions include:
 Historically relevant lettering should be studied as visual reference rather than mechanically copied.
 
 Prioritize legibility, language coverage, licensing, and the intended production medium when selecting fonts.
+
+### Practical Pairing
+
+- Pair Oswald for a compact, directional display headline with IBM Plex Sans for supporting copy.
+- Use a clear grotesque or sans-serif family for captions, labels, and practical information.
+- These are contemporary options rather than historical requirements; confirm script coverage and licensing.
 
 ## Color Direction
 

@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A direct and experimental typographic approach using oversized lettering, stark contrast, exposed grids, unconventional alignment, and deliberately raw visual structures.
 domains:
   - static_graphics
@@ -102,6 +102,12 @@ Useful contemporary font directions include:
 Font selection should support the message and intended level of visual tension.
 
 Use fonts with appropriate language coverage and licensing. Avoid sacrificing readability merely to make the design appear more extreme.
+
+### Practical Pairing
+
+- Pair Archivo Black for oversized headlines with Inter for supporting text and functional details.
+- Use a monospaced accent such as IBM Plex Mono only for short labels or metadata when it strengthens the concept.
+- Keep essential information in a readable face and verify font availability and licensing.
 
 ## Color Direction
 

@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: An expressive typographic approach inspired by Art Nouveau, combining flowing organic letterforms, botanical motifs, ornamental structures, and integrated typography and illustration.
 domains:
   - static_graphics
@@ -100,6 +100,12 @@ Useful contemporary font directions include:
 Historical lettering and type specimens may serve as references for proportion, rhythm, and ornament.
 
 Use fonts with suitable language support and appropriate licensing. Avoid using decorative typefaces for long paragraphs or small interface text.
+
+### Practical Pairing
+
+- Pair Cormorant Garamond for expressive headlines with Source Sans 3 for supporting text.
+- Use the serif's ornamental character selectively; keep body copy, captions, and controls in the more legible supporting family.
+- These contemporary candidates are not historical prescriptions; confirm language coverage and licensing.
 
 ## Color Direction
 

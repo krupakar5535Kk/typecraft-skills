@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: review
+status: approved
 summary: A clarity-driven typographic design approach using structured grids, asymmetrical composition, disciplined sans-serif typography, and purposeful visual hierarchy.
 domains:
   - static_graphics
@@ -126,6 +126,12 @@ Check actual font availability, licensing, language support, and rendering capab
 Prefer a coherent type family with sufficient weight and style variations.
 
 Do not introduce decorative display fonts or unrelated typeface combinations merely to create contrast.
+
+### Practical Pairing
+
+- Pair Univers or Helvetica for display and section headings with Source Sans 3 for supporting text when a distinct family is useful.
+- A single coherent sans-serif family is also appropriate when it provides the required hierarchy and language support.
+- These are candidates rather than requirements; check actual availability, licensing, and script coverage.
 
 ## Color Direction
 

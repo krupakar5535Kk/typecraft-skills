@@ -5,7 +5,7 @@ resource_type: typography_style
 schema_version: "1.2"
 resource_version: "1.0.0"
 version: 1.0.0
-status: draft
+status: approved
 summary: A geometric and expressive typographic approach influenced by the Art Deco design movement, combining architectural letterforms, streamlined geometry, decorative structure, and deliberate visual elegance.
 domains:
   - static_graphics
@@ -137,6 +137,12 @@ Possible contemporary directions include:
 Check actual font availability, licensing, language coverage, and rendering support before selecting a typeface.
 
 Do not use a decorative display typeface for all text.
+
+### Practical Pairing
+
+- Pair Poiret One for a short display title with Manrope for supporting text.
+- Keep the decorative face to brief headlines; use the supporting family for body copy, captions, and practical details.
+- Treat these as contemporary options, not historical requirements, and verify glyph coverage and licensing.
 
 ## Color Direction
 

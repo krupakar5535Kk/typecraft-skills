@@ -6,7 +6,20 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Resource Quality and Approval
+
+- Completed editorial and technical review of all 20 resources without changing their IDs, names, relationships, or library scope.
+- Added actionable, contemporary font-pairing examples to all 10 typography styles.
+- Approved all 10 typography styles and all 10 design templates for production use.
+
+### Installation and Compatibility
+
+- Added surface-specific platform records and source-checked installation routes.
+- Recorded GitHub Copilot VS Code runtime evidence and user-reported Claude Code discovery without conflating them.
+- Added identity-safe URL routing, native Gemini CLI installation, SHA-256 file verification, safe staged updates, and verified ZIP packaging.
+- Added JSON installation reports, full-manifest integrity checks, project-scope routing, and an isolated GitHub CLI install/discovery test.
+- Added isolated Gemini CLI 0.70.0 user-scope installation, SHA-256, and native discovery verification without model or account access.
+- Preserved the fixed library of 10 typography styles and 10 design templates.
 
 ## [1.0.0] - 2026-11-19
 

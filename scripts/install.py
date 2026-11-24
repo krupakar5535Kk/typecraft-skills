@@ -221,6 +221,7 @@ def main():
     print("TYPECRAFT UNIVERSAL INSTALLER")
     print("Repository:", REPOSITORY)
     print("Skill:", SKILL)
+    print("Project version:", data.get("project_version", "unknown"))
     print("Scope:", args.scope)
     print("Agent targets:", len(selected))
     print("Requested version:", args.version or "Latest available")

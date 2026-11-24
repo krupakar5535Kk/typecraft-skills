@@ -9,19 +9,20 @@
 # Never mark a platform Verified without an actual installation
 # and skill-discovery test.
 
-registry_version: "1.0"
+registry_version: "1.1"
 project_version: "1.1.0-dev"
 canonical_skill:
   name: typecraft-skills
   path: skills/typecraft-skills
   manifest: SKILL.md
-  repository: https://github.com/krupakar5535Kk/typecraft-skills
+  repository: https://github.com/krupakar5535Kk/typecraft-skills.git
 
 verification_levels:
-  verified: "Installation and skill discovery tested successfully."
-  compatible: "Platform documents support for the shared Agent Skills format."
+  verified: "TypeCraft files installed and native skill discovery confirmed; invocation is tracked separately."
+  compatible: "Official platform documentation describes a supported skill format and install route."
   research_required: "Installation method or compatibility needs investigation."
   unsupported: "No supported persistent skill installation mechanism identified."
+  invocation: "Actual skill invocation is recorded independently; an unrecorded invocation is not tested."
 
 installers:
   github_cli:
@@ -30,8 +31,10 @@ installers:
     availability: locally_detected
     preview_tested: true
     preview_tested_count: 48
-    installation_tested: false
-    installation_tested_count: 0
+    preview_tested_method: "Non-installing dry-run; target support is checked against the installed CLI help."
+    installation_tested: true
+    installation_tested_count: 1
+    installation_tested_method: "Actual local GitHub CLI install and skill-list discovery for github-copilot in a temporary project using gh 2.103.3; all 20 references matched by SHA-256, with no GitHub credentials."
     source: https://cli.github.com/manual/gh_skill_install
     supported_agents:
       - github-copilot
@@ -85,73 +88,281 @@ installers:
 
 platforms:
   antigravity:
-    display_name: Google Antigravity
+    display_name: Google Antigravity App
     category: ai_ide_and_agent
+    product_surface: Antigravity App
     skill_format: agentskills
     compatibility: compatible
+    official_documentation_url: https://antigravity.google/docs/skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Antigravity App was not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installation:
       method: native_directory
-      project_path: .agents/skills
-      user_path: ~/.gemini/config/skills
-      cli_project_path: .agents/skills
-      cli_user_path: ~/.gemini/antigravity-cli/skills
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.gemini/config/skills
+    discovery:
+      mechanism: "Antigravity App skill list and automatic skill activation"
+      user_action: "Inspect the App's skill list or start a fresh session."
     chat_installation:
       possible: conditional
       requirements:
         - repository_access
         - filesystem_access
         - user_permission
+    notes: "Official documentation identifies these locations for the App. TypeCraft installation and runtime discovery have not been tested."
+
+  antigravity_cli:
+    display_name: Antigravity CLI
+    category: coding_agent
+    product_surface: Antigravity CLI
+    skill_format: agentskills
+    compatibility: research_required
+    official_documentation_url: https://antigravity.google/docs/skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official skills documentation reviewed; no Antigravity CLI installation or runtime test was performed."
+    native_installer_available: unknown
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installer: github_cli
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    discovery:
+      mechanism: "Not established for the CLI surface."
+      user_action: "Use the CLI's own skill listing after installation."
+    notes: "The official skills page names the CLI as a supported surface but documents concrete locations for the App only. Do not infer the CLI path from App or Gemini CLI locations."
+
+  github_copilot:
+    display_name: GitHub Copilot
+    category: coding_agent
+    product_surface: GitHub Copilot Agent mode in Visual Studio Code
+    skill_format: agentskills
+    compatibility: verified
+    official_documentation_url: https://docs.github.com/en/copilot/concepts/customizations/agent-skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: historical_runtime_test
+      environment: "Linux GitHub Codespaces; Visual Studio Code; fresh Copilot Agent session; user scope."
+    native_installer_available: false
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: verified
+    installer: github_cli
+    installation:
+      method: github_cli_managed
+      user_scope_directory: ~/.copilot/skills
+      project_scope_directory: .github/skills
+    runtime_verification:
+      agent_id: github-copilot
+      tested_at: "2026-11-23"
+      skill_version: "1.1.0"
+      environment:
+        product: GitHub Copilot
+        editor: Visual Studio Code
+        host: GitHub Codespaces
+        session: "Fresh Copilot Agent session"
+      installation:
+        tested: true
+        scope: user
+        method: github_cli_managed
+        path: /home/codespace/.copilot/skills/typecraft-skills/
+        skill_manifest_present: true
+        reference_files_present: 20
+      skill_discovery:
+        tested: true
+        result: confirmed
+        skill_read: true
+      invocation:
+        tested: true
+        result: confirmed
+        references_exercised:
+          - Art Deco Typographic Style
+          - Swiss International Typographic Style
+          - E-commerce Product Showcase Layout
+          - Cinematic Title Poster
+    discovery:
+      mechanism: "VS Code Copilot Agent loads the skill in a fresh session."
+      user_action: "This verification applies only to the recorded Codespaces environment."
     evidence:
-      - https://antigravity.google/docs/skills
-    notes: "App, IDE and CLI have different global paths. Select the path for the actual Antigravity surface."
+      - https://docs.github.com/en/copilot/concepts/customizations/agent-skills
+      - https://cli.github.com/manual/gh_skill_install
+    notes: "Runtime evidence is limited to Copilot Agent mode in VS Code in GitHub Codespaces. Other Copilot surfaces and local installations are separate."
+
+  github_copilot_cli:
+    display_name: GitHub Copilot CLI
+    category: coding_agent
+    product_surface: Copilot CLI
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Copilot CLI was not run and TypeCraft was not installed."
+    native_installer_available: true
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: documented_skill_directory
+      optional_cli_command: "copilot skill add <DIRECTORY> registers an alternate skill location"
+      user_scope_directory: ~/.copilot/skills
+      project_scope_directory: .github/skills
+    discovery:
+      mechanism: "copilot skill list or interactive /skills list"
+      user_action: "Confirm the skill in the CLI skill list; reload or restart if needed."
+    notes: "Documented CLI commands are distinct from gh skill. TypeCraft has not been installed or discovered in this surface."
+
+  github_copilot_app:
+    display_name: GitHub Copilot app
+    category: ai_chat_and_workspace
+    product_surface: GitHub Copilot app
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://docs.github.com/en/copilot/how-tos/github-copilot-app/customize-github-copilot-app
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Copilot app was not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: product_customization_ui_or_configured_skill_source
+      user_scope_directory: "See configured Copilot CLI or personal skill source"
+      project_scope_directory: "See the linked repository's documented skill directory"
+    discovery:
+      mechanism: "Customize > Skills in the Copilot app"
+      user_action: "Install or enable TypeCraft in the app's Customize view."
+    notes: "The app surfaces configured repository and CLI skills; no TypeCraft-specific app installation or runtime test exists."
+
+  github_copilot_cloud_agent:
+    display_name: GitHub Copilot cloud agent
+    category: cloud_agent
+    product_surface: Copilot cloud agent and code review
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; no cloud-agent task or TypeCraft installation test was performed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: repository_skill_directory
+      user_scope_directory: not_applicable
+      project_scope_directory: .github/skills
+    discovery:
+      mechanism: "Cloud agent loads repository skills according to supported project locations."
+      user_action: "Commit the skill to the target repository and verify in a fresh cloud-agent task."
+    notes: "A local personal skill directory does not establish cloud-agent availability. Cloud agent and code review remain untested."
 
   chatgpt:
     display_name: ChatGPT
     category: ai_chat_and_workspace
+    product_surface: ChatGPT Skills
     skill_format: agentskills
     compatibility: compatible
+    official_documentation_url: https://help.openai.com/en/articles/20001066-skills-in-chatgpt
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; no eligible ChatGPT workspace was accessed and no upload was performed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installation:
-      method: official_skill_upload
-      user_action: "Skills > Create > Upload from your computer"
+      method: zip_upload_with_user_confirmation
+      user_action: "Plugins > Plugin Directory > Skills > Create > Upload from your computer; wait for scanning and confirmation"
       package_required: true
+      persistent_installation_verified: false
+      user_scope_directory: not_applicable
+      project_scope_directory: not_applicable
+    discovery:
+      mechanism: "ChatGPT Skills UI after upload, scan, and installation confirmation"
+      user_action: "Open Plugins > Plugin Directory > Skills, upload the ZIP, and confirm that ChatGPT installs it."
     chat_installation:
       possible: conditional
       requirements:
         - eligible_account
         - skills_feature_available
         - upload_or_workspace_install_permission
-    evidence:
-      - https://help.openai.com/en/articles/20001066-skills-in-chatgpt
-      - https://learn.chatgpt.com/docs/build-skills
-    notes: "Ordinary chat cannot guarantee persistent installation. Availability depends on account and workspace."
+    notes: "The package can be prepared, but upload, scanning, and installation require the user's ChatGPT UI and workspace permissions."
 
   claude_code:
     display_name: Claude Code
     category: coding_agent
+    product_surface: Claude Code local sessions
     skill_format: agentskills
     compatibility: compatible
+    official_documentation_url: https://code.claude.com/docs/en/skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; the user-reported local observation was not independently reproduced."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installer: github_cli
     installation:
       method: native_directory
-      project_path: .claude/skills
-      user_path: ~/.claude/skills
+      project_scope_directory: .claude/skills
+      user_scope_directory: ~/.claude/skills
+    discovery:
+      mechanism: "Claude Code /skills menu or direct /typecraft-skills invocation"
+      user_action: "Check /skills in a local Claude Code session."
+    user_reported_runtime_verification:
+      reported_at: "2026-11-23"
+      source: user_report
+      installation_tested: false
+      reported_location: ~/.claude/skills/typecraft-skills
+      skill_listed: true
+      skill_manifest_read: true
+      reported_style_count: 10
+      reported_template_count: 10
+      exact_source_match: not_tested
+      installed_version: not_established
+      notes: "User-reported existing local Claude Code copy was listed and read. No fresh install or comparison with the current GitHub tree was performed."
     chat_installation:
       possible: conditional
       requirements:
         - repository_access
         - filesystem_access
         - user_permission
+    notes: "This documents local Claude Code only. Personal ~/.claude/skills copies are not automatically equivalent to Cowork or remote cloud-session skills."
 
   codex:
     display_name: OpenAI Codex
     category: coding_agent
+    product_surface: Codex CLI and IDE extension
     skill_format: agentskills
     compatibility: compatible
+    official_documentation_url: https://learn.chatgpt.com/docs/build-skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Codex CLI and IDE extension were not run and TypeCraft was not installed."
+    native_installer_available: true
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installer: github_cli
     installation:
       method: native_directory
-      project_path: .agents/skills
-      user_path: ~/.agents/skills
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.agents/skills
+      native_installer: "Codex $skill-installer"
+    discovery:
+      mechanism: "Codex /skills selector or $skill invocation"
+      user_action: "Restart Codex if a local install is not discovered."
     chat_installation:
       possible: conditional
       requirements:
@@ -162,95 +373,396 @@ platforms:
   cursor:
     display_name: Cursor
     category: ai_ide
+    product_surface: Cursor local Agent
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
+    official_documentation_url: https://cursor.com/docs/skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; Cursor local Agent and Cloud Agents were not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installer: github_cli
+    installation:
+      method: native_directory
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.agents/skills
+    discovery:
+      mechanism: "Cursor Agent skill list and slash-command picker"
+      user_action: "Confirm the skill in local Cursor; separately sync or publish for Cloud Agents."
+    notes: "Cursor also supports .cursor/skills, Claude/Codex directories, and separate Cloud Agent synchronization. Local user skills do not automatically sync to Cloud Agents."
 
   opencode:
     display_name: OpenCode
     category: coding_agent
+    product_surface: OpenCode
     skill_format: agentskills
     compatibility: compatible
+    official_documentation_url: https://opencode.ai/docs/skills/
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official documentation reviewed; OpenCode was not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
     installer: github_cli
     installation:
       method: native_directory
-      project_path: .opencode/skills
-      user_path: ~/.config/opencode/skills
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.agents/skills
+    discovery:
+      mechanism: "OpenCode skill tool list and @typecraft-skills invocation"
+      user_action: "Inspect the active OpenCode session's available skills."
+    notes: "OpenCode also reads .opencode/skills and ~/.config/opencode/skills. The installer uses the shared .agents/skills locations to avoid creating an additional copy."
 
   gemini_cli:
     display_name: Gemini CLI
     category: coding_agent
+    product_surface: Gemini CLI
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: verified
+    official_documentation_url: https://geminicli.com/docs/cli/skills/
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: manual_runtime_test
+      environment: "Linux GitHub Codespaces; Gemini CLI 0.70.0; isolated temporary HOME; user scope; no personal credentials or model session."
+    native_installer_available: true
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: not_tested
     installer: github_cli
+    installation:
+      method: native_cli_with_safe_directory_fallback
+      native_command: "gemini skills install CANONICAL_SKILL_DIRECTORY --scope user|workspace"
+      project_scope_directory: .gemini/skills
+      user_scope_directory: ~/.gemini/skills
+    runtime_verification:
+      agent_id: gemini-cli
+      tested_at: "2026-11-23"
+      skill_version: "1.1.0-dev"
+      environment:
+        product: Gemini CLI
+        host: Linux GitHub Codespaces
+        session: "Isolated non-model CLI test; no account or credential used."
+        cli_version: "0.70.0"
+      installation:
+        tested: true
+        scope: user
+        method: "gemini skills install <local canonical path> --scope user --consent"
+        path: "$HOME/.gemini/skills/typecraft-skills/"
+        skill_manifest_present: true
+        reference_files_present: 20
+        sha256_tree_match: true
+      skill_discovery:
+        tested: true
+        result: confirmed
+        command: "gemini skills list --all"
+      invocation:
+        tested: false
+        result: not_attempted
+        reason: "Skill listing does not establish model-session invocation."
+    discovery:
+      mechanism: "gemini skills list --all"
+      user_action: "Review Gemini's consent prompt during installation; the router does not bypass it."
+    notes: "Automated runtime evidence covers native user-scope installation and discovery only. Project-scope discovery requires a trusted workspace and was not claimed; model invocation was not tested."
 
   cline:
     display_name: Cline
     category: coding_agent
+    product_surface: Cline
     skill_format: agentskills
     compatibility: research_required
     installer: github_cli
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Cline was not run and no native route was confirmed."
+    native_installer_available: unknown
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "GitHub CLI advertises this host ID; platform-native paths and TypeCraft runtime discovery were not established."
+    discovery:
+      mechanism: "Platform-native skill listing, if available."
+      user_action: "Verify installation and discovery directly in Cline."
 
   roo_code:
     display_name: Roo Code
     category: coding_agent
+    product_surface: Roo Code
     skill_format: agentskills
     compatibility: research_required
     installer: github_cli
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Roo Code was not run and no native route was confirmed."
+    native_installer_available: unknown
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "GitHub CLI advertises a Roo host ID; current official installation paths and TypeCraft runtime discovery need direct verification."
+    discovery:
+      mechanism: "Platform-native skill listing, if available."
+      user_action: "Verify the host ID, installation path, and discovery directly in Roo Code."
 
   goose:
     display_name: Goose
     category: coding_agent
+    product_surface: Goose
     skill_format: agentskills
     compatibility: research_required
     installer: github_cli
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Goose was not run and no native route was confirmed."
+    native_installer_available: unknown
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "GitHub CLI advertises this host ID; platform-native paths and TypeCraft runtime discovery were not established."
+    discovery:
+      mechanism: "Platform-native skill listing, if available."
+      user_action: "Verify installation and discovery directly in Goose."
 
   openhands:
     display_name: OpenHands
     category: coding_agent
+    product_surface: OpenHands
     skill_format: agentskills
     compatibility: research_required
     installer: github_cli
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; OpenHands was not run and no native route was confirmed."
+    native_installer_available: unknown
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "GitHub CLI advertises this host ID; platform-native paths and TypeCraft runtime discovery were not established."
+    discovery:
+      mechanism: "Platform-native skill listing, if available."
+      user_action: "Verify installation and discovery directly in OpenHands."
 
   qwen_code:
     display_name: Qwen Code
     category: coding_agent
+    product_surface: Qwen Code
     skill_format: agentskills
     compatibility: research_required
     installer: github_cli
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Qwen Code was not run and no native route was confirmed."
+    native_installer_available: unknown
+    installation:
+      method: github_cli_preview_fallback
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "GitHub CLI advertises this host ID; platform-native paths and TypeCraft runtime discovery were not established."
+    discovery:
+      mechanism: "Platform-native skill listing, if available."
+      user_action: "Verify installation and discovery directly in Qwen Code."
 
   windsurf:
     display_name: Windsurf
     category: ai_ide
+    product_surface: Windsurf editor and agent
     skill_format: agentskills
     compatibility: research_required
+    official_documentation_url: https://docs.windsurf.com/windsurf/cascade/skills
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "The former documentation URL redirected to Devin documentation; Windsurf was not run."
+    native_installer_available: unknown
     installation:
       method: needs_verification
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "The requested legacy documentation URL redirects to Devin documentation. Current Windsurf-specific routes and behavior require confirmation; no path is assumed."
+    discovery:
+      mechanism: "Not established for the current Windsurf product."
+      user_action: "Confirm the current Windsurf-supported route before installing."
 
   zed:
     display_name: Zed
     category: ai_editor
+    product_surface: Zed Agent
     skill_format: agentskills
     compatibility: research_required
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Zed Agent was not run and no native route was confirmed."
+    native_installer_available: unknown
     installation:
       method: needs_verification
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "Agent Skills installation and discovery were not confirmed from current official documentation."
+    discovery:
+      mechanism: "Not established."
+      user_action: "Confirm current official skill support before installing."
 
   aider:
     display_name: Aider
     category: coding_agent
+    product_surface: Aider
     skill_format: needs_verification
     compatibility: research_required
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Available documentation and installer catalog reviewed; Aider was not run and no native route was confirmed."
+    native_installer_available: unknown
     installation:
       method: needs_verification
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    notes: "Agent Skills installation and discovery were not confirmed from current official documentation."
+    discovery:
+      mechanism: "Not established."
+      user_action: "Confirm current official skill support before installing."
 
   custom_agents:
     display_name: Custom Agent Frameworks
     category: agent_framework
+    product_surface: Individually configured agent frameworks
     skill_format: agentskills
     compatibility: research_required
+    official_documentation_url: null
+    documentation_checked: "2026-11-23"
+    verification_environment:
+      kind: documentation_review
+      environment: "Registry review only; custom frameworks require individual product documentation and runtime testing."
+    native_installer_available: false
     installation:
       method: adapter_required
+      project_scope_directory: null
+      user_scope_directory: null
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    discovery:
+      mechanism: "Framework-specific."
+      user_action: "Build and test a framework-specific adapter."
     notes: "Evaluate each framework for filesystem access, skill discovery and persistent storage."
+
+native_adapters:
+  claude-code:
+    platform: claude_code
+    scope_paths:
+      user: ~/.claude/skills
+      project: .claude/skills
+    evidence: https://code.claude.com/docs/en/skills
+  codex:
+    platform: codex
+    scope_paths:
+      user: ~/.agents/skills
+      project: .agents/skills
+    evidence: https://learn.chatgpt.com/docs/build-skills
+  cursor:
+    platform: cursor
+    scope_paths:
+      user: ~/.agents/skills
+      project: .agents/skills
+    alternate_scope_paths:
+      user:
+        - ~/.cursor/skills
+        - ~/.claude/skills
+        - ~/.codex/skills
+      project:
+        - .cursor/skills
+        - .claude/skills
+        - .codex/skills
+    evidence: https://cursor.com/docs/skills
+  gemini-cli:
+    platform: gemini_cli
+    scope_paths:
+      user: ~/.gemini/skills
+      project: .gemini/skills
+    alternate_scope_paths:
+      user:
+        - ~/.agents/skills
+      project:
+        - .agents/skills
+    evidence: https://geminicli.com/docs/cli/skills/
+  opencode:
+    platform: opencode
+    scope_paths:
+      user: ~/.agents/skills
+      project: .agents/skills
+    alternate_scope_paths:
+      user:
+        - ~/.config/opencode/skills
+        - ~/.claude/skills
+        - ~/.codex/skills
+      project:
+        - .opencode/skills
+        - .claude/skills
+        - .codex/skills
+    evidence: https://opencode.ai/docs/skills/
+  antigravity:
+    platform: antigravity
+    scope_paths:
+      user: ~/.gemini/config/skills
+      project: .agents/skills
+    evidence: https://antigravity.google/docs/skills
+  github-copilot-cli:
+    platform: github_copilot_cli
+    scope_paths:
+      user: ~/.copilot/skills
+      project: .github/skills
+    alternate_scope_paths:
+      user:
+        - ~/.agents/skills
+      project:
+        - .agents/skills
+    evidence: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills
+
+runtime_detection:
+  environment_variable: TYPECRAFT_AGENT
+  automatic_detection_requires_explicit_host_identity: true
+  do_not_guess_from_installed_applications_or_paths: true
+
+fallbacks:
+  chat-only:
+    persistent_installation: unsupported
+    user_action: "For temporary use, ask the agent to read the canonical skill files in this repository for the current conversation."
+    notes: "A chat-only agent without repository/filesystem access cannot install or persist a skill."
 
 # Individual GitHub CLI agent catalog.
 # GitHub CLI owns the host-specific installation paths.
@@ -260,42 +772,42 @@ agent_catalog:
     display_name: "GitHub Copilot"
     installer: github_cli
     installation_method: github_cli_managed
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: claude-code
     display_name: "Claude Code"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: cursor
     display_name: "Cursor"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: codex
     display_name: "OpenAI Codex"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: gemini-cli
     display_name: "Gemini CLI"
     installer: github_cli
-    installation_method: github_cli_managed
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_method: native_cli
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: antigravity
     display_name: "Google Antigravity"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: antigravity-cli
     display_name: "Antigravity CLI"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: antigravity2.0
@@ -469,7 +981,7 @@ agent_catalog:
   - agent_id: opencode
     display_name: "OpenCode"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: openhands
