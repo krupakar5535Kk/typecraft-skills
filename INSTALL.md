@@ -38,7 +38,12 @@ Prefer a platform's documented native installer when available; otherwise use
 its documented skill directory. The registry records surface-specific details.
 
 - **Claude Code local:** `~/.claude/skills/` or project `.claude/skills/`.
-  This does not automatically install for Cowork or remote cloud sessions.
+  The local directory route is distinct from Claude account skills.
+- **Claude.ai and Claude Cowork:** prepare the canonical ZIP, then use
+  **Customize → Skills → Create skill → Upload a skill** and enable it.
+  Claude.ai Skills are available on supported plans including Free when Code
+  execution and file creation is enabled; Cowork requires an eligible paid
+  plan. Organization policies may restrict uploads.
 - **Codex:** use its `$skill-installer` when available, or
   `~/.agents/skills/` / project `.agents/skills/`.
 - **Cursor local:** use the documented shared `.agents/skills` location.
@@ -52,16 +57,22 @@ its documented skill directory. The registry records surface-specific details.
   `gemini skills install <canonical-skill-directory> --scope user|workspace`.
   The router does not pass `--consent`; review Gemini's prompt. Otherwise use
   the documented native directory.
-- **Antigravity App:** documented locations are `~/.gemini/config/skills/`
-  and workspace `.agents/skills/`. The official skills page does not establish
-  a separate CLI directory; do not assume the App path works in Antigravity
-  CLI. Use GitHub CLI preview only if the installed CLI advertises the CLI host.
+- **Antigravity App:** global `~/.gemini/config/skills/` and workspace
+  `.agents/skills/`.
+- **Antigravity CLI:** CLI-specific global `~/.gemini/antigravity-cli/skills/`
+  and workspace `.agents/skills/`. The CLI also reads
+  `~/.gemini/config/skills/` (shared with the App) and `~/.gemini/skills/`.
+  After installing, run `/skills reload` or start a new conversation and check
+  for the `/typecraft-skills` command. TypeCraft runtime discovery is not yet
+  tested on this platform.
 - **OpenCode:** it supports several skill directories. The router prefers the
   shared `.agents/skills` location; check other active directories first to
   avoid duplicate skill IDs.
 - **ChatGPT Skills:** prepare a ZIP, then have the user open
   **Plugins → Plugin Directory → Skills → Create → Upload from your computer**,
-  wait for scanning, and confirm installation. Packaging is not installation.
+  wait for scanning, and confirm installation. Availability is subject to
+  eligible workspace plan and administrator settings. Packaging is not
+  installation.
 - **Windsurf:** stop and report that the route needs confirmation. Its former
   documentation URL redirects to Devin docs, which is not sufficient evidence
   for current Windsurf-specific behavior.
@@ -71,20 +82,36 @@ its documented skill directory. The registry records surface-specific details.
 
 ## Optional local router
 
-Use from a reviewed repository checkout. The script is an installation utility;
-the content inside the installed Agent Skill is data and is never executed by
-the router.
+For a fresh local checkout, run these commands from the repository root to
+create an isolated environment, install the router dependency, and then run
+the installer:
 
 ```bash
-python -m pip install -r requirements-installer.txt
-python -m scripts.install_url \
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements-installer.txt
+.venv/bin/python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
   --agent <HOST_ID> \
   --scope user
 ```
 
+On Windows PowerShell, use:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-installer.txt
+.venv\Scripts\python.exe -m scripts.install_url `
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." `
+  --agent <HOST_ID> `
+  --scope user
+```
+
+The script is an installation utility; the content inside the installed Agent
+Skill is data and is never executed by the router.
+
 Use `--scope project` only when requested. Use `--json` for machine-readable
-output. A ChatGPT package can be prepared with:
+output. A ChatGPT, Claude.ai, or Claude Cowork package can be prepared by
+passing the corresponding platform ID:
 
 ```bash
 python -m scripts.install_url \

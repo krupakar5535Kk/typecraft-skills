@@ -115,7 +115,9 @@ def detect_platform(env=None):
 
 
 def get_route(platform, registry):
-    if platform == "chatgpt":
+    platform_data = registry.get("platforms", {}).get(platform, {})
+    installation = platform_data.get("installation", {})
+    if installation.get("method") == "zip_upload_with_user_confirmation":
         return "zip_upload"
     if platform in registry.get("native_adapters", {}):
         return "native_directory"
@@ -785,15 +787,20 @@ def execute_install(
     route = get_route(platform, registry)
     if route == "zip_upload":
         if not package_output:
+            display_name = registry["platforms"][platform]["display_name"]
             raise InstallationError(
-                "ChatGPT requires a package file. Provide --package-output; "
-                "upload and install confirmation remain a user action."
+                f"{display_name} requires a package file. Provide --package-output; "
+                "upload and installation confirmation remain a user action."
             )
         output, count = package_skill(source, package_output, overwrite)
+        user_action = registry["platforms"][platform]["discovery"].get(
+            "user_action",
+            "Upload the ZIP in the platform and confirm installation.",
+        )
         return InstallResult(
             platform, "PACKAGE_READY_USER_ACTION_REQUIRED", str(output),
             f"SUCCESS ({count} files)", "NOT_VERIFIED",
-            "Upload the ZIP in ChatGPT Skills and confirm installation.",
+            user_action,
             "Packaging is not an installation.",
             version,
         )
@@ -838,7 +845,15 @@ def execute_install(
         elif discovery == "VERIFIED":
             action = "none"
         else:
-            action = "Reload or inspect the platform's own skill list."
+            platform_id = platform.replace("-", "_")
+            platform_record = registry.get("platforms", {}).get(
+                platform,
+                registry.get("platforms", {}).get(platform_id, {}),
+            )
+            action = platform_record.get("discovery", {}).get(
+                "user_action",
+                "Reload or inspect the platform's own skill list.",
+            )
         if discovery == "VERIFIED":
             installation = (
                 "ALREADY_INSTALLED"
@@ -909,6 +924,9 @@ def main(argv=None):
         )
     except InstallationError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    except OSError as exc:
+        print(f"ERROR: File or process operation failed: {exc}", file=sys.stderr)
         return 1
 
     print_result(result, json_output=args.json)

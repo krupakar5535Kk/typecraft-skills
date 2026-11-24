@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 import zipfile
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -21,8 +21,10 @@ from scripts.install_url import (
     get_route,
     is_install_request,
     load_registry,
+    main,
     package_skill,
     resolve_native_destination,
+    resolve_native_destinations,
     print_result,
     verify_skill_tree,
     _verify_cli_files,
@@ -149,11 +151,13 @@ class UniversalInstallTests(unittest.TestCase):
                 project_root=self.root / "project",
             )
 
-    def test_antigravity_app_path_is_documented_but_cli_path_is_not_assumed(self):
+    def test_antigravity_app_and_cli_have_documented_surface_specific_routes(self):
         project = self.root / "project"
         home = self.root / "home"
         self.assertEqual(get_route("antigravity", self.registry), "native_directory")
-        self.assertEqual(get_route("antigravity-cli", self.registry), "github_cli")
+        self.assertEqual(
+            get_route("antigravity-cli", self.registry), "native_directory"
+        )
 
         app_destination = resolve_native_destination(
             "antigravity",
@@ -179,17 +183,60 @@ class UniversalInstallTests(unittest.TestCase):
             (project / ".agents" / "skills" / "typecraft-skills").resolve(),
         )
 
+        cli_destinations = resolve_native_destinations(
+            "antigravity-cli",
+            "user",
+            self.registry,
+            project_root=project,
+            home=home,
+        )
+        self.assertEqual(
+            cli_destinations,
+            [
+                (
+                    home
+                    / ".gemini"
+                    / "antigravity-cli"
+                    / "skills"
+                    / "typecraft-skills"
+                ).resolve(),
+                (home / ".gemini" / "config" / "skills" / "typecraft-skills").resolve(),
+                (home / ".gemini" / "skills" / "typecraft-skills").resolve(),
+            ],
+        )
         self.assertEqual(
             self.registry["platforms"]["antigravity"]["compatibility"], "compatible"
         )
         self.assertEqual(
             self.registry["platforms"]["antigravity_cli"]["compatibility"],
-            "research_required",
+            "compatible",
         )
-        self.assertNotIn("antigravity-cli", self.registry["native_adapters"])
+        self.assertIn("antigravity-cli", self.registry["native_adapters"])
         self.assertEqual(
             get_route("github-copilot-cli", self.registry), "native_directory"
         )
+        cli = self.registry["platforms"]["antigravity_cli"]
+        self.assertEqual(cli["runtime_discovery_verification"], "not_tested")
+
+    def test_antigravity_cli_installs_files_without_claiming_runtime_discovery(self):
+        project = self.root / "project"
+        project.mkdir()
+        home = self.root / "home"
+        result = execute_install(
+            REQUEST,
+            "antigravity-cli",
+            source=self.source,
+            registry=self.registry,
+            project_root=project,
+            home=home,
+        )
+        self.assertEqual(
+            result.installation, "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
+        )
+        self.assertEqual(result.file_verification, "SUCCESS")
+        self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
+        self.assertIn("/.gemini/antigravity-cli/skills/", result.location)
+        self.assertIn("/skills reload", result.user_action_remaining)
 
     def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
@@ -204,7 +251,7 @@ class UniversalInstallTests(unittest.TestCase):
             1,
         ).replace(
             "      kind: documentation_review\n"
-            "      environment: \"Official documentation reviewed; Antigravity App was not run and TypeCraft was not installed.\"\n",
+            "      environment: \"Official Antigravity skills documentation reviewed; Antigravity App was not run and TypeCraft was not installed.\"\n",
             "      kind: historical_runtime_test\n"
             "      environment: \"Runtime test environment not recorded.\"\n",
             1,
@@ -591,7 +638,41 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(result.installation, "PACKAGE_READY_USER_ACTION_REQUIRED")
         self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
-        self.assertIn("Upload", result.user_action_remaining)
+        self.assertIn("upload", result.user_action_remaining.lower())
+
+    def test_claude_chat_and_cowork_use_zip_upload_routes(self):
+        for platform in ("claude_ai", "claude_cowork", "chatgpt"):
+            with self.subTest(platform=platform):
+                result = execute_install(
+                    REQUEST,
+                    platform,
+                    source=self.source,
+                    registry=self.registry,
+                    package_output=self.root / f"{platform}.zip",
+                )
+                self.assertEqual(
+                    get_route(platform, self.registry), "zip_upload"
+                )
+                self.assertEqual(
+                    result.installation, "PACKAGE_READY_USER_ACTION_REQUIRED"
+                )
+                self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
+                self.assertIn("upload", result.user_action_remaining.lower())
+
+    @patch("scripts.install_url.execute_install", side_effect=PermissionError("denied"))
+    def test_cli_reports_filesystem_errors_without_a_traceback(self, _install):
+        output = io.StringIO()
+        with redirect_stderr(output):
+            exit_code = main(
+                [
+                    "--request",
+                    REQUEST,
+                    "--agent",
+                    "codex",
+                ]
+            )
+        self.assertEqual(exit_code, 1)
+        self.assertIn("File or process operation failed: denied", output.getvalue())
 
     def test_canonical_skill_install_and_zip_keep_every_source_file(self):
         install_result = execute_install(

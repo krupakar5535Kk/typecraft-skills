@@ -86,7 +86,7 @@ Explicit user choices must never be silently overridden.
 
 The URL by itself is an installation request. The same applies when it is followed by a request such as “Install this skill.” A compatible agent should inspect this repository, read [INSTALL.md](INSTALL.md), identify its actual platform, install the complete canonical skill, and check the platform's own discovery mechanism. Do not infer the platform from the repository, operating system, or installed applications.
 
-The flow requires repository access and, for persistent local installation, filesystem access and permission to write to the documented skill location. ChatGPT requires a ZIP upload and user confirmation. Chat-only environments without persistent installation access can use the files in the current conversation only; they must not claim a persistent installation.
+The flow requires repository access and, for persistent local installation, filesystem access and permission to write to the documented skill location. Claude.ai, Claude Cowork, and ChatGPT use product-specific skill upload and confirmation flows; packaging is not installation. Chat-only environments without persistent installation access can use the files in the current conversation only; they must not claim a persistent installation.
 
 When a reviewed checkout and local terminal are available, the optional router
 is:
@@ -97,7 +97,7 @@ is:
 
 **Platform notes:**
 
-- Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App have documentation-backed routes. The Antigravity CLI path remains unestablished; do not assume the App path applies.
+- Claude.ai, Claude Cowork, Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App and CLI have documentation-backed routes. Claude.ai and Cowork use an account-managed ZIP upload; Claude Code also has local directories and supported account skill sync. Antigravity App and CLI are separate targets: the App uses `~/.gemini/config/skills/`, while the CLI-specific user directory is `~/.gemini/antigravity-cli/skills/`; both support project `.agents/skills/`.
 - GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. VS Code Agent in GitHub Codespaces and Gemini CLI user-scope installation/discovery have recorded evidence; actual skill invocation is recorded separately.
 - GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been installed or discovered in every host.
 - ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.

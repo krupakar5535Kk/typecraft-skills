@@ -121,7 +121,7 @@ exists for GitHub Copilot Agent mode in Visual Studio Code running in GitHub
 Codespaces and Gemini CLI user scope. Only the Copilot record includes actual
 skill-invocation evidence. Copilot CLI, app, and cloud agent are separate
 surfaces. Claude Code local sessions are not equivalent to Cowork or remote
-cloud sessions. Windsurf and Antigravity CLI remain unverified.
+cloud sessions. Windsurf and both Antigravity surfaces remain unverified.
 
 Platform-specific installation instructions must accurately describe the requirements and limitations of each environment.
 

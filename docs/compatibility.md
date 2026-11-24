@@ -39,8 +39,10 @@ verification stages; a successful skill listing does not establish invocation.
 | GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
 | Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
 | Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI 0.70.0; no model invocation |
-| Google Antigravity App | compatible | `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
-| Antigravity CLI | research_required | GitHub CLI preview fallback only if the installed CLI advertises the host | Not tested | Not tested; official App path is not assumed to be the CLI path |
+| Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; no Claude upload test | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. |
+| Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; no Cowork upload test | Not verified; paid-plan and rollout requirements apply. |
+| Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
+| Antigravity CLI | compatible | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; it also reads `~/.gemini/config/skills/` and `~/.gemini/skills/` | Not tested | Not tested; CLI supports skill slash commands and `/skills reload` |
 | OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested; OpenCode has additional native locations that should be checked for duplicates |
 | ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
 | Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
@@ -86,7 +88,15 @@ Codespaces environment cannot inspect the user's Mac home directory.
 ## Product-surface distinctions
 
 - **Claude Code:** local `~/.claude/skills/` is not automatically equivalent
-  to Cowork, claude.ai account skills, or remote cloud-session skills.
+  to account-managed skills. Claude Code v2.1.273+ can sync enabled Claude.ai
+  skills for supported account sign-ins; that route is distinct from a local
+  directory install and does not mean TypeCraft was tested in Cowork.
+- **Claude.ai and Cowork:** the current help center documents ZIP upload via
+  Customize → Skills. Claude.ai lists Free, Pro, Max, Ultra, Team, and
+  Enterprise availability subject to Code execution/file creation and
+  organization policy; Cowork is available on eligible paid plans. The
+  TypeCraft package is verified locally, but neither platform upload nor
+  runtime discovery has been tested.
 - **GitHub Copilot:** VS Code, CLI, app, and cloud agent/code review have
   different management and persistence behavior. The verified VS Code
   observation is not transferable to the other surfaces.
@@ -97,9 +107,12 @@ Codespaces environment cannot inspect the user's Mac home directory.
   command only when the installed CLI advertises scoped installation. User
   scope has automated file and discovery evidence; workspace discovery and
   model invocation remain unverified.
-- **Antigravity:** the current official skills page describes App locations.
-  It does not establish a CLI-specific path, so the registry leaves the CLI
-  route to a checked GitHub CLI preview rather than guessing.
+- **Antigravity App and CLI:** the official skills page documents separate
+  product surfaces. Both read workspace `.agents/skills/`; the App global
+  directory is `~/.gemini/config/skills/`. The CLI additionally reads
+  `~/.gemini/antigravity-cli/skills/` and `~/.gemini/skills/`. Its `/skills
+  reload` command refreshes skill slash commands. TypeCraft installation,
+  discovery, and invocation have not been tested in either Antigravity surface.
 - **OpenCode:** discovers multiple compatible directories. Use one shared
   skill source and inspect all active locations to avoid duplicate IDs.
 - **ChatGPT Skills:** creating a ZIP is only packaging. The user must upload,

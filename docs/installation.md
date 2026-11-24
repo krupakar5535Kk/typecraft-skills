@@ -31,6 +31,8 @@ discovery.
 
 | Surface | Documented route and scope | Discovery and limits |
 |---|---|---|
+| Claude.ai | ZIP upload via **Customize → Skills → Create skill → Upload a skill** | Enable the uploaded skill. Available on eligible plans including Free when Code execution and file creation is enabled; organization policy may restrict it. |
+| Claude Cowork | Account-managed ZIP upload via **Customize → Skills** | Enable the skill and check it in Cowork. Paid-plan and rollout restrictions apply. |
 | Claude Code, local | Native personal `~/.claude/skills/` or project `.claude/skills/` | Check `/skills`. A local personal install does not automatically reach Cowork or remote cloud sessions. |
 | OpenAI Codex | `$skill-installer` or native `~/.agents/skills/` / project `.agents/skills/` | Check `/skills` or invoke `$typecraft-skills`; restart if needed. |
 | Cursor local Agent | Native shared `~/.agents/skills/` or project `.agents/skills/` | Check Cursor's skill picker. Personal local skills are not automatically synced to Cloud Agents. |
@@ -40,9 +42,9 @@ discovery.
 | GitHub Copilot cloud agent/code review | Add a project skill to the repository's documented skills directory | A personal local copy is not cloud persistence. Test a fresh cloud task separately. |
 | Gemini CLI | Native local-directory install with user or workspace scope; safe directory copy if the installed CLI lacks scoped install support | User-scope install and `gemini skills list --all` verified with Gemini CLI 0.70.0 in isolated Ubuntu CI. Review the install consent prompt. Workspace discovery requires the project to be trusted; model invocation was not tested. |
 | Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Check discovery in the App. The registry does not claim TypeCraft runtime testing. |
-| Antigravity CLI | GitHub CLI preview fallback only when that installed CLI advertises `antigravity-cli` | Official documentation names the CLI surface but does not establish a CLI-specific directory here; no path is guessed. |
+| Antigravity CLI | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; shared global alternatives are `~/.gemini/config/skills/` and `~/.gemini/skills/` | Run `/skills reload` or start a new conversation, then check for `/typecraft-skills`. TypeCraft discovery is not tested. |
 | OpenCode | Shared native `~/.agents/skills/` or `.agents/skills/` | OpenCode also reads its own directories. The shared path avoids installing a duplicate when possible; inspect all active sources. |
-| ChatGPT Skills | Create a ZIP, then use **Plugins → Plugin Directory → Skills → Create → Upload from your computer** | ZIP creation is not installation. The user must upload, wait for scanning, and confirm availability. |
+| ChatGPT Skills | Create a ZIP, then use **Plugins → Plugin Directory → Skills → Create → Upload from your computer** | Available to eligible Business, Enterprise, Healthcare, and Edu users subject to workspace settings. The user must upload, wait for scanning, and confirm availability. |
 | Windsurf | No route is advertised by this project yet | The former skills documentation URL redirects to Devin documentation. Current Windsurf-specific behavior needs verification. |
 
 Other `gh skill` host IDs are installer integrations only. At the time of this
@@ -52,16 +54,20 @@ runtime discovery. The router checks the actual CLI help before using it.
 
 ## Optional local router
 
-From a reviewed repository checkout, with Python and the pinned dependency
-installed:
+From a fresh local checkout, create an isolated Python environment and install
+the required dependency before running the router:
 
 ```bash
-python -m pip install -r requirements-installer.txt
-python -m scripts.install_url \
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements-installer.txt
+.venv/bin/python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
   --agent <HOST_ID> \
   --scope user
 ```
+
+On Windows PowerShell, substitute
+`.venv\Scripts\python.exe` for `.venv/bin/python`.
 
 Use `--agent auto` only when the active runtime sets `TYPECRAFT_AGENT` to its
 exact host ID. An explicit `--agent <HOST_ID>` is also supported. Unknown or
