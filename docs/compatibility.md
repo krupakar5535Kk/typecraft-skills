@@ -61,7 +61,7 @@ installation record reports all 20 reference files present.
 This evidence applies only to the named VS Code + Codespaces environment. It
 does not verify Copilot CLI, the Copilot app, cloud agent, other editors, or
 other install scopes. It is historical evidence for TypeCraft 1.1.0; the
-current repository registry version is `1.1.0-dev`.
+current repository registry version is `1.2.0`.
 
 ### Actual Gemini CLI evidence
 

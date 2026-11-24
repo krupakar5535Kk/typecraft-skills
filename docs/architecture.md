@@ -1,9 +1,9 @@
 
 # TYPECRAFT SKILLS
 
-## Technical Architecture v1.1.0-dev
+## Technical Architecture v1.2.0
 
-**Status:** Release candidate
+**Status:** Current release
 **Project Type:** Open-Source, Tool-Independent AI Agent Skill
 **License:** MIT
 

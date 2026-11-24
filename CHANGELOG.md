@@ -6,6 +6,8 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-24
+
 ### Resource Quality and Approval
 
 - Completed editorial and technical review of all 20 resources without changing their IDs, names, relationships, or library scope.

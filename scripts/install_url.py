@@ -21,7 +21,7 @@ SKILL_SOURCE = ROOT / "skills" / "typecraft-skills"
 INSTALL_GUIDE = ROOT / "INSTALL.md"
 SKILL_NAME = "typecraft-skills"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
-PROJECT_VERSION = "1.1.0-dev"
+PROJECT_VERSION = "1.2.0"
 
 URL_PATTERN = re.compile(
     r"https://github\.com/krupakar5535Kk/typecraft-skills(?:\.git)?/?"
