@@ -97,8 +97,8 @@ is:
 
 **Platform notes:**
 
-- Claude.ai, Claude Cowork, Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App and CLI have documentation-backed routes. Claude.ai and Cowork use an account-managed ZIP upload; Claude Code also has local directories and supported account skill sync. Antigravity App and CLI are separate targets: the App uses `~/.gemini/config/skills/`, while the CLI-specific user directory is `~/.gemini/antigravity-cli/skills/`; both support project `.agents/skills/`.
-- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. VS Code Agent in GitHub Codespaces and Copilot CLI 1.0.105 have TypeCraft install, discovery, and invocation evidence; Gemini CLI has user-scope install/discovery evidence without a model invocation.
+- Claude.ai, Claude Cowork, Claude Code local, Codex CLI/IDE, Cursor, Gemini CLI, OpenCode, Cline, Roo Code, Kilo Code, and Antigravity App, IDE, and CLI have documentation-backed routes. Claude.ai and Cowork require account-managed upload/enablement. Codex CLI can install from the repository marketplace; ChatGPT desktop marketplace availability and installation remain untested, and ChatGPT web uploads require user confirmation. Antigravity App, IDE, and CLI remain separate targets with product-specific discovery surfaces.
+- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. Copilot CLI 1.0.105 has TypeCraft install, discovery, and invocation evidence; VS Code Agent has historical invocation evidence for TypeCraft 1.1.0. Gemini CLI 0.70.0 has user-scope install/discovery evidence without model invocation. OpenCode 1.19.6 has project install, SHA-256 integrity, and native discovery evidence; invocation was not tested because no provider credential was available.
 - GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been installed or discovered in every host.
 - ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.
 - Windsurf's former skills documentation URL redirects to Devin documentation; the current Windsurf-specific route remains unverified.
@@ -170,10 +170,12 @@ TypeCraft uses a tool-independent architecture with tool-aware execution.
 
 Compatibility is surface-specific. Official documentation-backed routes are
 not the same as a tested installation, and neither a file copy nor installer
-inventory is proof of runtime discovery. The only recorded TypeCraft runtime
-verification is GitHub Copilot Agent mode in Visual Studio Code running in
-GitHub Codespaces. See the [Compatibility Guide](docs/compatibility.md) for
-statuses, evidence, and remaining work.
+inventory is proof of runtime discovery. Verified installation/discovery
+evidence is recorded separately for GitHub Copilot VS Code, GitHub Copilot
+CLI, Codex CLI, Gemini CLI, and OpenCode; their versions, scopes, invocation
+results, and limitations differ. Codex CLI plugin installation and native
+discovery are verified, but invocation was not tested. See the
+[Compatibility Guide](docs/compatibility.md) for the full matrix and evidence.
 
 See the [Compatibility Guide](docs/compatibility.md).
 

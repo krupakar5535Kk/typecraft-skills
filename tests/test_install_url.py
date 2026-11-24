@@ -102,9 +102,67 @@ class UniversalInstallTests(unittest.TestCase):
     def test_routes_native_chatgpt_chat_only_and_cli_hosts(self):
         self.assertEqual(get_route("codex", self.registry), "native_directory")
         self.assertEqual(get_route("chatgpt", self.registry), "zip_upload")
+        self.assertEqual(
+            get_route("chatgpt_desktop", self.registry),
+            "openai_plugin_marketplace",
+        )
         self.assertEqual(get_route("chat-only", self.registry), "session_only")
         self.assertEqual(get_route("github-copilot", self.registry), "github_cli")
         self.assertEqual(get_route("unknown-agent", self.registry), "unsupported")
+
+    def test_routes_cline_roo_and_kilo_to_their_native_directories(self):
+        project = self.root / "project"
+        home = self.root / "home"
+        expected = {
+            "cline": (".cline", "~/.cline"),
+            "roo": (".roo", "~/.roo"),
+            "kilo": (".kilo", "~/.kilo"),
+        }
+        for platform, (project_directory, user_directory) in expected.items():
+            with self.subTest(platform=platform):
+                self.assertEqual(get_route(platform, self.registry), "native_directory")
+                project_path = resolve_native_destination(
+                    platform,
+                    "project",
+                    self.registry,
+                    project_root=project,
+                    home=home,
+                )
+                user_path = resolve_native_destination(
+                    platform,
+                    "user",
+                    self.registry,
+                    project_root=project,
+                    home=home,
+                )
+                self.assertEqual(
+                    project_path,
+                    (
+                        project
+                        / project_directory
+                        / "skills"
+                        / "typecraft-skills"
+                    ).resolve(strict=False),
+                )
+                self.assertEqual(
+                    user_path,
+                    (
+                        home
+                        / user_directory.removeprefix("~/")
+                        / "skills"
+                        / "typecraft-skills"
+                    ).resolve(strict=False),
+                )
+                self.assertEqual(
+                    self.registry["platforms"][platform]["compatibility"],
+                    "compatible",
+                )
+                self.assertEqual(
+                    self.registry["platforms"][platform][
+                        "runtime_discovery_verification"
+                    ],
+                    "not_tested",
+                )
 
     def test_routes_every_advertised_github_cli_host_and_registered_native_adapter(self):
         for agent_id in self.registry["installers"]["github_cli"]["supported_agents"]:
@@ -218,6 +276,67 @@ class UniversalInstallTests(unittest.TestCase):
         cli = self.registry["platforms"]["antigravity_cli"]
         self.assertEqual(cli["runtime_discovery_verification"], "not_tested")
 
+    def test_antigravity_ide_uses_its_documented_surface_location(self):
+        project = self.root / "project"
+        home = self.root / "home"
+        self.assertEqual(
+            get_route("antigravity-ide", self.registry),
+            "native_directory",
+        )
+        self.assertEqual(
+            resolve_native_destination(
+                "antigravity-ide",
+                "user",
+                self.registry,
+                project_root=project,
+                home=home,
+            ),
+            (
+                home
+                / ".gemini"
+                / "config"
+                / "skills"
+                / "typecraft-skills"
+            ).resolve(),
+        )
+        self.assertEqual(
+            resolve_native_destination(
+                "antigravity-ide",
+                "project",
+                self.registry,
+                project_root=project,
+                home=home,
+            ),
+            (project / ".agents" / "skills" / "typecraft-skills").resolve(),
+        )
+        self.assertEqual(
+            self.registry["platforms"]["antigravity_ide"][
+                "runtime_discovery_verification"
+            ],
+            "not_tested",
+        )
+
+    def test_codex_ide_uses_its_documented_shared_skill_directory(self):
+        project = self.root / "project"
+        home = self.root / "home"
+        self.assertEqual(get_route("codex-ide", self.registry), "native_directory")
+        self.assertEqual(
+            resolve_native_destination(
+                "codex-ide",
+                "user",
+                self.registry,
+                project_root=project,
+                home=home,
+            ),
+            (home / ".agents" / "skills" / "typecraft-skills").resolve(),
+        )
+        self.assertEqual(
+            self.registry["platforms"]["codex_ide"][
+                "runtime_discovery_verification"
+            ],
+            "not_tested",
+        )
+
     def test_antigravity_cli_installs_files_without_claiming_runtime_discovery(self):
         project = self.root / "project"
         project.mkdir()
@@ -300,6 +419,56 @@ class UniversalInstallTests(unittest.TestCase):
         self.assertEqual(status, "NOT_VERIFIED")
         self.assertIn("did not list", message)
 
+    def test_opencode_discovery_requires_the_exact_installed_manifest(self):
+        destination = self.root / "project" / ".agents" / "skills" / "typecraft-skills"
+        inventory = json.dumps([
+            {
+                "name": "typecraft-skills",
+                "location": str(destination / "SKILL.md"),
+            }
+        ])
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/opencode"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout=inventory, stderr=""
+                ),
+            ) as run,
+        ):
+            status, message = _verify_native_discovery(
+                "opencode",
+                cwd=destination.parents[3],
+                destination=destination,
+            )
+        self.assertEqual(status, "VERIFIED")
+        self.assertIn("at the installed location", message)
+        self.assertEqual(
+            run.call_args.args[0],
+            ["/usr/bin/opencode", "--pure", "debug", "skill"],
+        )
+
+        other_path = destination.parent / "other-skill" / "SKILL.md"
+        other_inventory = json.dumps([
+            {"name": "typecraft-skills", "location": str(other_path)}
+        ])
+        with (
+            patch("scripts.install_url.shutil.which", return_value="/usr/bin/opencode"),
+            patch(
+                "scripts.install_url.subprocess.run",
+                return_value=subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout=other_inventory, stderr=""
+                ),
+            ),
+        ):
+            status, message = _verify_native_discovery(
+                "opencode",
+                cwd=destination.parents[3],
+                destination=destination,
+            )
+        self.assertEqual(status, "NOT_VERIFIED")
+        self.assertIn("did not list", message)
+
     def test_registry_rejects_runtime_verified_status_without_test_evidence(self):
         repository_root = Path(__file__).resolve().parents[1]
         registry_text = (
@@ -346,7 +515,40 @@ class UniversalInstallTests(unittest.TestCase):
             if platform["compatibility"] == "verified"
         ]
         self.assertEqual(
-            verified, ["github_copilot", "github_copilot_cli", "gemini_cli"]
+            verified,
+            [
+                "github_copilot",
+                "github_copilot_cli",
+                "codex",
+                "opencode",
+                "gemini_cli",
+            ],
+        )
+        codex = platforms["codex"]
+        self.assertEqual(
+            codex["runtime_verification"]["environment"]["cli_version"],
+            "0.172.0",
+        )
+        self.assertEqual(
+            codex["runtime_verification"]["skill_discovery"]["command"],
+            "codex plugin list --json",
+        )
+        self.assertEqual(
+            codex["runtime_verification"]["installation"]["sha256_tree_match"],
+            "true",
+        )
+        self.assertEqual(codex["skill_invocation_verification"], "not_tested")
+        opencode = platforms["opencode"]
+        self.assertEqual(
+            opencode["runtime_verification"]["installation"]["sha256_tree_match"],
+            "true",
+        )
+        self.assertEqual(
+            opencode["runtime_verification"]["skill_discovery"]["command"],
+            "opencode --pure debug skill",
+        )
+        self.assertEqual(
+            opencode["skill_invocation_verification"], "not_tested"
         )
 
         verification = platforms["github_copilot"]["runtime_verification"]
@@ -416,6 +618,13 @@ class UniversalInstallTests(unittest.TestCase):
         )
         self.assertEqual(gemini["installation_verified"], "true")
         self.assertEqual(gemini["skill_discovery_verified"], "true")
+        codex_catalog = next(
+            entry
+            for entry in self.registry["agent_catalog"]
+            if entry["agent_id"] == "codex"
+        )
+        self.assertEqual(codex_catalog["installation_verified"], "true")
+        self.assertEqual(codex_catalog["skill_discovery_verified"], "true")
         gemini_platform = platforms["gemini_cli"]
         self.assertEqual(
             gemini_platform["skill_invocation_verification"], "not_tested"
@@ -430,7 +639,13 @@ class UniversalInstallTests(unittest.TestCase):
                 and entry["skill_discovery_verified"] == "false"
                 for entry in self.registry["agent_catalog"]
                 if entry["agent_id"]
-                not in {"github-copilot", "github-copilot-cli", "gemini-cli"}
+                not in {
+                    "github-copilot",
+                    "github-copilot-cli",
+                    "codex",
+                    "gemini-cli",
+                    "opencode",
+                }
             )
         )
 
@@ -480,11 +695,23 @@ class UniversalInstallTests(unittest.TestCase):
             for line in contents.splitlines()
             if line.startswith("| `")
         ]
+        allowed_statuses = {
+            "verified",
+            "compatible",
+            "research_required",
+            "unsupported",
+        }
+        matrix_statuses = [
+            line.split("|")[3].strip()
+            for line in contents.splitlines()
+            if line.startswith("| `")
+        ]
         catalog_ids = [
             entry["agent_id"] for entry in self.registry["agent_catalog"]
         ]
         self.assertEqual(len(documented_ids), len(set(documented_ids)))
         self.assertCountEqual(documented_ids, catalog_ids)
+        self.assertTrue(set(matrix_statuses).issubset(allowed_statuses))
 
     def test_native_install_copies_complete_skill_and_does_not_replace_identical_copy(self):
         result = execute_install(
@@ -760,6 +987,75 @@ class UniversalInstallTests(unittest.TestCase):
                 )
                 self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
                 self.assertIn("upload", result.user_action_remaining.lower())
+
+    def test_openai_plugin_marketplace_manifest_targets_the_canonical_skill(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        plugin = json.loads(
+            (repository_root / "plugin.json").read_text(encoding="utf-8")
+        )
+        marketplace = json.loads(
+            (
+                repository_root
+                / ".agents"
+                / "plugins"
+                / "marketplace.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(plugin["name"], "typecraft-skills")
+        self.assertEqual(plugin["version"], self.registry["project_version"])
+        self.assertTrue(
+            (repository_root / "skills" / "typecraft-skills" / "SKILL.md").is_file()
+        )
+        self.assertEqual(
+            marketplace["plugins"][0]["source"],
+            {"source": "local", "path": "./"},
+        )
+        self.assertEqual(marketplace["plugins"][0]["name"], plugin["name"])
+        self.assertEqual(
+            marketplace["plugins"][0]["policy"]["installation"],
+            "AVAILABLE",
+        )
+
+    def test_chatgpt_desktop_route_does_not_claim_user_installation(self):
+        result = execute_install(
+            REQUEST,
+            "chatgpt_desktop",
+            source=self.source,
+            registry=self.registry,
+        )
+        self.assertEqual(
+            result.installation,
+            "PLUGIN_SOURCE_READY_USER_ACTION_REQUIRED",
+        )
+        self.assertEqual(result.skill_discovery, "NOT_VERIFIED")
+        self.assertIn(
+            "marketplace availability varies",
+            result.user_action_remaining,
+        )
+
+    def test_chatgpt_desktop_route_rejects_malformed_marketplace_shape(self):
+        repository_root = self.root / "repository"
+        marketplace_directory = repository_root / ".agents" / "plugins"
+        marketplace_directory.mkdir(parents=True)
+        (repository_root / "plugin.json").write_text(
+            json.dumps({"name": "typecraft-skills"}),
+            encoding="utf-8",
+        )
+        (marketplace_directory / "marketplace.json").write_text(
+            "[]",
+            encoding="utf-8",
+        )
+        with patch("scripts.install_url.ROOT", repository_root):
+            with self.assertRaisesRegex(
+                InstallationError,
+                "must be JSON objects",
+            ):
+                execute_install(
+                    REQUEST,
+                    "chatgpt_desktop",
+                    source=self.source,
+                    registry=self.registry,
+                )
 
     @patch("scripts.install_url.execute_install", side_effect=PermissionError("denied"))
     def test_cli_reports_filesystem_errors_without_a_traceback(self, _install):

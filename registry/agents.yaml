@@ -139,6 +139,29 @@ platforms:
       user_action: "In Antigravity CLI, run /skills reload or start a new conversation and confirm /typecraft-skills is available."
     notes: "Official docs list ~/.gemini/antigravity-cli/skills as CLI-only, ~/.gemini/skills as CLI-readable, and ~/.gemini/config/skills as shared with the App. The adapter prefers the CLI-only user path to keep surface installations distinct. TypeCraft installation and discovery have not been tested."
 
+  antigravity_ide:
+    display_name: Antigravity IDE
+    category: ai_ide_and_agent
+    product_surface: Antigravity standalone IDE
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://antigravity.google/docs/skills
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official Antigravity skills documentation reviewed; standalone IDE was not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: native_directory
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.gemini/config/skills
+    discovery:
+      mechanism: "Inspect active skills in the Customizations menu in the agent side panel."
+      user_action: "Open Customizations in the Antigravity IDE and confirm TypeCraft appears; start a fresh agent session."
+    notes: "The official IDE location is ~/.gemini/config/skills globally and .agents/skills in workspaces; the legacy global path ~/.gemini/antigravity/skills is also supported. TypeCraft runtime discovery and invocation are not tested."
+
   github_copilot:
     display_name: GitHub Copilot
     category: coding_agent
@@ -225,13 +248,13 @@ platforms:
       environment:
         product: GitHub Copilot CLI
         host: Linux GitHub Codespaces
-        session: "Isolated project/user installation and discovery; separate one-shot model invocation."
+        session: "Fresh isolated project install, native discovery, and separate authenticated one-shot skill invocation."
         cli_version: "1.0.105"
       installation:
         tested: true
         scope: project
         method: TypeCraft router native directory adapter
-        path: "$PROJECT/.github/skills/typecraft-skills/"
+        path: "/tmp/typecraft-copilot-invoke-VxQZxz/project/.github/skills/typecraft-skills/"
         skill_manifest_present: true
         reference_files_present: 20
         sha256_tree_match: true
@@ -243,10 +266,12 @@ platforms:
       invocation:
         tested: true
         result: confirmed
+        prompt: "Swiss International Typographic Style with the Cinematic Title Poster template; request a concise fictional film poster design direction."
         references_exercised:
           - Swiss International Typographic Style
           - Cinematic Title Poster
-    notes: "Automated installation and native discovery passed at both project and user scope. A separate bounded CLI session explicitly invoked /typecraft-skills and correctly used the Swiss style and five-zone poster template. No credentials were used for installation/discovery; invocation used the configured Copilot account."
+        observed_guidance: "The response applied an asymmetric modular grid, clean sans-serif title hierarchy, generous whitespace, restrained color, image and information zones, and instructed not to invent credits."
+    notes: "Automated installation and native discovery passed at project and user scope. The 2026-11-24 one-shot invocation used the requested Swiss style and Cinematic Title Poster references. No credentials were used for installation/discovery; invocation used the configured Copilot account."
 
   github_copilot_app:
     display_name: GitHub Copilot app
@@ -311,21 +336,45 @@ platforms:
     installation:
       method: zip_upload_with_user_confirmation
       package_root: typecraft-skills/
-      user_action: "Plugins > Plugin Directory > Skills > Create > Upload from your computer; wait for scanning and confirmation"
+      user_action: "In ChatGPT, open Plugins > Skills > Create > Upload from your computer; wait for the scan and install or enable TypeCraft."
       package_required: true
       persistent_installation_verified: false
       user_scope_directory: not_applicable
       project_scope_directory: not_applicable
     discovery:
-      mechanism: "ChatGPT Skills UI after upload, scan, and installation confirmation"
-      user_action: "Open Plugins > Plugin Directory > Skills, upload the ZIP, and confirm that ChatGPT installs it."
+      mechanism: "ChatGPT Skills UI after upload, scan, and user installation/enablement"
+      user_action: "Open Plugins > Skills, upload the ZIP, wait for the scan, then install or enable TypeCraft."
     chat_installation:
       possible: conditional
       requirements:
         - eligible_business_enterprise_healthcare_or_edu_account
         - skills_feature_available
         - upload_or_workspace_install_permission
-    notes: "Official documentation lists eligible Business, Enterprise, Healthcare, and Edu users, subject to workspace settings and rollout. The package can be prepared, but upload, scanning, and installation require the user's ChatGPT UI and permissions."
+    notes: "Current official documentation supports Create with chat, Create with editor, and Upload from your computer. The repository also contains a Codex/ChatGPT desktop local marketplace plugin package. Persistent installation in ChatGPT web still requires a user or authorized workspace administrator to upload/install it; TypeCraft account installation has not been tested."
+
+  chatgpt_desktop:
+    display_name: ChatGPT desktop app
+    category: ai_chat_and_workspace
+    product_surface: ChatGPT desktop app Plugins Directory
+    skill_format: openai_plugin_with_agentskills
+    compatibility: compatible
+    official_documentation_url: https://developers.openai.com/plugins/build/plugins
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official local plugin marketplace documentation reviewed; ChatGPT desktop app was unavailable and TypeCraft was not installed there."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: openai_repo_marketplace
+      project_scope_directory: .agents/plugins/marketplace.json
+      user_scope_directory: not_applicable
+      package_root: repository root
+    discovery:
+      mechanism: "If the ChatGPT desktop surface exposes local/repo marketplaces, add this repository in Plugins and install TypeCraft from that marketplace."
+      user_action: "Confirm the install in ChatGPT desktop; local/repo marketplace availability varies by surface and was not tested here."
+    notes: "The marketplace exposes the root plugin.json and existing skills/typecraft-skills directory. It does not duplicate canonical skill content. Local marketplace discovery and install have not been tested in the ChatGPT desktop app; Codex CLI plugin installation is a separate verified surface."
 
   claude_ai:
     display_name: Claude.ai
@@ -437,26 +486,77 @@ platforms:
   codex:
     display_name: OpenAI Codex
     category: coding_agent
-    product_surface: Codex CLI and IDE extension
+    product_surface: Codex CLI
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     official_documentation_url: https://learn.chatgpt.com/docs/build-skills
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
-      kind: documentation_review
-      environment: "Official documentation reviewed; Codex CLI and IDE extension were not run and TypeCraft was not installed."
+      kind: automated_runtime_test
+      environment: "Linux; Codex CLI 0.172.0; temporary isolated CODEX_HOME; no OpenAI credentials or model session."
     native_installer_available: true
-    file_installation_verification: not_tested
-    runtime_discovery_verification: not_tested
-    installer: github_cli
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: not_tested
     installation:
       method: native_directory
       project_scope_directory: .agents/skills
       user_scope_directory: ~/.agents/skills
-      native_installer: "Codex $skill-installer"
+      native_installer: "Codex $skill-installer or the OpenAI plugin marketplace"
     discovery:
-      mechanism: "Codex /skills selector or $skill invocation"
-      user_action: "Restart Codex if a local install is not discovered."
+      mechanism: "codex plugin list --json; Codex CLI also supports /skills and $typecraft-skills for local skills."
+      user_action: "The tested CLI listed TypeCraft after installation. Model invocation requires an authenticated Codex session and was not tested."
+    runtime_verification:
+      agent_id: codex
+      tested_at: "2026-11-24"
+      skill_version: "1.2.0"
+      environment:
+        product: Codex CLI
+        host: Linux
+        session: "Isolated CODEX_HOME; plugin marketplace add/install and persistent plugin inventory; no model session."
+        cli_version: "0.172.0"
+      installation:
+        tested: "true"
+        scope: user
+        method: official_codex_plugin_marketplace
+        path: "Temporary isolated CODEX_HOME/plugins/cache/typecraft-skills/typecraft-skills/1.2.0/skills/typecraft-skills/"
+        skill_manifest_present: "true"
+        reference_files_present: "20"
+        sha256_tree_match: "true"
+      skill_discovery:
+        tested: "true"
+        result: confirmed
+        command: "codex plugin list --json"
+        listed_plugin_id: "typecraft-skills@typecraft-skills"
+        installed_and_enabled: "true"
+      invocation:
+        tested: "false"
+        result: not_attempted
+        reason: "No authenticated Codex model session was used in the isolated runtime test."
+    notes: "Codex CLI 0.172.0 added the repo marketplace, listed TypeCraft as available, installed it into isolated CODEX_HOME, and listed the installed/enabled plugin. The plugin contains the canonical skill without a second SKILL.md implementation. Invocation was not tested."
+
+  codex_ide:
+    display_name: OpenAI Codex IDE extension
+    category: coding_agent
+    product_surface: Codex IDE extension
+    skill_format: agentskills
+    compatibility: compatible
+    official_documentation_url: https://learn.chatgpt.com/docs/build-skills
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official Codex skills documentation reviewed; the IDE extension was not run and TypeCraft was not installed."
+    native_installer_available: false
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    installation:
+      method: native_directory
+      project_scope_directory: .agents/skills
+      user_scope_directory: ~/.agents/skills
+    discovery:
+      mechanism: "Codex IDE extension skill selector; native skills are loaded from shared Codex skill directories."
+      user_action: "Open /skills or the skill selector in a fresh Codex IDE session."
+    notes: "OpenAI's official skills guide lists standalone skills for the IDE extension and the same ~/.agents/skills and project .agents/skills locations. The CLI test does not verify the IDE extension."
     chat_installation:
       possible: conditional
       requirements:
@@ -493,24 +593,51 @@ platforms:
     category: coding_agent
     product_surface: OpenCode
     skill_format: agentskills
-    compatibility: compatible
+    compatibility: verified
     official_documentation_url: https://opencode.ai/docs/skills/
-    documentation_checked: "2026-11-23"
+    documentation_checked: "2026-11-24"
     verification_environment:
-      kind: documentation_review
-      environment: "Official documentation reviewed; OpenCode was not run and TypeCraft was not installed."
+      kind: automated_runtime_test
+      environment: "Linux isolated project and HOME; OpenCode CLI 1.19.6; no provider credentials or model session."
     native_installer_available: false
-    file_installation_verification: not_tested
-    runtime_discovery_verification: not_tested
+    file_installation_verification: verified
+    runtime_discovery_verification: verified
+    skill_invocation_verification: not_tested
     installer: github_cli
     installation:
       method: native_directory
       project_scope_directory: .agents/skills
       user_scope_directory: ~/.agents/skills
+    runtime_verification:
+      agent_id: opencode
+      tested_at: "2026-11-24"
+      skill_version: "1.2.0"
+      environment:
+        product: OpenCode
+        host: "Linux isolated temporary project"
+        session: "Native CLI discovery check; no account or provider credential used."
+        cli_version: "1.19.6"
+      installation:
+        tested: "true"
+        scope: project
+        method: "URL-first router native directory install"
+        path: "/tmp/typecraft-opencode-edAbKa/project/.agents/skills/typecraft-skills/"
+        skill_manifest_present: "true"
+        reference_files_present: "20"
+        sha256_tree_match: "true"
+      skill_discovery:
+        tested: "true"
+        result: confirmed
+        command: "opencode --pure debug skill"
+        listed_path: "/tmp/typecraft-opencode-edAbKa/project/.agents/skills/typecraft-skills/SKILL.md"
+      invocation:
+        tested: "false"
+        result: not_attempted
+        reason: "No OpenCode provider account or credential was available in the isolated environment."
     discovery:
-      mechanism: "OpenCode skill tool list and @typecraft-skills invocation"
-      user_action: "Inspect the active OpenCode session's available skills."
-    notes: "OpenCode also reads .opencode/skills and ~/.config/opencode/skills. The installer uses the shared .agents/skills locations to avoid creating an additional copy."
+      mechanism: "opencode --pure debug skill lists discovered skills without loading external project plugins; invoke in a model session with @typecraft-skills."
+      user_action: "Restart an already-running OpenCode session after installation."
+    notes: "TypeCraft 1.2.0 was installed in an isolated project and discovered at its exact manifest path by OpenCode 1.19.6. Discovery used --pure to skip external plugins; integration tests verify a project plugin is not executed. Invocation was not tested because no provider credential was available. The project route uses OpenCode's documented shared .agents/skills directory."
 
   gemini_cli:
     display_name: Gemini CLI
@@ -568,48 +695,96 @@ platforms:
     category: coding_agent
     product_surface: Cline
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     installer: github_cli
-    official_documentation_url: null
-    documentation_checked: "2026-11-23"
+    official_documentation_url: https://docs.cline.bot/customization/skills
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
-      environment: "Available documentation and installer catalog reviewed; Cline was not run and no native route was confirmed."
-    native_installer_available: unknown
+      environment: "Current official Cline Skills documentation reviewed; Cline was not installed or run."
+    native_installer_available: false
     installation:
-      method: github_cli_preview_fallback
-      project_scope_directory: null
-      user_scope_directory: null
+      method: native_directory
+      project_scope_directory: .cline/skills
+      user_scope_directory: ~/.cline/skills
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
-    notes: "GitHub CLI advertises this host ID; platform-native paths and TypeCraft runtime discovery were not established."
     discovery:
-      mechanism: "Platform-native skill listing, if available."
-      user_action: "Verify installation and discovery directly in Cline."
+      mechanism: "Cline Skills panel or slash-command picker; skills are loaded from native directories."
+      user_action: "Confirm the skill is enabled in the Cline Skills panel and test it in a fresh chat."
+    notes: "Official documentation supports Agent Skills at .cline/skills and ~/.cline/skills. TypeCraft files, discovery, and invocation have not been tested in Cline."
 
-  roo_code:
+  roo:
     display_name: Roo Code
     category: coding_agent
     product_surface: Roo Code
     skill_format: agentskills
-    compatibility: research_required
+    compatibility: compatible
     installer: github_cli
-    official_documentation_url: null
-    documentation_checked: "2026-11-23"
+    official_documentation_url: https://roocodeinc.github.io/Roo-Code/features/skills/
+    documentation_checked: "2026-11-24"
     verification_environment:
       kind: documentation_review
-      environment: "Available documentation and installer catalog reviewed; Roo Code was not run and no native route was confirmed."
+      environment: "Current official Roo Code Skills documentation reviewed; Roo Code was not installed or run."
+    native_installer_available: false
+    installation:
+      method: native_directory
+      project_scope_directory: .roo/skills
+      user_scope_directory: ~/.roo/skills
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    discovery:
+      mechanism: "Roo Code automatically indexes skills at startup and exposes matching skills to the agent."
+      user_action: "Start a fresh Roo Code session and confirm TypeCraft is discovered."
+    notes: "Official documentation supports .roo/skills and ~/.roo/skills, as well as shared .agents/skills paths. TypeCraft files, discovery, and invocation have not been tested in Roo Code."
+
+  kilo:
+    display_name: Kilo Code
+    category: coding_agent
+    product_surface: Kilo Code
+    skill_format: agentskills
+    compatibility: compatible
+    installer: github_cli
+    official_documentation_url: https://kilo.ai/docs/customize/skills
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Current official Kilo Code Skills documentation reviewed; Kilo Code was not installed or run."
+    native_installer_available: false
+    installation:
+      method: native_directory
+      project_scope_directory: .kilo/skills
+      user_scope_directory: ~/.kilo/skills
+    file_installation_verification: not_tested
+    runtime_discovery_verification: not_tested
+    discovery:
+      mechanism: "Kilo Code scans skill directories at startup; request /reload or start a fresh session after changes."
+      user_action: "Confirm TypeCraft is listed or invoked in a fresh Kilo Code session."
+    notes: "Official documentation also supports shared .agents/skills locations. TypeCraft files, discovery, and invocation have not been tested in Kilo Code."
+
+  continue:
+    display_name: Continue
+    category: coding_agent
+    product_surface: Continue CLI
+    skill_format: agentskills
+    compatibility: research_required
+    installer: github_cli
+    official_documentation_url: https://docs.continue.dev/cli/quickstart
+    documentation_checked: "2026-11-24"
+    verification_environment:
+      kind: documentation_review
+      environment: "Official Continue CLI quickstart reviewed; an Agent Skills route was not established."
     native_installer_available: unknown
     installation:
-      method: github_cli_preview_fallback
+      method: needs_verification
       project_scope_directory: null
       user_scope_directory: null
     file_installation_verification: not_tested
     runtime_discovery_verification: not_tested
-    notes: "GitHub CLI advertises a Roo host ID; current official installation paths and TypeCraft runtime discovery need direct verification."
     discovery:
-      mechanism: "Platform-native skill listing, if available."
-      user_action: "Verify the host ID, installation path, and discovery directly in Roo Code."
+      mechanism: "No official Agent Skills discovery mechanism was established."
+      user_action: "Confirm current official Agent Skills support and its supported install paths."
+    notes: "Continue CLI is distributed as cn, but the reviewed official Skills URL returned 404 and no supported Agent Skills install route was established."
 
   goose:
     display_name: Goose
@@ -788,6 +963,12 @@ native_adapters:
       user: ~/.agents/skills
       project: .agents/skills
     evidence: https://learn.chatgpt.com/docs/build-skills
+  codex-ide:
+    platform: codex_ide
+    scope_paths:
+      user: ~/.agents/skills
+      project: .agents/skills
+    evidence: https://learn.chatgpt.com/docs/build-skills
   cursor:
     platform: cursor
     scope_paths:
@@ -829,6 +1010,41 @@ native_adapters:
         - .claude/skills
         - .codex/skills
     evidence: https://opencode.ai/docs/skills/
+  cline:
+    platform: cline
+    scope_paths:
+      user: ~/.cline/skills
+      project: .cline/skills
+    alternate_scope_paths:
+      user:
+        - ~/.claude/skills
+      project:
+        - .claude/skills
+    evidence: https://docs.cline.bot/customization/skills
+  roo:
+    platform: roo
+    scope_paths:
+      user: ~/.roo/skills
+      project: .roo/skills
+    alternate_scope_paths:
+      user:
+        - ~/.agents/skills
+      project:
+        - .agents/skills
+    evidence: https://roocodeinc.github.io/Roo-Code/features/skills/
+  kilo:
+    platform: kilo
+    scope_paths:
+      user: ~/.kilo/skills
+      project: .kilo/skills
+    alternate_scope_paths:
+      user:
+        - ~/.agents/skills
+        - ~/.claude/skills
+      project:
+        - .agents/skills
+        - .claude/skills
+    evidence: https://kilo.ai/docs/customize/skills
   antigravity:
     platform: antigravity
     scope_paths:
@@ -844,6 +1060,15 @@ native_adapters:
       user:
         - ~/.gemini/config/skills
         - ~/.gemini/skills
+    evidence: https://antigravity.google/docs/skills
+  antigravity-ide:
+    platform: antigravity_ide
+    scope_paths:
+      user: ~/.gemini/config/skills
+      project: .agents/skills
+    alternate_scope_paths:
+      user:
+        - ~/.gemini/antigravity/skills
     evidence: https://antigravity.google/docs/skills
   github-copilot-cli:
     platform: github_copilot_cli
@@ -894,9 +1119,9 @@ agent_catalog:
   - agent_id: codex
     display_name: "OpenAI Codex"
     installer: github_cli
-    installation_method: native_directory
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_method: openai_plugin_marketplace
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: gemini-cli
     display_name: "Gemini CLI"
     installer: github_cli
@@ -948,7 +1173,7 @@ agent_catalog:
   - agent_id: cline
     display_name: "Cline"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: codebuddy
@@ -1032,7 +1257,7 @@ agent_catalog:
   - agent_id: kilo
     display_name: "Kilo Code"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: kimi-cli
@@ -1087,8 +1312,8 @@ agent_catalog:
     display_name: "OpenCode"
     installer: github_cli
     installation_method: native_directory
-    installation_verified: false
-    skill_discovery_verified: false
+    installation_verified: true
+    skill_discovery_verified: true
   - agent_id: openhands
     display_name: "OpenHands"
     installer: github_cli
@@ -1128,7 +1353,7 @@ agent_catalog:
   - agent_id: roo
     display_name: "Roo Code"
     installer: github_cli
-    installation_method: github_cli_managed
+    installation_method: native_directory
     installation_verified: false
     skill_discovery_verified: false
   - agent_id: trae

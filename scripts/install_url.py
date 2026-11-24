@@ -119,6 +119,8 @@ def get_route(platform, registry):
     installation = platform_data.get("installation", {})
     if installation.get("method") == "zip_upload_with_user_confirmation":
         return "zip_upload"
+    if installation.get("method") == "openai_repo_marketplace":
+        return "openai_plugin_marketplace"
     if platform in registry.get("native_adapters", {}):
         return "native_directory"
     if platform in registry.get("fallbacks", {}):
@@ -682,6 +684,59 @@ def _verify_native_discovery(platform, cwd=None, destination=None):
             "GitHub Copilot CLI did not list typecraft-skills at the installed location.",
         )
 
+    if platform == "opencode":
+        executable = shutil.which("opencode")
+        if not executable:
+            return "NOT_VERIFIED", "OpenCode is unavailable for a discovery check."
+        if destination is None:
+            return (
+                "NOT_VERIFIED",
+                "The installed skill location is required to verify OpenCode discovery.",
+            )
+
+        try:
+            result = subprocess.run(
+                [executable, "--pure", "debug", "skill"],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=cwd,
+                timeout=30,
+            )
+        except subprocess.TimeoutExpired:
+            return "NOT_VERIFIED", "OpenCode skill discovery timed out."
+        except OSError as exc:
+            return "NOT_VERIFIED", f"Could not run OpenCode skill discovery: {exc}"
+        if result.returncode:
+            detail = result.stderr.strip() or result.stdout.strip()
+            return "NOT_VERIFIED", (
+                f"OpenCode skill discovery failed: {detail or result.returncode}"
+            )
+        try:
+            skills = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            return "NOT_VERIFIED", f"Invalid JSON from OpenCode skill list: {exc}"
+        if not isinstance(skills, list):
+            return "NOT_VERIFIED", "Unexpected OpenCode skill inventory."
+
+        expected = Path(destination).resolve(strict=False)
+        expected_manifest = (expected / "SKILL.md").resolve(strict=False)
+        if any(
+            isinstance(skill, dict)
+            and skill.get("name") == SKILL_NAME
+            and isinstance(skill.get("location"), str)
+            and Path(skill["location"]).resolve(strict=False)
+            in {expected, expected_manifest}
+            for skill in skills
+        ):
+            return "VERIFIED", (
+                "OpenCode listed typecraft-skills at the installed location."
+            )
+        return (
+            "NOT_VERIFIED",
+            "OpenCode did not list typecraft-skills at the installed location.",
+        )
+
     if platform != "gemini-cli":
         return "NOT_VERIFIED", "Confirm discovery in the platform's own skill list or UI."
 
@@ -843,6 +898,60 @@ def execute_install(
         )
 
     route = get_route(platform, registry)
+    if route == "openai_plugin_marketplace":
+        plugin_manifest = ROOT / "plugin.json"
+        marketplace_manifest = ROOT / ".agents" / "plugins" / "marketplace.json"
+        if not plugin_manifest.is_file() or not marketplace_manifest.is_file():
+            raise InstallationError(
+                "The OpenAI plugin manifest or repository marketplace is missing."
+            )
+        try:
+            plugin = json.loads(plugin_manifest.read_text(encoding="utf-8"))
+            marketplace = json.loads(
+                marketplace_manifest.read_text(encoding="utf-8")
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise InstallationError(
+                f"Could not validate the OpenAI plugin marketplace: {exc}"
+            ) from exc
+        if not isinstance(plugin, dict) or not isinstance(marketplace, dict):
+            raise InstallationError(
+                "The OpenAI plugin and marketplace metadata must be JSON objects."
+            )
+        plugin_entries = marketplace.get("plugins")
+        if not isinstance(plugin_entries, list):
+            raise InstallationError(
+                "The OpenAI marketplace must contain a plugin list."
+            )
+        if (
+            plugin.get("name") != SKILL_NAME
+            or plugin.get("version") != version
+            or not any(
+                isinstance(entry, dict)
+                and entry.get("name") == SKILL_NAME
+                and entry.get("source") == {"source": "local", "path": "./"}
+                and isinstance(entry.get("policy"), dict)
+                and entry["policy"].get("installation") == "AVAILABLE"
+                for entry in plugin_entries
+            )
+            or not verify_skill_tree(SKILL_SOURCE, SKILL_SOURCE)
+        ):
+            raise InstallationError(
+                "The repository marketplace does not target the canonical "
+                "TypeCraft plugin and skill."
+            )
+        action = registry["platforms"][platform]["discovery"]["user_action"]
+        return InstallResult(
+            platform,
+            "PLUGIN_SOURCE_READY_USER_ACTION_REQUIRED",
+            str(plugin_manifest),
+            "SUCCESS",
+            "NOT_VERIFIED",
+            action,
+            "The repository marketplace points to the canonical skill. "
+            "ChatGPT desktop must confirm and install the plugin in its UI.",
+            version,
+        )
     if route == "zip_upload":
         if not package_output:
             display_name = registry["platforms"][platform]["display_name"]
@@ -901,6 +1010,10 @@ def execute_install(
         if discovery == "VERIFIED" and platform == "gemini-cli":
             action = (
                 "Gemini may request consent when the skill is activated."
+            )
+        elif discovery == "VERIFIED" and platform == "opencode":
+            action = (
+                "Restart any running OpenCode session; new sessions discover the skill."
             )
         elif discovery == "VERIFIED":
             action = "none"
