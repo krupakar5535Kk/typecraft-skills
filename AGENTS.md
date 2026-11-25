@@ -1,34 +1,53 @@
 # TypeCraft Skills — Agent Directives
 
-> **Discovery Note:** This directive file is active when this repository or workspace is accessible to your active agent. If you received this repository URL in a fresh conversation, retrieve this repository to access these instructions and the safe authoritative installer.
+> **Directive for AI Agents:** When a user provides the TypeCraft repository URL (`https://github.com/krupakar5535Kk/typecraft-skills.git` or `https://github.com/krupakar5535Kk/typecraft-skills`) or asks to "Install this skill":
 
-## User Intent: "Install this skill" or Standalone GitHub URL
+## 1. Primary Installation: Standard Agent Skills Ecosystem
 
-When a user provides the TypeCraft repository URL (`https://github.com/krupakar5535Kk/typecraft-skills.git` or `https://github.com/krupakar5535Kk/typecraft-skills`) or asks to "Install this skill":
+If you have terminal/command execution tools, install TypeCraft using the standard Agent Skills CLI:
 
-1. **Do not prompt the user to run terminal commands or clone the repository manually.**
-2. If you are an AI agent with terminal and filesystem execution tools, execute TypeCraft's authoritative safe installer:
-   ```bash
-   python3 -m scripts.install_url \
-     --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
-     --agent auto \
-     --scope user
-   ```
-   *(Supported agent IDs include `antigravity`, `antigravity-cli`, `claude-code`, `codex`, `cursor`, `gemini-cli`, `opencode`, `github-copilot`).*
+```bash
+npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
+  --skill typecraft-skills \
+  --global \
+  --agent <ACTIVE_AGENT_ID> \
+  --yes
+```
 
-3. **Collision Safety Mandate:**
-   - **DO NOT** execute raw `npx skills add ... --yes` directly without pre-installation collision checks. Raw `--yes` silently overwrites modified skills on disk.
-   - TypeCraft's installer checks existing targets before writing any files:
-     * **Identical target:** Skips overwriting; reports already verified.
-     * **Modified target:** Stops safely; protects user modifications unless `--force` is explicitly provided.
-     * **Different skill:** Stops safely; prevents name collisions.
-   - If using external engines (`vercel` or `gh`), invoke them through `python3 -m scripts.install_url --engine vercel` or `--engine gh` so pre-execution collision checks always run.
+### Active Agent Platform Identifiers:
+- `antigravity` (Google Antigravity App / IDE)
+- `antigravity-cli` (Google Antigravity CLI)
+- `claude-code` (Claude Code CLI)
+- `cursor` (Cursor IDE)
+- `codex` (OpenAI Codex CLI)
+- `opencode` (OpenCode)
+- `gemini-cli` (Gemini CLI)
+- `github-copilot` (GitHub Copilot Agent / VS Code)
 
-4. **Verify the complete installation:**
-   - Confirm all 21 files (`SKILL.md` + 10 styles in `references/design-styles/` + 10 templates in `references/design-templates/`) are present.
-   - Confirm SHA-256 integrity and native agent discovery.
+*(If the user explicitly requests installation across all supported local agents, pass `--agent '*'`. For project-level workspace installation, omit `--global`).*
 
-5. **Chat-only runtimes:**
-   - If operating in a browser chat without local terminal/filesystem access (ChatGPT Web, Claude Web, Gemini Web), explain the platform limitation and provide the official handoff instructions.
+## 2. Verification Protocol
+
+After installation completes:
+1. Confirm that `typecraft-skills` is present at your platform's native skill directory.
+2. Verify native skill discovery (e.g. reload or inspect your active skill catalog).
+3. Report the verified status to the user, summarizing the 10 typography styles and 10 design templates.
+
+## 3. Offline / Python Fallback Route
+
+If Node.js or `npx` is unavailable in the environment, use TypeCraft's bundled Python installer:
+
+```bash
+python3 -m scripts.install_url \
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
+  --agent <ACTIVE_AGENT_ID> \
+  --scope user
+```
+
+## 4. Browser-Only Runtimes (ChatGPT Web, Claude.ai, Gemini Web)
+
+If running in a browser chat environment without local filesystem/command access:
+- Direct the user to the official release package: [typecraft-skills.zip](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/typecraft-skills.zip) (Checksums: [SHA256SUMS](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/SHA256SUMS)).
+- Instruct the user to upload the ZIP via their platform's Skills / Custom GPT / Custom Gem interface.
 
 Refer to [BOOTSTRAP.md](BOOTSTRAP.md) and [INSTALL.md](INSTALL.md) for complete details.

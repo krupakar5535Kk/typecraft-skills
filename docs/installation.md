@@ -15,42 +15,66 @@ https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-The URL alone (with or without `.git` or followed by "Install this skill") signals installation intent. Tool-enabled agents with terminal and filesystem permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [INSTALL.md](../INSTALL.md), detect their active platform identity, and install the complete canonical skill atomically using TypeCraft's safe installer.
-
-Do not prompt the user to run terminal commands manually when the agent has execution capabilities.
+The URL alone (with or without `.git` or followed by "Install this skill") signals installation intent. Tool-enabled agents with command execution permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [INSTALL.md](../INSTALL.md), identify their active platform, and install TypeCraft globally using the standard Agent Skills CLI.
 
 ---
 
-## 2. Local-Agent Installation Route (CLI & Terminal Agents)
+## 2. Standard Installation Route (Official Skills CLI)
 
-When running inside an interactive terminal, local CLI agent, or reviewed checkout, run TypeCraft's authoritative collision-protected installer:
+TypeCraft adopts the standard Agent Skills distribution ecosystem using the official Vercel Skills CLI (`skills`).
 
-### Command Syntax
+### Primary Command (Active Agent, Global Scope)
 
 ```bash
-# From repository root with Python environment:
+npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
+  --skill typecraft-skills \
+  --global \
+  --agent <ACTIVE_AGENT_ID> \
+  --yes
+```
+
+### Installation Scope Options:
+- **Active Agent Global (Default & Recommended):** `--global --agent <ACTIVE_AGENT_ID>` installs the skill into the user's persistent global directory for that agent.
+- **All Local Agents:** `--global --agent '*'` installs TypeCraft across all supported AI coding agents detected on the local system.
+- **Project Scope:** Omit `--global` to link or copy the skill into the current repository workspace (e.g. `.agents/skills/` or `.claude/skills/`).
+
+### Target Agent Platform Identifiers:
+- `antigravity` — Google Antigravity App / IDE (`~/.gemini/config/skills/typecraft-skills/`)
+- `antigravity-cli` — Google Antigravity CLI (`~/.gemini/antigravity-cli/skills/typecraft-skills/`)
+- `claude-code` — Claude Code CLI (`~/.claude/skills/typecraft-skills/`)
+- `cursor` — Cursor IDE (`~/.agents/skills/typecraft-skills/`)
+- `codex` — OpenAI Codex CLI (`~/.agents/skills/typecraft-skills/`)
+- `opencode` — OpenCode (`~/.agents/skills/typecraft-skills/`)
+- `gemini-cli` — Gemini CLI (`~/.gemini/skills/typecraft-skills/`)
+- `github-copilot` — GitHub Copilot Agent / VS Code (`~/.copilot/skills/typecraft-skills/`)
+
+---
+
+## 3. Offline / Maintainer Python Fallback Route
+
+If Node.js or `npx` is unavailable in the environment, or for offline/sandboxed execution, use TypeCraft's bundled Python installer:
+
+```bash
+# User scope (global):
 python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
-  --agent auto \
+  --agent <ACTIVE_AGENT_ID> \
   --scope user
+
+# Project scope:
+python -m scripts.install_url \
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
+  --agent <ACTIVE_AGENT_ID> \
+  --scope project
 ```
 
 On Windows PowerShell:
 ```powershell
 python -m scripts.install_url `
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." `
-  --agent auto `
+  --agent <ACTIVE_AGENT_ID> `
   --scope user
 ```
-
-### Options & Flags
-- `--agent auto`: Automatically detects the host runtime from environment signals (`TYPECRAFT_AGENT` or unambiguous host signals).
-- `--agent <HOST_ID>`: Targets an explicit agent identity (e.g. `claude-code`, `gemini-cli`, `codex`, `cursor`, `antigravity`, `antigravity-cli`, `opencode`, `github-copilot`).
-- `--scope user`: Installs globally to the user's home configuration directory (default, recommended for persistence across sessions).
-- `--scope project`: Installs locally into the current repository workspace (e.g. `.claude/skills/`, `.agents/skills/`, or `.github/skills/`).
-- `--engine auto|native|vercel|gh`: Selects the installation engine. External engines (`vercel` and `gh`) are pre-checked by TypeCraft's collision guard.
-- `--force`: Authorizes replacing or updating an existing installation after explicit review.
-- `--json`: Outputs machine-readable installation status.
 
 ### Automated Collision & Overwrite Safety
 TypeCraft checks candidate destinations before writing files:
@@ -61,7 +85,7 @@ TypeCraft checks candidate destinations before writing files:
 
 ---
 
-## 3. Browser-Based Platform Route (ChatGPT, Claude.ai, Gemini Web)
+## 4. Browser-Based Platform Route (ChatGPT, Claude.ai, Gemini Web)
 
 Browser-based chat platforms operate in sandboxed browser environments without local terminal or filesystem access. For these platforms, download the official release package and upload it directly:
 
@@ -81,15 +105,15 @@ python -m scripts.install_url \
 The router verifies ZIP integrity, exact file paths (`typecraft-skills/` root), and content hashes.
 
 ### Platform Upload Steps
-- **ChatGPT Web:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach the ZIP / `SKILL.md` to **Custom GPT → Knowledge**). Availability is subject to workspace plan and policy.
-- **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**). Enable the skill after upload.
 - **Gemini Web:**
   - *Custom Skills Upload (Primary):* Open **Customize → Skills** (or **More → Customize → Skills**), select **Upload a skill** (or **Upload file**), and upload `typecraft-skills.zip`. Review the parsed metadata and save. In chat, invoke via `@typecraft-skills` or `/typecraft-skills`. Custom Skills upload is available on Gemini Advanced or eligible Google Workspace (Business, Enterprise, Education) accounts with custom skills enabled.
   - *Custom Gems (Legacy / Fallback):* For standard consumer accounts or environments where Custom Skills upload is unavailable, open **Gem Manager → New Gem**, paste the contents of `skills/typecraft-skills/SKILL.md` into the Gem instructions, or attach `SKILL.md` directly into the chat session.
+- **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**). Enable the skill after upload.
+- **ChatGPT Web:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach the ZIP / `SKILL.md` to **Custom GPT → Knowledge**). Availability is subject to workspace plan and policy.
 
 ---
 
-## 4. Platform Evaluation Stages & Compatibility Matrix
+## 5. Platform Evaluation Stages & Compatibility Matrix
 
 To prevent misleading claims, TypeCraft strictly separates four lifecycle stages:
 1. **Installation** — Files copied to a documented native directory or archive uploaded.
@@ -97,44 +121,19 @@ To prevent misleading claims, TypeCraft strictly separates four lifecycle stages
 3. **Invocation** — The agent model actually accesses, parses, and applies TypeCraft typography styles or design templates in a real creative task.
 4. **Persistence** — Availability across fresh, independent conversations without reinstallation.
 
-### Status Definitions
-- **verified** — TypeCraft files were installed and the platform itself discovered the skill in the recorded environment.
-- **compatible** — Official product documentation establishes a supported Agent Skills format and route; full end-to-end model invocation is unverified.
-- **research_required** — Product support, installation paths, or runtime behavior is unconfirmed.
-- **unsupported** — No persistent installation route is available.
+### Evaluation Summary
 
-### Platform Summary Matrix
-
-| Platform Surface | Status | Documented Route & Scope | File Verification | Native Discovery | Model Invocation | Persistence |
-|---|---|---|---|---|---|---|
-| **GitHub Copilot CLI** | **verified** | `~/.copilot/skills/` or `.github/skills/` | Verified: 21/21 files SHA-256 matched | Verified (`copilot skill list --json`) in CLI 1.0.105 & 1.0.114 | Verified: Swiss Style & Cinematic Poster exercised | User & project directory |
-| **GitHub Copilot VS Code Agent** | **verified** | GitHub CLI managed (`~/.copilot/skills/`) | Verified: 21/21 files matched | Verified in VS Code Agent in Codespaces | Verified (historical v1.1.0 Codespaces session) | User scope in Codespaces |
-| **Gemini CLI** | **verified** | `~/.gemini/skills/` or `.gemini/skills/` | Verified: 21/21 files SHA-256 matched | Verified (`gemini skills list --all` in v0.70.0 & v0.71.1) | Not verified (headless execution blocked by interactive browser OAuth) | User directory |
-| **OpenAI Codex** | **compatible** | `~/.agents/skills/` or `~/.codex/skills/` | Verified in test suite (21/21 files matched) | Native index and bundled `$skill-installer` registered | Not verified (live CLI execution blocked by upstream account usage quota limit) | User directory |
-| **Claude Code, local** | **compatible** | `~/.claude/skills/` or `.claude/skills/` | Isolated installer & SHA-256 verified | Documented (`/skills`); user-reported discovery observed | Not tested | User directory |
-| **Cursor local Agent** | **compatible** | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (Cursor Features > Skills panel) | Not tested | User directory |
-| **Google Antigravity App** | **compatible** | Global `~/.gemini/config/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented in App skill catalog | Not tested | Global config |
-| **Antigravity CLI** | **compatible** | `~/.gemini/antigravity-cli/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (`/skills reload`) | Not tested | User directory |
-| **OpenCode** | **compatible** | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (`opencode skills list`) | Not tested | User directory |
-| **ChatGPT Skills** | **compatible** | Release ZIP upload via Plugin Directory | Package integrity tests pass locally | User action required to upload and confirm | Not tested | Workspace-managed |
-| **Claude.ai / Cowork** | **compatible** | Release ZIP upload via Customize → Skills | Package integrity tests pass locally | User action required to upload and enable | Not tested | Account-managed |
-| **Gemini Web** | **compatible** | Release ZIP upload via Customize → Skills (or Custom Gem fallback) | Package integrity tests pass locally | User action required to upload and enable | Not tested | Account-managed |
-| **Windsurf** | **research_required** | Unconfirmed | Not tested | Former URL redirects to Devin docs | Not tested | Unconfirmed |
+| Surface | Status | Route | Verified Evidence |
+|---|---|---|---|
+| **GitHub Copilot CLI** | **verified** | Native directory (`~/.copilot/skills/`) | Full installation, discovery (`copilot skill list`), and model invocation verified on CLI 1.0.105 & 1.0.114. |
+| **GitHub Copilot VS Code Agent** | **verified** | GitHub CLI managed (`~/.copilot/skills/`) | Historical installation, discovery, and invocation verified in GitHub Codespaces (v1.1.0). |
+| **Gemini CLI** | **verified** | Native directory (`~/.gemini/skills/`) | User-scope installation and native discovery verified via `gemini skills list --all`; live model invocation blocked by headless OAuth requirement. |
+| **Google Antigravity App / CLI** | **compatible** | Standard CLI (`~/.gemini/config/skills/`, `~/.gemini/antigravity-cli/skills/`) | Live installation and catalog inspection verified; `/skills reload` supported. |
+| **Claude Code CLI** | **compatible** | Standard CLI (`~/.claude/skills/`) | Route documented and verified with `skills add`; user-reported discovery observed; model invocation unverified in CI. |
+| **Cursor IDE** | **compatible** | Standard CLI (`~/.agents/skills/`) | Route documented and verified with `skills add`; local user skills do not automatically sync to Cloud Agents. |
+| **OpenAI Codex** | **compatible** | Standard CLI (`~/.agents/skills/`, `~/.codex/skills/`) | Route documented and verified with `skills add`; live invocation blocked by upstream account usage limit. |
+| **OpenCode** | **compatible** | Standard CLI (`~/.agents/skills/`) | Route documented and verified with `skills add`. |
+| **ChatGPT / Claude.ai / Cowork / Gemini Web** | **compatible** | Release ZIP upload | Verified local packaging; upload, scan, and confirmation require user action and account eligibility. |
+| **Windsurf** | **research_required** | Unconfirmed | Former documentation URL redirects to Devin; native route unconfirmed. |
 
 See the complete [Compatibility Guide](compatibility.md) for detailed audit logs and recorded evidence.
-
----
-
-## 5. Maintainer Multi-Target Utility
-
-Maintainers testing GitHub CLI host targets across multiple platforms can use `scripts/install.py`:
-
-```bash
-# Preview all 48 advertised GitHub CLI host targets:
-python -m scripts.install --all --scope user --dry-run
-
-# Install selected targets:
-python -m scripts.install --agent claude-code --agent cursor --scope user
-```
-
-Use `--force` only when you explicitly intend to overwrite an existing installation.
