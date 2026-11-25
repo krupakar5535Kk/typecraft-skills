@@ -7,6 +7,17 @@ for official documentation, installation method and scope, native installer
 availability, file verification, runtime discovery, evidence, limitations, and
 remaining user action.
 
+### Four distinct evaluation stages
+
+To maintain strict technical accuracy, TypeCraft evaluates platform compatibility across four separate lifecycle stages:
+
+1. **Installation** — The physical copying or unpacking of canonical skill files to the host's supported path (e.g. native directory copy, `gh skill install`, or ZIP package creation/upload).
+2. **Discovery** — The platform's native runtime catalog or skill inventory affirmatively indexes TypeCraft (e.g. `copilot skill list`, `gemini skills list`, or native skill manifest detection).
+3. **Invocation** — The agent's model actually references, parses, and successfully applies TypeCraft typography styles or design templates to a real-world creative prompt.
+4. **Persistence** — The skill remains permanently discovered and invokable across fresh sessions without requiring reinstallation.
+
+A platform cannot be claimed as "verified" based on installation alone. Runtime discovery and actual model invocation are tracked independently.
+
 - **verified** — TypeCraft files were installed and the platform itself
   discovered the skill in the recorded environment.
 - **compatible** — current official product documentation establishes a
@@ -29,23 +40,24 @@ verification stages; a successful skill listing does not establish invocation.
 
 ## Platform verification matrix
 
-| Platform surface | Status | Documented install | File verification | Runtime discovery |
-|---|---|---|---|---|
-| Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Not tested in this environment | Not tested. A user reported that an existing local copy was listed and its full `SKILL.md` read; source equality and version were not checked. |
-| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `~/.codex/skills/` | Verified in test suite (21/21 files SHA-256 matched) | Native index in `~/.agents/skills/` and `$CODEX_HOME/skills` documented and confirmed via bundled `skill-installer`; live CLI invocation blocked by account quota limit. |
-| GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session |
-| GitHub Copilot CLI | verified | `~/.copilot/skills/` or project `.github/skills/` | Verified at both scopes; 20 reference files match the canonical tree | Verified with `copilot skill list --json`; one actual CLI invocation exercised Swiss International Typographic Style and Cinematic Title Poster |
-| GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
-| GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
-| Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
-| Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI (v0.70.0 and v0.71.1); live automated invocation blocked by interactive browser OAuth requirement in headless shell |
-| Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; no Claude upload test | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. |
-| Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; no Cowork upload test | Not verified; paid-plan and rollout requirements apply. |
-| Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
-| Antigravity CLI | compatible | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; it also reads `~/.gemini/config/skills/` and `~/.gemini/skills/` | Not tested | Not tested; CLI supports skill slash commands and `/skills reload` |
-| OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested; OpenCode has additional native locations that should be checked for duplicates |
-| ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills | Package integrity tests pass locally; no ChatGPT upload test | Not verified; upload, scan, and confirmation require the user and an eligible workspace |
-| Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation |
+| Platform surface | Status | Documented install | File verification | Runtime discovery | Skill invocation |
+|---|---|---|---|---|---|
+| Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Isolated installer & SHA-256 integrity tested | Documented (`/skills`); user-reported discovery of existing copy, unverified in CI | Not tested |
+| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `~/.codex/skills/` | Verified in test suite (21/21 files SHA-256 matched) | Native index in `~/.agents/skills/` and `$CODEX_HOME/skills` documented and confirmed via bundled `skill-installer` | Not verified (live CLI execution blocked by upstream account usage quota limit) |
+| GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session | Verified (historical v1.1.0 Codespaces): exercised Art Deco, Swiss style, E-commerce layout, and Cinematic Title Poster |
+| GitHub Copilot CLI | verified | `~/.copilot/skills/` or project `.github/skills/` | Verified at both scopes; 20 reference files match the canonical tree | Verified with `copilot skill list --json` in CLI 1.0.105 and 1.0.114 | Verified: explicit CLI invocation exercised Swiss International Typographic Style and Cinematic Title Poster |
+| GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested | Not tested |
+| GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task | Not tested |
+| Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 integrity tested | Documented (Cursor Features > Skills); local personal skills do not automatically sync to Cloud Agents | Not tested |
+| Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI (v0.70.0 and v0.71.1) | Not verified (no model session or automated invocation attempted; interactive browser OAuth required in headless shell) |
+| Gemini Web | compatible | Upload ZIP through Customize → Skills → Upload a skill (or Custom Gem fallback) | Package integrity tests pass locally; ZIP contains 21/21 canonical files | Not verified; user must upload and enable. Requires Gemini Advanced or Workspace with custom skills enabled. | Not tested |
+| Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; ZIP contains 21/21 canonical files | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. | Not tested |
+| Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; ZIP contains 21/21 canonical files | Not verified; paid-plan and rollout requirements apply. | Not tested |
+| Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Isolated installer & SHA-256 integrity tested | Documented in app skill catalog; runtime discovery not verified in CI | Not tested |
+| Antigravity CLI | compatible | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; it also reads `~/.gemini/config/skills/` and `~/.gemini/skills/` | Isolated installer & SHA-256 integrity tested | Documented (`/skills reload`); runtime discovery not verified in CI | Not tested |
+| OpenCode | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 integrity tested | Documented (`opencode skills list`); multiple native directories should be checked for duplicates | Not tested |
+| ChatGPT Skills | compatible | ZIP upload in Plugins → Plugin Directory → Skills (or Custom GPT Knowledge) | Package integrity tests pass locally; ZIP contains 21/21 canonical files | Not verified; upload, scan, and confirmation require the user and an eligible workspace | Not tested |
+| Windsurf | research_required | No route advertised here | Not tested | Not tested; the former Windsurf skills URL redirects to Devin documentation | Not tested |
 
 ### GitHub CLI host catalog (48 IDs)
 
@@ -179,6 +191,7 @@ Codespaces environment cannot inspect the user's Mac home directory.
   command only when the installed CLI advertises scoped installation. User
   scope has automated file and discovery evidence; workspace discovery and
   model invocation remain unverified.
+- **Gemini Web:** supports open-standard Custom Skills upload via Customize → Skills → Upload a skill for Gemini Advanced and Google Workspace (Business, Enterprise, Education) accounts. The upload accepts the TypeCraft ZIP archive containing `SKILL.md` and reference materials. Personal accounts without custom skills access fallback to Custom Gems (instructions paste). Packaging tests pass locally, but user upload, UI activation, and model invocation remain unverified.
 - **Antigravity App and CLI:** the official skills page documents separate
   product surfaces. Both read workspace `.agents/skills/`; the App global
   directory is `~/.gemini/config/skills/`. The CLI additionally reads
@@ -203,9 +216,9 @@ that TypeCraft was installed, discovered, or invoked in the target agent.
 The following are explicitly blocked on environments or account actions not
 available to this run:
 
-- **Claude.ai, Cowork, and ChatGPT:** a user with an eligible account must
-  upload the generated ZIP, confirm the product's scan/install step, enable the
-  skill, and verify it in a fresh session. Packaging tests are not product
+- **Claude.ai, Cowork, Gemini Web, and ChatGPT:** a user with an eligible account
+  must upload the generated ZIP, confirm the product's scan/install step, enable
+  the skill, and verify it in a fresh session. Packaging tests are not product
   installation tests.
 - **Claude Code, Codex, Cursor, OpenCode, Antigravity App, and Antigravity
   CLI:** their native runtimes were not installed in this environment. Their

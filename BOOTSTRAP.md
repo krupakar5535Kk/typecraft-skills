@@ -129,7 +129,7 @@ If your runtime is a browser or mobile chat without persistent filesystem access
 2. **Provide Official Platform Handoff:**
    - **ChatGPT Web Skills:** Direct the user to **Settings > Skills > Upload from your computer**. Use `--package-output` to create the ZIP.
    - **Claude Free / Pro Web:** Instruct the user to attach or paste `skills/typecraft-skills/SKILL.md` into Project Knowledge or the active conversation context.
-   - **Gemini Web / Mobile:** Instruct the user to create a Custom Gem using `skills/typecraft-skills/SKILL.md`.
+   - **Gemini Web / Mobile:** Direct eligible users (Gemini Advanced or Workspace) to **Customize → Skills → Upload a skill** with `typecraft-skills.zip`. For standard accounts or environments without Custom Skills upload, fallback to creating a **Custom Gem** with `skills/typecraft-skills/SKILL.md` or attaching the file.
 
 ---
 

@@ -1,0 +1,104 @@
+name: Release Assets
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build and attach assets to (e.g. 1.4.0 or v1.4.0)'
+        required: false
+        default: '1.4.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    name: Build and Upload Release Assets
+    runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Determine target release tag
+        id: resolve-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT_NAME" = "release" ]; then
+            RAW_TAG="$RELEASE_TAG"
+          else
+            RAW_TAG="$INPUT_TAG"
+            if [ -z "$RAW_TAG" ]; then
+              RAW_TAG="$REF_NAME"
+            fi
+          fi
+
+          # Validate tag format strictly to prevent script and argument injection
+          if ! echo "$RAW_TAG" | grep -Eq '^[a-zA-Z0-9][a-zA-Z0-9._-]*$'; then
+            echo "ERROR: Invalid tag format '$RAW_TAG'. Tags must contain only alphanumeric characters, dots, underscores, or hyphens." >&2
+            exit 1
+          fi
+
+          # Resolve matching release tag (handles 'v1.4.0' vs '1.4.0')
+          if gh release view "$RAW_TAG" >/dev/null 2>&1; then
+            TARGET_TAG="$RAW_TAG"
+          elif gh release view "v$RAW_TAG" >/dev/null 2>&1; then
+            TARGET_TAG="v$RAW_TAG"
+          elif gh release view "${RAW_TAG#v}" >/dev/null 2>&1; then
+            TARGET_TAG="${RAW_TAG#v}"
+          else
+            TARGET_TAG="$RAW_TAG"
+          fi
+
+          echo "tag=$TARGET_TAG" >> "$GITHUB_OUTPUT"
+          echo "Selected release tag: $TARGET_TAG"
+
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.resolve-tag.outputs.tag }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-installer.txt
+
+      - name: Build and verify canonical release ZIP
+        run: |
+          python -m scripts.install_url \
+            --request "https://github.com/krupakar5535Kk/typecraft-skills.git" \
+            --agent chatgpt \
+            --package-output typecraft-skills.zip \
+            --force
+
+      - name: Generate and verify SHA-256 checksum
+        run: |
+          sha256sum typecraft-skills.zip > SHA256SUMS
+          sha256sum -c SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_TAG: ${{ steps.resolve-tag.outputs.tag }}
+        run: |
+          if ! echo "$TARGET_TAG" | grep -Eq '^[a-zA-Z0-9][a-zA-Z0-9._-]*$'; then
+            echo "ERROR: Refusing to upload to invalid release tag '$TARGET_TAG'" >&2
+            exit 1
+          fi
+
+          gh release upload "$TARGET_TAG" \
+            typecraft-skills.zip SHA256SUMS \
+            --clobber
