@@ -8,14 +8,23 @@ import subprocess
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from strictyaml import load
 
-from scripts.install_url import (
-    check_destination_collision,
-    resolve_all_candidate_destinations,
-)
+try:
+    from scripts.install_url import (
+        check_destination_collision,
+        resolve_all_candidate_destinations,
+    )
+except ModuleNotFoundError:
+    from install_url import (
+        check_destination_collision,
+        resolve_all_candidate_destinations,
+    )
 
-ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "registry" / "agents.yaml"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
 SOURCE_URL = f"https://github.com/{REPOSITORY}"

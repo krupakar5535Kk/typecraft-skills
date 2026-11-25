@@ -16,6 +16,8 @@ from pathlib import Path
 from strictyaml import StrictYAMLError, load
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 REGISTRY_PATH = ROOT / "registry" / "agents.yaml"
 SKILL_SOURCE = ROOT / "skills" / "typecraft-skills"
 INSTALL_GUIDE = ROOT / "INSTALL.md"
