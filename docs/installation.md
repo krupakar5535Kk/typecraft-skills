@@ -1,119 +1,137 @@
 # TypeCraft Skills — Installation
 
-## One URL, one canonical skill
+**ONE URL. ONE SKILL. EVERY COMPATIBLE AI AGENT.**
 
-Paste this URL alone into a compatible agent:
+TypeCraft Skills is distributed as a single, canonical Agent Skill containing exactly 20 production-approved creative resources (10 typography styles and 10 design templates) located in `skills/typecraft-skills/`.
 
-`https://github.com/krupakar5535Kk/typecraft-skills.git`
+---
 
-The URL alone is an installation request. The same applies to the canonical URL
-without `.git`, including ordinary Markdown links and trailing punctuation.
-Questions about the repository are not installation requests.
+## 1. Quick Start: Install with One GitHub URL
 
-The agent must inspect [INSTALL.md](../INSTALL.md), identify its actual runtime,
-and install only `skills/typecraft-skills/`. Do not infer the product from the
-operating system, browser, repository name, or installed applications. If the
-active agent cannot supply its exact supported host ID, ask which platform to
-target; do not install to a guessed location.
+Paste the canonical repository URL into your AI agent:
 
-There is exactly one TypeCraft implementation, with 10 typography styles and
-10 design templates. Install or package its full directory, including
-`SKILL.md` and every reference. Do not execute scripts in the downloaded skill.
+```text
+https://github.com/krupakar5535Kk/typecraft-skills.git
+Install this skill.
+```
 
-## Platform routes
+The URL alone (with or without `.git` or followed by "Install this skill") signals installation intent. Tool-enabled agents with terminal and filesystem permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [INSTALL.md](../INSTALL.md), detect their active platform identity, and install the complete canonical skill atomically using TypeCraft's safe installer.
 
-The [compatibility registry](../registry/agents.yaml) records documentation
-URLs, current route, scopes, file checks, runtime checks, and outstanding user
-actions. `compatible` means the official documentation supports a route;
-`verified` requires TypeCraft installation and native runtime discovery.
-Actual skill invocation is tracked separately and is never inferred from
-discovery.
+Do not prompt the user to run terminal commands manually when the agent has execution capabilities.
 
-| Surface | Documented route and scope | Discovery and limits |
-|---|---|---|
-| Claude.ai | ZIP upload via **Customize → Skills → Create skill → Upload a skill** | Enable the uploaded skill. Available on eligible plans including Free when Code execution and file creation is enabled; organization policy may restrict it. |
-| Claude Cowork | Account-managed ZIP upload via **Customize → Skills** | Enable the skill and check it in Cowork. Paid-plan and rollout restrictions apply. |
-| Claude Code, local | Native personal `~/.claude/skills/` or project `.claude/skills/` | Check `/skills`. A local personal install does not automatically reach Cowork or remote cloud sessions. |
-| OpenAI Codex | `$skill-installer` or native `~/.agents/skills/` / project `.agents/skills/` | Check `/skills` or invoke `$typecraft-skills`; restart if needed. |
-| Cursor local Agent | Native shared `~/.agents/skills/` or project `.agents/skills/` | Check Cursor's skill picker. Personal local skills are not automatically synced to Cloud Agents. |
-| GitHub Copilot in VS Code | `gh skill install` or native project/personal skills | Historical TypeCraft 1.1.0 verification applies to VS Code Agent in GitHub Codespaces only; see the compatibility guide. |
-| GitHub Copilot CLI | Router installs to the documented `~/.copilot/skills/` or `.github/skills/` directory | TypeCraft 1.2.0 file integrity and native discovery passed at both scopes on CLI 1.0.105; one explicit skill invocation exercised the Swiss style and Cinematic Title Poster template. |
-| GitHub Copilot app | Use skills configured for a repository or Copilot CLI; manage in **Customize → Skills** | App discovery and installation are not the same as VS Code or CLI verification. |
-| GitHub Copilot cloud agent/code review | Add a project skill to the repository's documented skills directory | A personal local copy is not cloud persistence. Test a fresh cloud task separately. |
-| Gemini CLI | Native local-directory install with user or workspace scope; safe directory copy if the installed CLI lacks scoped install support | User-scope install and `gemini skills list --all` verified with Gemini CLI 0.70.0 in isolated Ubuntu CI. Review the install consent prompt. Workspace discovery requires the project to be trusted; model invocation was not tested. |
-| Google Antigravity App | Native global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Check discovery in the App. The registry does not claim TypeCraft runtime testing. |
-| Antigravity CLI | CLI-only global `~/.gemini/antigravity-cli/skills/` or workspace `.agents/skills/`; shared global alternatives are `~/.gemini/config/skills/` and `~/.gemini/skills/` | Run `/skills reload` or start a new conversation, then check for `/typecraft-skills`. TypeCraft discovery is not tested. |
-| OpenCode | Shared native `~/.agents/skills/` or `.agents/skills/` | OpenCode also reads its own directories. The shared path avoids installing a duplicate when possible; inspect all active sources. |
-| ChatGPT Skills | Create a ZIP, then use **Plugins → Plugin Directory → Skills → Create → Upload from your computer** | Available to eligible Business, Enterprise, Healthcare, and Edu users subject to workspace settings. The user must upload, wait for scanning, and confirm availability. |
-| Windsurf | No route is advertised by this project yet | The former skills documentation URL redirects to Devin documentation. Current Windsurf-specific behavior needs verification. |
+---
 
-Other `gh skill` host IDs are installer integrations only. At the time of this
-registry check, GitHub CLI 2.103.3 advertised 48 host IDs. That proves only the
-installed CLI's host list, not the platform's TypeCraft compatibility or
-runtime discovery. The router checks the actual CLI help before using it.
+## 2. Local-Agent Installation Route (CLI & Terminal Agents)
 
-## Optional local router
+When running inside an interactive terminal, local CLI agent, or reviewed checkout, run TypeCraft's authoritative collision-protected installer:
 
-From a fresh local checkout, create an isolated Python environment and install
-the required dependency before running the router:
+### Command Syntax
 
 ```bash
-python -m venv .venv
-.venv/bin/python -m pip install -r requirements-installer.txt
-.venv/bin/python -m scripts.install_url \
+# From repository root with Python environment:
+python -m scripts.install_url \
   --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
-  --agent <HOST_ID> \
+  --agent auto \
   --scope user
 ```
 
-On Windows PowerShell, substitute
-`.venv\Scripts\python.exe` for `.venv/bin/python`.
+On Windows PowerShell:
+```powershell
+python -m scripts.install_url `
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." `
+  --agent auto `
+  --scope user
+```
 
-Use `--agent auto` only when the active runtime sets `TYPECRAFT_AGENT` to its
-exact host ID. An explicit `--agent <HOST_ID>` is also supported. Unknown or
-missing identity fails closed. Use `--scope project` only when requested.
-`--json` emits the same report as machine-readable JSON.
+### Options & Flags
+- `--agent auto`: Automatically detects the host runtime from environment signals (`TYPECRAFT_AGENT` or unambiguous host signals).
+- `--agent <HOST_ID>`: Targets an explicit agent identity (e.g. `claude-code`, `gemini-cli`, `codex`, `cursor`, `antigravity`, `antigravity-cli`, `opencode`, `github-copilot`).
+- `--scope user`: Installs globally to the user's home configuration directory (default, recommended for persistence across sessions).
+- `--scope project`: Installs locally into the current repository workspace (e.g. `.claude/skills/`, `.agents/skills/`, or `.github/skills/`).
+- `--engine auto|native|vercel|gh`: Selects the installation engine. External engines (`vercel` and `gh`) are pre-checked by TypeCraft's collision guard.
+- `--force`: Authorizes replacing or updating an existing installation after explicit review.
+- `--json`: Outputs machine-readable installation status.
 
-The router compares complete source and destination trees by file SHA-256.
-Identical installs are left untouched. A different existing directory is never
-replaced without explicit approval (`--force`). Native directory updates stage
-and verify the replacement, preserve extra files, and restore the old directory
-if the replacement fails. Symlinks and unsafe paths are rejected. For
-GitHub-CLI-managed updates, the CLI's own update behavior applies; review the
-target and use `--force` only after authorizing replacement.
+### Automated Collision & Overwrite Safety
+TypeCraft checks candidate destinations before writing files:
+- **No existing copy:** Installs all 21 canonical files cleanly.
+- **Identical installation:** Detects matching SHA-256 tree; reports verified without rewriting.
+- **Modified copy:** Safely halts (`ExistingInstallationError`) to protect local user customizations unless `--force` is explicitly provided.
+- **Name collision:** Safely halts if a different skill shares the folder name.
 
-The result reports project version, actual host ID, location, file verification,
-runtime discovery, and remaining user action independently. File equality,
-the GitHub CLI inventory, and successful ZIP creation are not runtime discovery.
+---
 
-## ChatGPT package
+## 3. Browser-Based Platform Route (ChatGPT, Claude.ai, Gemini Web)
 
-The router prepares the complete canonical skill with `typecraft-skills/` at
-the ZIP root:
+Browser-based chat platforms operate in sandboxed browser environments without local terminal or filesystem access. For these platforms, download the official release package and upload it directly:
+
+- **Latest Downloadable Asset:** [typecraft-skills.zip](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/typecraft-skills.zip)
+- **Checksum Verification:** [SHA256SUMS](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/SHA256SUMS)
+
+### Local Package Generation
+You can also build the verified release archive locally from source:
 
 ```bash
 python -m scripts.install_url \
-  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git" \
   --agent chatgpt \
   --package-output ./typecraft-skills.zip
 ```
 
-It verifies ZIP integrity, exact file paths, and content hashes. The user must
-upload the archive, wait for ChatGPT's scan, and confirm installation. Account
-eligibility and workspace permissions may apply.
+The router verifies ZIP integrity, exact file paths (`typecraft-skills/` root), and content hashes.
 
-## Chat-only fallback
+### Platform Upload Steps
+- **ChatGPT Web:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach the ZIP / `SKILL.md` to **Custom GPT → Knowledge**). Availability is subject to workspace plan and policy.
+- **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**). Enable the skill after upload.
+- **Gemini Web:** Attach `typecraft-skills/SKILL.md` to your conversation or embed it into a **Custom Gem**.
 
-When persistent installation is not supported, state that explicitly. If the
-agent can read the entire canonical directory, it may use it for the current
-conversation only. Never report that as a persistent install.
+---
 
-## Maintainer multi-target utility
+## 4. Platform Evaluation Stages & Compatibility Matrix
 
-`scripts/install.py` is for maintainers intentionally targeting GitHub CLI
-hosts, not the URL-first current-agent flow. Preview before installing:
+To prevent misleading claims, TypeCraft strictly separates four lifecycle stages:
+1. **Installation** — Files copied to a documented native directory or archive uploaded.
+2. **Discovery** — The platform's native skill catalog affirmatively indexes TypeCraft (`copilot skill list`, `gemini skills list`, `/skills` in Claude Code, `$skill-installer` in Codex).
+3. **Invocation** — The agent model actually accesses, parses, and applies TypeCraft typography styles or design templates in a real creative task.
+4. **Persistence** — Availability across fresh, independent conversations without reinstallation.
+
+### Status Definitions
+- **verified** — TypeCraft files were installed and the platform itself discovered the skill in the recorded environment.
+- **compatible** — Official product documentation establishes a supported Agent Skills format and route; full end-to-end model invocation is unverified.
+- **research_required** — Product support, installation paths, or runtime behavior is unconfirmed.
+- **unsupported** — No persistent installation route is available.
+
+### Platform Summary Matrix
+
+| Platform Surface | Status | Documented Route & Scope | File Verification | Native Discovery | Model Invocation | Persistence |
+|---|---|---|---|---|---|---|
+| **GitHub Copilot CLI** | **verified** | `~/.copilot/skills/` or `.github/skills/` | Verified: 21/21 files SHA-256 matched | Verified (`copilot skill list --json`) in CLI 1.0.105 & 1.0.114 | Verified: Swiss Style & Cinematic Poster exercised | User & project directory |
+| **GitHub Copilot VS Code Agent** | **verified** | GitHub CLI managed (`~/.copilot/skills/`) | Verified: 21/21 files matched | Verified in VS Code Agent in Codespaces | Verified (historical v1.1.0 Codespaces session) | User scope in Codespaces |
+| **Gemini CLI** | **verified** | `~/.gemini/skills/` or `.gemini/skills/` | Verified: 21/21 files SHA-256 matched | Verified (`gemini skills list --all` in v0.70.0 & v0.71.1) | Not verified (headless execution blocked by interactive browser OAuth) | User directory |
+| **OpenAI Codex** | **compatible** | `~/.agents/skills/` or `~/.codex/skills/` | Verified in test suite (21/21 files matched) | Native index and bundled `$skill-installer` registered | Not verified (live CLI execution blocked by upstream account usage quota limit) | User directory |
+| **Claude Code, local** | **compatible** | `~/.claude/skills/` or `.claude/skills/` | Isolated installer & SHA-256 verified | Documented (`/skills`); user-reported discovery observed | Not tested | User directory |
+| **Cursor local Agent** | **compatible** | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (Cursor Features > Skills panel) | Not tested | User directory |
+| **Google Antigravity App** | **compatible** | Global `~/.gemini/config/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented in App skill catalog | Not tested | Global config |
+| **Antigravity CLI** | **compatible** | `~/.gemini/antigravity-cli/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (`/skills reload`) | Not tested | User directory |
+| **OpenCode** | **compatible** | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (`opencode skills list`) | Not tested | User directory |
+| **ChatGPT Skills** | **compatible** | Release ZIP upload via Plugin Directory | Package integrity tests pass locally | User action required to upload and confirm | Not tested | Workspace-managed |
+| **Claude.ai / Cowork** | **compatible** | Release ZIP upload via Customize → Skills | Package integrity tests pass locally | User action required to upload and enable | Not tested | Account-managed |
+| **Windsurf** | **research_required** | Unconfirmed | Not tested | Former URL redirects to Devin docs | Not tested | Unconfirmed |
+
+See the complete [Compatibility Guide](compatibility.md) for detailed audit logs and recorded evidence.
+
+---
+
+## 5. Maintainer Multi-Target Utility
+
+Maintainers testing GitHub CLI host targets across multiple platforms can use `scripts/install.py`:
 
 ```bash
-python -m scripts.install --list
+# Preview all 48 advertised GitHub CLI host targets:
 python -m scripts.install --all --scope user --dry-run
+
+# Install selected targets:
+python -m scripts.install --agent claude-code --agent cursor --scope user
 ```
+
+Use `--force` only when you explicitly intend to overwrite an existing installation.

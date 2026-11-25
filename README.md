@@ -78,33 +78,76 @@ Explicit user choices must never be silently overridden.
 
 ## Installation
 
-### Install with one GitHub URL
+### 1. Install with one URL (Autonomous AI Coding Agents)
 
-**Paste this repository URL into a compatible agent:**
+**Paste this repository URL into your AI agent:**
 
-`https://github.com/krupakar5535Kk/typecraft-skills.git`
+```text
+https://github.com/krupakar5535Kk/typecraft-skills.git
+Install this skill.
+```
 
 The URL by itself is an installation request. The same applies when it is followed by a request such as “Install this skill.” A compatible agent should inspect this repository, read [BOOTSTRAP.md](BOOTSTRAP.md) and [INSTALL.md](INSTALL.md), identify its actual platform, install the complete canonical skill using TypeCraft's safe installer, and check the platform's own discovery mechanism. Do not infer the platform from the repository, operating system, or installed applications.
 
-**Collision Safety:**
-TypeCraft enforces automated pre-installation collision detection. It will never silently overwrite modified local files or unrelated skills. Raw commands like `npx skills add ... --yes` bypass collision protection and are strictly prohibited in the default workflow.
+### 2. Local-Agent Installation Route (CLI & Terminal Agents)
 
 When a reviewed checkout and local terminal are available, the authoritative installer is:
 
-`python -m scripts.install_url --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." --agent auto`
+```bash
+python -m scripts.install_url \
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." \
+  --agent auto \
+  --scope user
+```
 
-`--agent auto` uses `TYPECRAFT_AGENT` or unambiguous host runtime signals. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. You can also specify an engine: `--engine auto`, `--engine native`, `--engine vercel`, or `--engine gh`. Use `--agent chatgpt --package-output /tmp/typecraft-skills.zip` to prepare a package for manual upload.
+`--agent auto` uses `TYPECRAFT_AGENT` or unambiguous host runtime signals. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. You can also specify an agent explicitly (`--agent claude-code`, `--agent gemini-cli`, `--agent codex`, `--agent cursor`, `--agent antigravity`, etc.) or choose an installation engine: `--engine auto`, `--engine native`, `--engine vercel`, or `--engine gh`.
 
-**Platform notes:**
+**Collision & Overwrite Safety:**
+TypeCraft enforces automated pre-installation collision detection. It will never silently overwrite modified local files or unrelated skills. Raw commands like `npx skills add ... --yes` bypass collision protection and are strictly prohibited in the default workflow. Use `--force` only when you explicitly intend to overwrite an existing installation after review.
 
-- Claude.ai, Claude Cowork, Claude Code local, Codex, Cursor, Gemini CLI, OpenCode, and the Antigravity App and CLI have documentation-backed routes. Claude.ai and Cowork use an account-managed ZIP upload; Claude Code also has local directories and supported account skill sync. Antigravity App and CLI are separate targets: the App uses `~/.gemini/config/skills/`, while the CLI-specific user directory is `~/.gemini/antigravity-cli/skills/`; both support project `.agents/skills/`.
-- GitHub Copilot's VS Code, CLI, app, and cloud-agent surfaces are separate. VS Code Agent in GitHub Codespaces and Copilot CLI 1.0.105 have TypeCraft install, discovery, and invocation evidence; Gemini CLI has user-scope install/discovery evidence without a model invocation.
-- GitHub CLI provides a preview installer for its documented host IDs. Its supported-target list does not mean TypeCraft has been installed or discovered in every host.
-- ChatGPT Skills uses its own ZIP upload and workspace-eligibility flow. Upload and installation confirmation remain user actions.
-- Windsurf's former skills documentation URL redirects to Devin documentation; the current Windsurf-specific route remains unverified.
-- Chat-only agents without persistent installation access can use the canonical files for the current conversation only.
+### 3. Browser-Based Platform Route (ChatGPT, Claude.ai, Gemini Web)
 
-See [INSTALL.md](INSTALL.md) for host detection, installation, safety, and verification requirements.
+Browser-based chat platforms operate in sandboxed browser environments without local terminal or filesystem access. For these platforms, download the official release package and upload it directly:
+
+- **Latest Downloadable Asset:** [typecraft-skills.zip](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/typecraft-skills.zip)
+- **Checksum Verification:** [SHA256SUMS](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/SHA256SUMS)
+
+You can also package the canonical skill locally:
+
+```bash
+python -m scripts.install_url \
+  --request "https://github.com/krupakar5535Kk/typecraft-skills.git" \
+  --agent chatgpt \
+  --package-output ./typecraft-skills.zip
+```
+
+**Platform Upload Steps:**
+- **ChatGPT:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach to **Custom GPT → Knowledge**).
+- **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**).
+- **Gemini Web:** Attach `typecraft-skills/SKILL.md` to your conversation or embed it in a **Custom Gem**.
+
+### Platform Evaluation Stages & Compatibility
+
+TypeCraft strictly distinguishes between four lifecycle stages:
+- **Installation:** Files copied to a documented native directory or archive uploaded.
+- **Discovery:** The platform's native skill catalog affirmatively indexes TypeCraft (`copilot skill list`, `gemini skills list`, `/skills` in Claude Code, `$skill-installer` in Codex).
+- **Invocation:** The agent model actually accesses and applies TypeCraft typography styles or design templates in a real task.
+- **Persistence:** Availability across fresh, independent conversations without reinstallation.
+
+| Surface | Status | Route | Verified Evidence |
+|---|---|---|---|
+| **GitHub Copilot CLI** | **verified** | Native directory (`~/.copilot/skills/`) | Full installation, discovery (`copilot skill list`), and model invocation verified on CLI 1.0.105 & 1.0.114. |
+| **GitHub Copilot VS Code Agent** | **verified** | GitHub CLI managed (`~/.copilot/skills/`) | Historical installation, discovery, and invocation verified in GitHub Codespaces (v1.1.0). |
+| **Gemini CLI** | **verified** | Native directory (`~/.gemini/skills/`) | User-scope installation and native discovery verified via `gemini skills list --all`; live model invocation blocked by headless OAuth requirement. |
+| **OpenAI Codex** | **compatible** | Native directories (`~/.agents/skills/`, `~/.codex/skills/`) | Native paths and bundled `$skill-installer` registered; live invocation blocked by upstream ChatGPT account usage limit. |
+| **Claude Code CLI** | **compatible** | Native directory (`~/.claude/skills/`) | Route documented; user-reported discovery observed; end-to-end model invocation unverified in CI. |
+| **Cursor IDE** | **compatible** | Shared directory (`~/.agents/skills/`) | Route documented; local user skills do not automatically sync to Cloud Agents. |
+| **Google Antigravity App / CLI** | **compatible** | Native directories (`~/.gemini/config/skills/`, `~/.gemini/antigravity-cli/skills/`) | Documented native routes; App catalog & CLI `/skills reload` supported. |
+| **OpenCode** | **compatible** | Shared directory (`~/.agents/skills/`) | Documented native routes across multiple directories. |
+| **ChatGPT / Claude.ai / Cowork** | **compatible** | Release ZIP upload | Verified local packaging; upload, scan, and confirmation require user action and workspace eligibility. |
+| **Windsurf** | **research_required** | Unconfirmed | Former documentation URL redirects to Devin; native route unconfirmed. |
+
+See the complete [Compatibility Guide](docs/compatibility.md) and [Installation Guide](docs/installation.md) for full audit records and evidence.
 
 ### Maintainer: install for GitHub CLI targets
 
@@ -169,13 +212,11 @@ See the [Installation Guide](docs/installation.md) for installation instructions
 TypeCraft uses a tool-independent architecture with tool-aware execution.
 
 Compatibility is surface-specific. Official documentation-backed routes are
-not the same as a tested installation, and neither a file copy nor installer
-inventory is proof of runtime discovery. The only recorded TypeCraft runtime
-verification is GitHub Copilot Agent mode in Visual Studio Code running in
-GitHub Codespaces. See the [Compatibility Guide](docs/compatibility.md) for
-statuses, evidence, and remaining work.
-
-See the [Compatibility Guide](docs/compatibility.md).
+distinct from tested installations, and neither a file copy nor installer
+inventory is proof of runtime discovery or model invocation. TypeCraft
+independently tracks Installation, Discovery, Invocation, and Persistence.
+See the [Compatibility Guide](docs/compatibility.md) for complete statuses,
+recorded evidence, and evaluation matrices.
 
 ## Usage
 
