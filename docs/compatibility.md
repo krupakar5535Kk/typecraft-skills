@@ -32,13 +32,13 @@ verification stages; a successful skill listing does not establish invocation.
 | Platform surface | Status | Documented install | File verification | Runtime discovery |
 |---|---|---|---|---|
 | Claude Code, local | compatible | `~/.claude/skills/` or `.claude/skills/` | Not tested in this environment | Not tested. A user reported that an existing local copy was listed and its full `SKILL.md` read; source equality and version were not checked. |
-| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested |
+| OpenAI Codex | compatible | Codex `$skill-installer`; `~/.agents/skills/` or `~/.codex/skills/` | Verified in test suite (21/21 files SHA-256 matched) | Native index in `~/.agents/skills/` and `$CODEX_HOME/skills` documented and confirmed via bundled `skill-installer`; live CLI invocation blocked by account quota limit. |
 | GitHub Copilot, VS Code Agent in Codespaces | verified | GitHub CLI managed; user scope | Verified: `SKILL.md` and 20 references | Verified in one fresh VS Code Agent session |
 | GitHub Copilot CLI | verified | `~/.copilot/skills/` or project `.github/skills/` | Verified at both scopes; 20 reference files match the canonical tree | Verified with `copilot skill list --json`; one actual CLI invocation exercised Swiss International Typographic Style and Cinematic Title Poster |
 | GitHub Copilot app | compatible | Skills configured for repositories or Copilot CLI; manage in app UI | Not tested | Not tested |
 | GitHub Copilot cloud agent and code review | compatible | Project skill in the repository | Not tested | Not tested in a fresh cloud task |
 | Cursor local Agent | compatible | Shared `~/.agents/skills/` or `.agents/skills/` | Not tested | Not tested. Local user skills do not automatically sync to Cloud Agents. |
-| Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI 0.70.0; no model invocation |
+| Gemini CLI | verified | Native local-directory install; user or workspace scope | Verified: all files and 20 references matched by SHA-256 in user scope | Verified by `gemini skills list --all` in Gemini CLI (v0.70.0 and v0.71.1); live automated invocation blocked by interactive browser OAuth requirement in headless shell |
 | Claude.ai | compatible | Upload ZIP through **Customize → Skills → Create skill → Upload a skill** | Package integrity tests pass locally; no Claude upload test | Not verified; user must enable after upload. Official docs include Free plans with Code execution and file creation enabled. |
 | Claude Cowork | compatible | Same account-managed ZIP upload via **Customize → Skills** | Package integrity tests pass locally; no Cowork upload test | Not verified; paid-plan and rollout requirements apply. |
 | Google Antigravity App | compatible | Global `~/.gemini/config/skills/` or workspace `.agents/skills/` | Not tested | Not tested in the App |
@@ -60,7 +60,7 @@ explicitly marked **verified** have TypeCraft runtime discovery evidence.
 | `github-copilot` | GitHub Copilot | verified | GitHub CLI-managed route; actual installation tested | VS Code Agent in Codespaces; see evidence below |
 | `claude-code` | Claude Code | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
 | `cursor` | Cursor | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
-| `codex` | OpenAI Codex | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
+| `codex` | OpenAI Codex | compatible | Native directories `~/.agents/skills` and `~/.codex/skills`; isolated installer/file-integrity tests | Official route documented; alternate $CODEX_HOME/skills path registered; live runtime quota limited |
 | `gemini-cli` | Gemini CLI | verified | Native CLI; isolated installer/file-integrity test | Native installation and discovery; see evidence below |
 | `antigravity` | Google Antigravity App | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |
 | `antigravity-cli` | Antigravity CLI | compatible | Native directory; isolated installer/file-integrity tests | Official route documented; TypeCraft runtime not tested |

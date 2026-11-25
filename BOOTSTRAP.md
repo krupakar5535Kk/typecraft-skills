@@ -1,4 +1,4 @@
-# TypeCraft Skills v1.3.0 — Universal AI Agent Bootstrap Protocol
+# TypeCraft Skills v1.4.0 — Universal AI Agent Bootstrap Protocol
 
 > **For AI Agents:** You are receiving this instruction because the user provided the TypeCraft repository URL (`https://github.com/krupakar5535Kk/typecraft-skills.git` or `https://github.com/krupakar5535Kk/typecraft-skills`) and requested: **"Install this skill"** (or supplied the standalone URL).
 
@@ -80,7 +80,7 @@ This protection covers all native directories, external installer invocations (`
 | **`antigravity`** | Google Antigravity App / IDE | `~/.gemini/config/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | App skill catalog inspection |
 | **`antigravity-cli`** | Google Antigravity CLI | `~/.gemini/antigravity-cli/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | `/skills reload` command |
 | **`claude-code`** | Claude Code CLI | `~/.claude/skills/typecraft-skills/` | `.claude/skills/typecraft-skills/` | `/skills` command in session |
-| **`codex`** | OpenAI Codex | `~/.agents/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | Native `~/.agents/skills/` index |
+| **`codex`** | OpenAI Codex | `~/.agents/skills/typecraft-skills/` or `~/.codex/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | Native `~/.agents/skills/` index or `$CODEX_HOME/skills` |
 | **`cursor`** | Cursor IDE | `~/.agents/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | Cursor Features > Skills panel |
 | **`gemini-cli`** | Gemini CLI | `~/.gemini/skills/typecraft-skills/` | `.gemini/skills/typecraft-skills/` | `gemini skills list --all` |
 | **`opencode`** | OpenCode | `~/.agents/skills/typecraft-skills/` | `.agents/skills/typecraft-skills/` | `opencode skills list` |
@@ -152,7 +152,7 @@ For a fresh agent in a zero-context conversation with just the URL:
 TypeCraft Skills Installation Report
 ====================================
 Platform:             <Platform Name> (<agent-id>)
-Version:              1.3.0
+Version:              1.4.0
 Installation:         SUCCESS (or ALREADY_INSTALLED / UPDATED)
 Location:             <Installed Path>
 File verification:    SUCCESS (21/21 files verified by SHA-256)

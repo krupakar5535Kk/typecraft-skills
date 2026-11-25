@@ -45,7 +45,8 @@ its documented skill directory. The registry records surface-specific details.
   execution and file creation is enabled; Cowork requires an eligible paid
   plan. Organization policies may restrict uploads.
 - **Codex:** use its `$skill-installer` when available, or
-  `~/.agents/skills/` / project `.agents/skills/`.
+  `~/.agents/skills/` / `$CODEX_HOME/skills` (`~/.codex/skills/`) or project
+  `.agents/skills/` / `.codex/skills/`.
 - **Cursor local:** use the documented shared `.agents/skills` location.
   Local personal skills do not automatically sync to Cloud Agents.
 - **Copilot VS Code, CLI, app, and cloud agent:** treat these as separate

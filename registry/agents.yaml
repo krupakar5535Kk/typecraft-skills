@@ -1,5 +1,5 @@
 # TypeCraft Universal Agent Compatibility Registry
-# Version: 1.3.0
+# Version: 1.4.0
 #
 # This registry separates:
 # - installer availability
@@ -10,7 +10,7 @@
 # and skill-discovery test.
 
 registry_version: "1.2"
-project_version: "1.3.0"
+project_version: "1.4.0"
 canonical_skill:
   name: typecraft-skills
   path: skills/typecraft-skills
@@ -787,6 +787,11 @@ native_adapters:
     scope_paths:
       user: ~/.agents/skills
       project: .agents/skills
+    alternate_scope_paths:
+      user:
+        - ~/.codex/skills
+      project:
+        - .codex/skills
     evidence: https://learn.chatgpt.com/docs/build-skills
   cursor:
     platform: cursor

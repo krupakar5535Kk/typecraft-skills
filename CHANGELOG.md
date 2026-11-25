@@ -4,20 +4,25 @@ All notable changes to TypeCraft Skills are documented here.
 
 This project follows Semantic Versioning.
 
-## [Unreleased]
+## [1.4.0] - 2026-11-25
 
-### Installation and Compatibility
+### Cross-Platform Ecosystem & Multi-Platform Acceptance
 
-- Added the documented Antigravity CLI native skill paths while keeping its
-  user-scope adapter distinct from the Antigravity App.
-- Documented CLI `/skills reload` discovery steps without claiming TypeCraft
-  runtime verification.
-- Added distinct Claude.ai and Claude Cowork ZIP-upload routes, including
-  current plan and account-policy prerequisites.
-- Added Copilot CLI native discovery verification and real project/user
-  installation plus invocation evidence for TypeCraft 1.2.0.
-- Clarified virtual-environment setup and dependency installation for fresh
-  local router checkouts.
+- Distinct `antigravity-cli` runtime signal (`AGY_CLI`) separated from `antigravity` app.
+- Registered native `$CODEX_HOME/skills` (`~/.codex/skills`) in OpenAI Codex candidate destinations based on primary evidence from bundled `skill-installer`.
+- Completed comprehensive multi-platform acceptance campaign with 7-stage verification across coding agents (Antigravity App/CLI, Gemini CLI, OpenAI Codex CLI, Claude Code, Cursor, OpenCode, GitHub Copilot) and browser platforms (ChatGPT Web, Claude Web Free, Gemini Web).
+- Extended test suite with automated regression coverage.
+
+## [1.3.0] - 2026-11-25
+
+### Authoritative Universal URL-First Installation
+
+- Implemented authoritative universal URL-first entry point (`BOOTSTRAP.md` and `AGENTS.md`).
+- Automated pre-execution collision protection across native, Vercel, and GitHub CLI flows preventing silent overwrite of user customizations.
+- Hardened `scripts/install.py` with repository-root `sys.path` injection for direct script execution across Windows, macOS, and Linux.
+- Added documented Antigravity CLI native skill paths while keeping its user-scope adapter distinct from the Antigravity App.
+- Added distinct Claude.ai and Claude Cowork ZIP-upload routes.
+- Verified 59 unit tests and all repository validators across Ubuntu, macOS, and Windows CI.
 
 ## [1.2.0] - 2026-11-24
 

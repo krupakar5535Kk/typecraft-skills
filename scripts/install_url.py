@@ -23,11 +23,12 @@ SKILL_SOURCE = ROOT / "skills" / "typecraft-skills"
 INSTALL_GUIDE = ROOT / "INSTALL.md"
 SKILL_NAME = "typecraft-skills"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
-PROJECT_VERSION = "1.3.0"
+PROJECT_VERSION = "1.4.0"
 SOURCE_GIT_URL = f"https://github.com/{REPOSITORY}.git"
 
 AGENT_SIGNALS = {
-    "antigravity": ("AGY_VERSION", "AGY_ACCOUNT", "ANTIGRAVITY", "AGY_CLI"),
+    "antigravity": ("AGY_VERSION", "AGY_ACCOUNT", "ANTIGRAVITY"),
+    "antigravity-cli": ("AGY_CLI",),
     "claude-code": ("CLAUDE_CODE", "CLAUDE_AGENT", "CLAUDE_PROJECT_DIR"),
     "codex": ("CODEX", "OPENAI_CODEX"),
     "cursor": ("CURSOR_AGENT", "CURSOR_IDE"),
