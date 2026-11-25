@@ -8,9 +8,23 @@ import subprocess
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from strictyaml import load
 
-ROOT = Path(__file__).resolve().parent.parent
+try:
+    from scripts.install_url import (
+        check_destination_collision,
+        resolve_all_candidate_destinations,
+    )
+except ModuleNotFoundError:
+    from install_url import (
+        check_destination_collision,
+        resolve_all_candidate_destinations,
+    )
+
 REGISTRY = ROOT / "registry" / "agents.yaml"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
 SOURCE_URL = f"https://github.com/{REPOSITORY}"
@@ -309,6 +323,21 @@ def main():
         if args.force and existing_path and existing_path in processed_paths:
             print(f"\nSKIPPED: {agent} — shared directory already processed")
             skipped.append(agent)
+            continue
+
+        # Check physical on-disk collision before invoking external installer
+        candidates = resolve_all_candidate_destinations(agent, args.scope)
+        try:
+            status, exist_path = check_destination_collision(
+                candidates, overwrite=args.force
+            )
+            if status == "identical" and not args.force:
+                print(f"\nSKIPPED: {agent} — already installed and verified identical ({exist_path})")
+                skipped.append(agent)
+                continue
+        except Exception as exc:
+            print(f"\nCOLLISION: {agent} — {exc}")
+            failed.append(agent)
             continue
 
         command = [

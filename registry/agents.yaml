@@ -1,5 +1,5 @@
 # TypeCraft Universal Agent Compatibility Registry
-# Version: 1.2.0
+# Version: 1.3.0
 #
 # This registry separates:
 # - installer availability
@@ -9,8 +9,8 @@
 # Never mark a platform Verified without an actual installation
 # and skill-discovery test.
 
-registry_version: "1.1"
-project_version: "1.2.0"
+registry_version: "1.2"
+project_version: "1.3.0"
 canonical_skill:
   name: typecraft-skills
   path: skills/typecraft-skills

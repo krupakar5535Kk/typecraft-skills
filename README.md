@@ -84,16 +84,16 @@ Explicit user choices must never be silently overridden.
 
 `https://github.com/krupakar5535Kk/typecraft-skills.git`
 
-The URL by itself is an installation request. The same applies when it is followed by a request such as “Install this skill.” A compatible agent should inspect this repository, read [INSTALL.md](INSTALL.md), identify its actual platform, install the complete canonical skill, and check the platform's own discovery mechanism. Do not infer the platform from the repository, operating system, or installed applications.
+The URL by itself is an installation request. The same applies when it is followed by a request such as “Install this skill.” A compatible agent should inspect this repository, read [BOOTSTRAP.md](BOOTSTRAP.md) and [INSTALL.md](INSTALL.md), identify its actual platform, install the complete canonical skill using TypeCraft's safe installer, and check the platform's own discovery mechanism. Do not infer the platform from the repository, operating system, or installed applications.
 
-The flow requires repository access and, for persistent local installation, filesystem access and permission to write to the documented skill location. Claude.ai, Claude Cowork, and ChatGPT use product-specific skill upload and confirmation flows; packaging is not installation. Chat-only environments without persistent installation access can use the files in the current conversation only; they must not claim a persistent installation.
+**Collision Safety:**
+TypeCraft enforces automated pre-installation collision detection. It will never silently overwrite modified local files or unrelated skills. Raw commands like `npx skills add ... --yes` bypass collision protection and are strictly prohibited in the default workflow.
 
-When a reviewed checkout and local terminal are available, the optional router
-is:
+When a reviewed checkout and local terminal are available, the authoritative installer is:
 
 `python -m scripts.install_url --request "https://github.com/krupakar5535Kk/typecraft-skills.git Install this skill." --agent auto`
 
-`--agent auto` uses `TYPECRAFT_AGENT` supplied by the active runtime. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. Use `--agent chatgpt --package-output /tmp/typecraft-skills.zip` to prepare a package for manual upload.
+`--agent auto` uses `TYPECRAFT_AGENT` or unambiguous host runtime signals. If the host identity is unavailable, the command stops and asks for an explicit host ID instead of guessing. You can also specify an engine: `--engine auto`, `--engine native`, `--engine vercel`, or `--engine gh`. Use `--agent chatgpt --package-output /tmp/typecraft-skills.zip` to prepare a package for manual upload.
 
 **Platform notes:**
 

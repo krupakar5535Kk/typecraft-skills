@@ -122,10 +122,19 @@ python -m scripts.install_url \
 
 The router inspects this guide, verifies the complete source tree and compares
 files by SHA-256. It rejects symlinks and unsafe paths, stages local directory
-installs, and restores the previous directory if replacement fails. Identical
-installs are not rewritten. A different or incomplete installation requires
-explicit approval via `--force`; local directory updates preserve extra files.
-Do not use `--force` to replace content without reviewing the target.
+installs, and restores the previous directory if replacement fails.
+
+### Collision Protection Table
+
+| Existing Target State | Required Behavior |
+|---|---|
+| No installation | Install all 21 canonical files normally |
+| Identical installation | Report already installed and verified without overwriting |
+| Modified TypeCraft copy | Stop safely with `ExistingInstallationError`; protect user changes |
+| Different skill with same name | Stop safely with `ExistingInstallationError`; refuse to clobber |
+| Explicit overwrite requested | Require explicit `--force` flag with user authorization |
+
+**Warning on External Package Managers:** Direct raw execution of `npx skills add ... --yes` bypasses collision checks and silently destroys modified files. Always invoke external engines through TypeCraft's installer (`--engine vercel` or `--engine gh`) to ensure pre-execution collision checks always run. Do not use `--force` to replace content without reviewing the target.
 
 ## Report installation and discovery separately
 
