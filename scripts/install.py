@@ -10,6 +10,11 @@ from pathlib import Path
 
 from strictyaml import load
 
+from scripts.install_url import (
+    check_destination_collision,
+    resolve_all_candidate_destinations,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "registry" / "agents.yaml"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
@@ -309,6 +314,21 @@ def main():
         if args.force and existing_path and existing_path in processed_paths:
             print(f"\nSKIPPED: {agent} — shared directory already processed")
             skipped.append(agent)
+            continue
+
+        # Check physical on-disk collision before invoking external installer
+        candidates = resolve_all_candidate_destinations(agent, args.scope)
+        try:
+            status, exist_path = check_destination_collision(
+                candidates, overwrite=args.force
+            )
+            if status == "identical" and not args.force:
+                print(f"\nSKIPPED: {agent} — already installed and verified identical ({exist_path})")
+                skipped.append(agent)
+                continue
+        except Exception as exc:
+            print(f"\nCOLLISION: {agent} — {exc}")
+            failed.append(agent)
             continue
 
         command = [

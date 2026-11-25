@@ -21,7 +21,18 @@ SKILL_SOURCE = ROOT / "skills" / "typecraft-skills"
 INSTALL_GUIDE = ROOT / "INSTALL.md"
 SKILL_NAME = "typecraft-skills"
 REPOSITORY = "krupakar5535Kk/typecraft-skills"
-PROJECT_VERSION = "1.2.0"
+PROJECT_VERSION = "1.3.0"
+SOURCE_GIT_URL = f"https://github.com/{REPOSITORY}.git"
+
+AGENT_SIGNALS = {
+    "antigravity": ("AGY_VERSION", "AGY_ACCOUNT", "ANTIGRAVITY", "AGY_CLI"),
+    "claude-code": ("CLAUDE_CODE", "CLAUDE_AGENT", "CLAUDE_PROJECT_DIR"),
+    "codex": ("CODEX", "OPENAI_CODEX"),
+    "cursor": ("CURSOR_AGENT", "CURSOR_IDE"),
+    "gemini-cli": ("GEMINI_CLI",),
+    "opencode": ("OPENCODE", "OPENCODE_DIR"),
+    "github-copilot": ("GITHUB_COPILOT", "COPILOT_AGENT"),
+}
 
 URL_PATTERN = re.compile(
     r"https://github\.com/krupakar5535Kk/typecraft-skills(?:\.git)?/?"
@@ -109,9 +120,16 @@ def detect_platform(env=None):
     """Resolve an explicit host identity supplied by the running agent."""
     variables = os.environ if env is None else env
     value = variables.get("TYPECRAFT_AGENT", "").strip().lower()
-    if not value or value == "auto":
-        return None
-    return value
+    if value and value != "auto":
+        return value
+    matched = [
+        agent_id
+        for agent_id, signals in AGENT_SIGNALS.items()
+        if any(variables.get(sig) for sig in signals)
+    ]
+    if len(matched) == 1:
+        return matched[0]
+    return None
 
 
 def get_route(platform, registry):
@@ -378,6 +396,87 @@ def resolve_native_destination(
     )[0]
 
 
+def resolve_all_candidate_destinations(
+    platform, scope, registry=None, project_root=None, home=None
+):
+    registry = load_registry() if registry is None else registry
+    destinations = []
+    seen = set()
+
+    def add_destination(dest):
+        if dest is not None:
+            key = os.path.normcase(str(dest))
+            if key not in seen:
+                destinations.append(dest)
+                seen.add(key)
+
+    if platform in registry.get("native_adapters", {}):
+        try:
+            for dest in resolve_native_destinations(
+                platform, scope, registry, project_root=project_root, home=home
+            ):
+                add_destination(dest)
+        except InstallationError:
+            pass
+
+    platform_record = registry.get("platforms", {}).get(
+        platform,
+        registry.get("platforms", {}).get(platform.replace("-", "_"), {}),
+    )
+    scope_dir = platform_record.get("installation", {}).get(f"{scope}_scope_directory")
+    if scope_dir:
+        try:
+            add_destination(_resolve_scope_path(scope_dir, project_root=project_root, home=home))
+        except InstallationError:
+            pass
+
+    try:
+        shared_scope = "~/.agents/skills" if scope == "user" else ".agents/skills"
+        add_destination(_resolve_scope_path(shared_scope, project_root=project_root, home=home))
+    except InstallationError:
+        pass
+
+    return destinations
+
+
+def check_destination_collision(destinations, source=SKILL_SOURCE, overwrite=False):
+    """
+    Check candidate destinations for existing installations.
+    Returns:
+      ('none', None) - no existing installation
+      ('identical', path) - verified identical TypeCraft installation
+      ('modified', path) - modified TypeCraft installation (raised if not overwrite)
+      ('different', path) - different skill or file (raised if not overwrite)
+    """
+    source, _ = _skill_files(source)
+    for destination in destinations:
+        p = Path(destination).expanduser()
+        if not p.exists():
+            continue
+        if p.is_symlink():
+            if not overwrite:
+                raise ExistingInstallationError(
+                    f"Refusing to interact with a symlinked installation: {p}"
+                )
+            return "different", p
+        if verify_skill_tree(source, p):
+            return "identical", p
+        if _is_typecraft_copy(p):
+            if not overwrite:
+                raise ExistingInstallationError(
+                    f"A TypeCraft copy at {p} differs from the current source (update available). "
+                    "Review it, then use --force to merge the update; extra files will be preserved."
+                )
+            return "modified", p
+        if not overwrite:
+            raise ExistingInstallationError(
+                f"Different or incomplete skill already exists at {p}; "
+                "request explicit overwrite approval before using --force."
+            )
+        return "different", p
+    return "none", None
+
+
 def package_skill(source, output, overwrite=False):
     source, files = _skill_files(source)
     output = Path(output).expanduser()
@@ -538,7 +637,7 @@ def _manifest_signature(text, metadata_source=None):
 
 
 def _install_with_github_cli(
-    platform, scope, source, overwrite, version, project_root=None
+    platform, scope, source, overwrite, version, project_root=None, home=None, registry=None
 ):
     if not shutil.which("gh"):
         raise InstallationError(
@@ -566,6 +665,30 @@ def _install_with_github_cli(
         raise InstallationError(
             f"The installed GitHub CLI does not advertise support for {platform}."
         )
+
+    # Pre-execution physical disk collision check for project scope or isolated home
+    if scope == "project" or home is not None:
+        candidates = resolve_all_candidate_destinations(
+            platform, scope, registry=registry, project_root=project_root, home=home
+        )
+        for dest in candidates:
+            p = Path(dest).expanduser()
+            if not p.exists():
+                continue
+            if p.is_symlink() and not overwrite:
+                raise ExistingInstallationError(
+                    f"Refusing to interact with a symlinked installation: {p}"
+                )
+            if not verify_skill_tree(source, p) and not overwrite:
+                if _is_typecraft_copy(p):
+                    raise ExistingInstallationError(
+                        f"A TypeCraft copy at {p} differs from the current source (update available). "
+                        "Review it, then use --force to merge the update; extra files will be preserved."
+                    )
+                raise ExistingInstallationError(
+                    f"Different or incomplete skill already exists at {p}; "
+                    "request explicit overwrite approval before using --force."
+                )
 
     rows = _load_gh_inventory(platform, scope, cwd=cwd)
     existing = _matching_rows(rows, platform, scope)
@@ -621,6 +744,88 @@ def _install_with_github_cli(
         installed.get("path", ""),
         "SUCCESS", "NOT_VERIFIED", "Check the platform's own skill list.",
         "The CLI inventory and complete reference-file set were verified.",
+        version,
+    )
+
+
+def _install_with_vercel_cli(
+    platform, scope, source, overwrite, version, project_root=None, home=None, registry=None
+):
+    candidates = resolve_all_candidate_destinations(
+        platform, scope, registry=registry, project_root=project_root, home=home
+    )
+    status, exist_path = check_destination_collision(
+        candidates, source=source, overwrite=overwrite
+    )
+    if status == "identical" and not overwrite:
+        discovery, message = _verify_native_discovery(
+            platform, cwd=project_root if scope == "project" else None, destination=exist_path
+        )
+        return InstallResult(
+            platform,
+            "ALREADY_INSTALLED" if discovery == "VERIFIED" else "FILES_ALREADY_PRESENT_DISCOVERY_UNVERIFIED",
+            str(exist_path),
+            "SUCCESS",
+            discovery,
+            "None" if discovery == "VERIFIED" else "Check the platform's own skill list.",
+            f"TypeCraft is already installed and verified identical at {exist_path}.",
+            version,
+        )
+
+    if not shutil.which("npx"):
+        raise InstallationError("Vercel Skills CLI (npx) is unavailable on PATH.")
+
+    cwd = project_root if scope == "project" else None
+    command = [
+        "npx", "skills", "add",
+        SOURCE_GIT_URL,
+        "--skill", SKILL_NAME,
+        "--agent", platform,
+    ]
+    if scope == "user":
+        command.append("--global")
+    command.append("--yes")
+
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=cwd,
+    )
+    if result.returncode != 0:
+        err = result.stderr.strip() or result.stdout.strip()
+        raise InstallationError(
+            f"Vercel Skills CLI installation failed for {platform} (exit {result.returncode}): {err}"
+        )
+
+    installed = next(
+        (p for p in candidates if p.is_dir() and verify_skill_tree(source, p)),
+        None,
+    )
+    if installed is None:
+        installed = next((p for p in candidates if p.is_dir()), None)
+        if installed is None or not verify_skill_tree(source, installed):
+            raise InstallationError(
+                "Vercel Skills CLI returned success, but the installed skill could not be "
+                "verified in its destination files."
+            )
+
+    discovery, message = _verify_native_discovery(
+        platform, cwd=cwd, destination=installed
+    )
+    installation = (
+        "SUCCESS" if discovery == "VERIFIED"
+        else "FILES_INSTALLED_DISCOVERY_UNVERIFIED"
+    )
+    return InstallResult(
+        platform,
+        installation,
+        str(installed),
+        "SUCCESS",
+        discovery,
+        "None" if discovery == "VERIFIED" else "Check the platform's own skill list.",
+        "The Vercel Skills CLI completed and canonical file set was verified.",
         version,
     )
 
@@ -826,6 +1031,7 @@ def execute_install(
     package_output=None,
     overwrite=False,
     env=None,
+    engine="auto",
 ):
     if not is_install_request(request):
         raise InstallationError(
@@ -840,6 +1046,20 @@ def execute_install(
         raise InstallationError(
             "Could not identify the active agent. Set TYPECRAFT_AGENT to its exact "
             "host ID or pass --agent explicitly; no platform will be guessed."
+        )
+
+    if engine not in ("auto", "native", "vercel", "gh"):
+        raise InstallationError(f"Unsupported installation engine: {engine}")
+
+    if engine == "vercel":
+        return _install_with_vercel_cli(
+            platform, scope, source, overwrite, version,
+            project_root=project_root, home=home, registry=registry,
+        )
+    if engine == "gh":
+        return _install_with_github_cli(
+            platform, scope, source, overwrite, version,
+            project_root=project_root, home=home, registry=registry,
         )
 
     route = get_route(platform, registry)
@@ -873,11 +1093,17 @@ def execute_install(
         )
     if route == "unsupported":
         raise InstallationError(f"Unsupported platform ID: {platform}")
-    if route == "native_directory":
+    if route == "native_directory" or engine == "native":
         destinations = resolve_native_destinations(
             platform, scope, registry, project_root=project_root, home=home
         )
-        destination = next(
+        candidates = resolve_all_candidate_destinations(
+            platform, scope, registry, project_root=project_root, home=home
+        )
+        status, exist_path = check_destination_collision(
+            candidates, source=source, overwrite=overwrite
+        )
+        destination = exist_path if (status == "identical" and exist_path) else next(
             (path for path in destinations if path.exists() or path.is_symlink()),
             destinations[0],
         )
@@ -934,7 +1160,7 @@ def execute_install(
             version,
         )
     return _install_with_github_cli(
-        platform, scope, source, overwrite, version, project_root=project_root
+        platform, scope, source, overwrite, version, project_root=project_root, home=home, registry=registry
     )
 
 
@@ -964,6 +1190,10 @@ def main(argv=None):
     parser.add_argument("--project-root", type=Path, default=Path.cwd())
     parser.add_argument("--package-output", type=Path)
     parser.add_argument(
+        "--engine", choices=("auto", "native", "vercel", "gh"), default="auto",
+        help="Installation engine (auto, native, vercel, gh).",
+    )
+    parser.add_argument(
         "--force", action="store_true",
         help="Replace an existing installation or package after explicit approval.",
     )
@@ -981,6 +1211,7 @@ def main(argv=None):
             project_root=args.project_root,
             package_output=args.package_output,
             overwrite=args.force,
+            engine=args.engine,
         )
     except InstallationError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
