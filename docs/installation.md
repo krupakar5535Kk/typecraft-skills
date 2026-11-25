@@ -83,7 +83,9 @@ The router verifies ZIP integrity, exact file paths (`typecraft-skills/` root), 
 ### Platform Upload Steps
 - **ChatGPT Web:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach the ZIP / `SKILL.md` to **Custom GPT → Knowledge**). Availability is subject to workspace plan and policy.
 - **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**). Enable the skill after upload.
-- **Gemini Web:** Attach `typecraft-skills/SKILL.md` to your conversation or embed it into a **Custom Gem**.
+- **Gemini Web:**
+  - *Custom Skills Upload (Primary):* Open **Customize → Skills** (or **More → Customize → Skills**), select **Upload a skill** (or **Upload file**), and upload `typecraft-skills.zip`. Review the parsed metadata and save. In chat, invoke via `@typecraft-skills` or `/typecraft-skills`. Custom Skills upload is available on Gemini Advanced or eligible Google Workspace (Business, Enterprise, Education) accounts with custom skills enabled.
+  - *Custom Gems (Legacy / Fallback):* For standard consumer accounts or environments where Custom Skills upload is unavailable, open **Gem Manager → New Gem**, paste the contents of `skills/typecraft-skills/SKILL.md` into the Gem instructions, or attach `SKILL.md` directly into the chat session.
 
 ---
 
@@ -116,6 +118,7 @@ To prevent misleading claims, TypeCraft strictly separates four lifecycle stages
 | **OpenCode** | **compatible** | Shared `~/.agents/skills/` or `.agents/skills/` | Isolated installer & SHA-256 verified | Documented (`opencode skills list`) | Not tested | User directory |
 | **ChatGPT Skills** | **compatible** | Release ZIP upload via Plugin Directory | Package integrity tests pass locally | User action required to upload and confirm | Not tested | Workspace-managed |
 | **Claude.ai / Cowork** | **compatible** | Release ZIP upload via Customize → Skills | Package integrity tests pass locally | User action required to upload and enable | Not tested | Account-managed |
+| **Gemini Web** | **compatible** | Release ZIP upload via Customize → Skills (or Custom Gem fallback) | Package integrity tests pass locally | User action required to upload and enable | Not tested | Account-managed |
 | **Windsurf** | **research_required** | Unconfirmed | Not tested | Former URL redirects to Devin docs | Not tested | Unconfirmed |
 
 See the complete [Compatibility Guide](compatibility.md) for detailed audit logs and recorded evidence.

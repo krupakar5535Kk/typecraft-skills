@@ -124,7 +124,7 @@ python -m scripts.install_url \
 **Platform Upload Steps:**
 - **ChatGPT:** Open **Plugins → Plugin Directory → Skills → Create → Upload from your computer** (or attach to **Custom GPT → Knowledge**).
 - **Claude.ai / Claude Cowork:** Open **Customize → Skills → Create skill → Upload a skill** (or add `typecraft-skills/SKILL.md` to **Project Knowledge**).
-- **Gemini Web:** Attach `typecraft-skills/SKILL.md` to your conversation or embed it in a **Custom Gem**.
+- **Gemini Web:** Open **Customize → Skills** (or **More → Customize → Skills**), select **Upload a skill**, and upload `typecraft-skills.zip`. Availability requires a Gemini Advanced subscription or an eligible Google Workspace (Business/Enterprise/Edu) account with custom skills enabled. Once saved, invoke via `@typecraft-skills` or `/typecraft-skills`. (For personal accounts or environments without Custom Skills upload access, paste `typecraft-skills/SKILL.md` into a **Custom Gem** or attach it to the conversation as a fallback).
 
 ### Platform Evaluation Stages & Compatibility
 
@@ -144,7 +144,7 @@ TypeCraft strictly distinguishes between four lifecycle stages:
 | **Cursor IDE** | **compatible** | Shared directory (`~/.agents/skills/`) | Route documented; local user skills do not automatically sync to Cloud Agents. |
 | **Google Antigravity App / CLI** | **compatible** | Native directories (`~/.gemini/config/skills/`, `~/.gemini/antigravity-cli/skills/`) | Documented native routes; App catalog & CLI `/skills reload` supported. |
 | **OpenCode** | **compatible** | Shared directory (`~/.agents/skills/`) | Documented native routes across multiple directories. |
-| **ChatGPT / Claude.ai / Cowork** | **compatible** | Release ZIP upload | Verified local packaging; upload, scan, and confirmation require user action and workspace eligibility. |
+| **ChatGPT / Claude.ai / Cowork / Gemini Web** | **compatible** | Release ZIP upload | Verified local packaging; upload, scan, and confirmation require user action and account eligibility (Gemini Advanced/Workspace for Skills upload; Custom Gems fallback). |
 | **Windsurf** | **research_required** | Unconfirmed | Former documentation URL redirects to Devin; native route unconfirmed. |
 
 See the complete [Compatibility Guide](docs/compatibility.md) and [Installation Guide](docs/installation.md) for full audit records and evidence.
