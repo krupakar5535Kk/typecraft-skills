@@ -38,6 +38,14 @@ record preserves the separate historical runtime environment and evidence.
 Installation, native discovery, and actual skill invocation are distinct
 verification stages; a successful skill listing does not establish invocation.
 
+### Primary Distribution: Standard Agent Skills Ecosystem
+
+TypeCraft adopts the standard Agent Skills distribution ecosystem using the official Vercel Skills CLI (`skills`).
+- **One Command:** `npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git --skill typecraft-skills --global --agent <AGENT> --yes`
+- **Native Discovery:** The Skills CLI discovers `typecraft-skills` directly from the repository's `skills/typecraft-skills/SKILL.md` manifest and installs all 20 reference files.
+- **Multi-Agent Targeting:** The standard CLI supports `--agent '*'` to target all supported local agent runtimes in one command.
+- **Offline / Maintainer Fallback:** TypeCraft provides bundled Python tools (`scripts/install_url.py`) for offline, air-gapped, or headless environments without Node.js.
+
 ## Platform verification matrix
 
 | Platform surface | Status | Documented install | File verification | Runtime discovery | Skill invocation |
