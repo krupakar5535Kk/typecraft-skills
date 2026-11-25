@@ -206,6 +206,13 @@ class TypeCraftBootstrapV13Tests(unittest.TestCase):
             for c in candidates_proj:
                 self.assertTrue(str(c).startswith(str(self.project)))
 
+        # Specific verification for codex candidate destinations including native $CODEX_HOME/skills
+        codex_user = resolve_all_candidate_destinations(
+            "codex", "user", registry=self.registry, project_root=self.project, home=self.home
+        )
+        self.assertIn(self.home / ".agents" / "skills" / "typecraft-skills", codex_user)
+        self.assertIn(self.home / ".codex" / "skills" / "typecraft-skills", codex_user)
+
     def test_invalid_and_unrelated_repository_urls(self):
         """Installer rejects non-canonical or malicious URLs and informational queries."""
         self.assertFalse(is_install_request("https://github.com/attacker/malicious-skill.git"))
@@ -223,6 +230,7 @@ class TypeCraftBootstrapV13Tests(unittest.TestCase):
         self.assertEqual(detect_platform({"AGY_VERSION": "2.0.0"}), "antigravity")
         self.assertEqual(detect_platform({"CURSOR_AGENT": "1"}), "cursor")
         self.assertEqual(detect_platform({"OPENCODE": "1"}), "opencode")
+        self.assertEqual(detect_platform({"AGY_CLI": "1"}), "antigravity-cli")
         # Preference to TYPECRAFT_AGENT over ambient signals
         self.assertEqual(
             detect_platform({"TYPECRAFT_AGENT": "codex", "CLAUDE_CODE": "1"}),
