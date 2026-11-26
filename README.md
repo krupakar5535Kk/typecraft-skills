@@ -76,7 +76,7 @@ https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-The agent autonomously inspects the repository, reads [BOOTSTRAP.md](BOOTSTRAP.md), identifies its active platform ID, and executes the standard Skills CLI installation command globally.
+The agent autonomously inspects the repository, reads [BOOTSTRAP.md](BOOTSTRAP.md), identifies its active platform ID, and executes the standard Skills CLI installation command globally. The user does not need to open a separate terminal, clone the repository, or copy files manually.
 
 ---
 
@@ -84,12 +84,13 @@ The agent autonomously inspects the repository, reads [BOOTSTRAP.md](BOOTSTRAP.m
 
 TypeCraft adopts the standard Agent Skills distribution ecosystem via the official Vercel Skills CLI (`skills`).
 
-#### Install for your active agent globally (Default):
+#### Install for your active agent globally (Default & Recommended):
 ```bash
 npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
   --skill typecraft-skills \
   --global \
   --agent <ACTIVE_AGENT_ID> \
+  --copy \
   --yes
 ```
 
@@ -99,6 +100,7 @@ npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
   --skill typecraft-skills \
   --global \
   --agent '*' \
+  --copy \
   --yes
 ```
 
@@ -107,22 +109,45 @@ npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
 npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
   --skill typecraft-skills \
   --agent <ACTIVE_AGENT_ID> \
+  --copy \
   --yes
 ```
 
-#### Supported Agent Identifiers:
-- `antigravity` — Google Antigravity App / IDE (`~/.gemini/config/skills/typecraft-skills/`)
-- `antigravity-cli` — Google Antigravity CLI (`~/.gemini/antigravity-cli/skills/typecraft-skills/`)
-- `claude-code` — Claude Code CLI (`~/.claude/skills/typecraft-skills/`)
-- `cursor` — Cursor IDE (`~/.agents/skills/typecraft-skills/`)
-- `codex` — OpenAI Codex CLI (`~/.agents/skills/typecraft-skills/`)
-- `opencode` — OpenCode (`~/.agents/skills/typecraft-skills/`)
-- `gemini-cli` — Gemini CLI (`~/.gemini/skills/typecraft-skills/`)
-- `github-copilot` — GitHub Copilot Agent / VS Code (`~/.copilot/skills/typecraft-skills/`)
+---
+
+### 3. Target IDE and Agent Environments
+
+1. **Google Antigravity IDE (`antigravity`):**
+   - Installs to `~/.gemini/config/skills/typecraft-skills/`
+   - Autonomous in-chat execution and immediate session discovery verified in Antigravity v2.31.0.
+2. **Claude Free — Claude Web/Desktop Skills:**
+   - Sandboxed browser chat. Go to **Settings → Capabilities → Enable Code execution and file creation**, then **Customize → Skills → Create skill → Upload a skill** with [typecraft-skills.zip](https://github.com/krupakar5535Kk/typecraft-skills/releases/latest/download/typecraft-skills.zip).
+   - *Note:* Account-level skill uploads in Claude Free are separate from and do not entitle or install Claude Code.
+3. **Claude Code IDE Integration (`claude-code`):**
+   - Installs to `~/.claude/skills/typecraft-skills/`
+   - Discovered via `/skills`. Requires paid Anthropic subscription or API key; **not included in Claude Free**.
+4. **Cursor IDE (`cursor`):**
+   - Installs to `~/.cursor/skills/typecraft-skills/` and shared `~/.agents/skills/typecraft-skills/`.
+   - Discovered in Features > Skills panel. Local skills do not automatically synchronize to remote Cloud Agents.
+5. **OpenAI Codex IDE (`codex`):**
+   - Installs to `~/.agents/skills/typecraft-skills/` and `$CODEX_HOME/skills/typecraft-skills` (`~/.codex/skills/typecraft-skills`).
+   - Discovered via internal index and bundled `$skill-installer`. Note that ChatGPT Free includes Codex with strict rate limits; hitting a rate limit is an account quota constraint, not an installation failure.
+6. **OpenCode IDE / Environment (`opencode`):**
+   - Installs to `~/.config/opencode/skills/typecraft-skills/` and `~/.agents/skills/typecraft-skills/`.
+   - Verified via `opencode skills list` and native file discovery.
+7. **VS Code with GitHub Copilot Agent (`github-copilot`):**
+   - Installs to `~/.copilot/skills/typecraft-skills/` or workspace `.github/skills/`.
+   - Discovered in Copilot Agent Skills inventory.
+8. **Gemini CLI (`gemini-cli`) vs Gemini Web:**
+   - *Gemini CLI:* Terminal agent installing to `~/.gemini/skills/`. Verified discovery via `gemini skills list --all`.
+   - *Gemini Web:* Browser chat. Requires uploading `typecraft-skills.zip` via **Customize → Skills** (Gemini Advanced/Workspace) or creating a **Custom Gem** with `skills/typecraft-skills/SKILL.md`.
+9. **Additional Officially Supported IDE Agents:**
+   - Supported targets in Skills CLI: Windsurf (`~/.codeium/windsurf/skills/`), Zed (`~/.agents/skills/`), Cline (`~/.agents/skills/`), Roo Code (`~/.roo/skills/`), Devin (`~/.config/devin/skills/`), Trae (`~/.trae/skills/`).
+   - Wildcard `--agent '*'` installs across all detected local coding agents simultaneously.
 
 ---
 
-### 3. Offline / Maintainer Python Fallback Route
+### 4. Offline / Maintainer Python Fallback Route
 
 If Node.js or `npx` is unavailable in the environment, use TypeCraft's bundled Python installer:
 
@@ -137,7 +162,7 @@ python3 -m scripts.install_url \
 
 ---
 
-### 4. Browser-Based Platforms (ChatGPT Web, Claude.ai, Gemini Web)
+### 5. Browser-Based Platforms (ChatGPT Web, Claude.ai, Gemini Web)
 
 Browser-based chat platforms operate in sandboxed browser environments without local filesystem or terminal access. For these platforms, download the official release package and upload it directly:
 
@@ -161,16 +186,16 @@ TypeCraft strictly evaluates platform readiness across four lifecycle stages:
 
 | Surface | Status | Route | Verified Evidence |
 |---|---|---|---|
+| **Google Antigravity App / IDE** | **verified** | Standard CLI (`~/.gemini/config/skills/`) | Live installation, catalog indexing, and in-session model invocation verified in Antigravity v2.31.0. |
 | **GitHub Copilot CLI** | **verified** | Native directory (`~/.copilot/skills/`) | Full installation, discovery (`copilot skill list`), and model invocation verified on CLI 1.0.105 & 1.0.114. |
 | **GitHub Copilot VS Code Agent** | **verified** | GitHub CLI managed (`~/.copilot/skills/`) | Historical installation, discovery, and invocation verified in GitHub Codespaces (v1.1.0). |
 | **Gemini CLI** | **verified** | Native directory (`~/.gemini/skills/`) | User-scope installation and native discovery verified via `gemini skills list --all`; live model invocation blocked by headless OAuth requirement. |
-| **Google Antigravity App / CLI** | **compatible** | Standard CLI (`~/.gemini/config/skills/`, `~/.gemini/antigravity-cli/skills/`) | Live installation and catalog inspection verified; `/skills reload` supported. |
-| **Claude Code CLI** | **compatible** | Standard CLI (`~/.claude/skills/`) | Route documented and verified with `skills add`; user-reported discovery observed; model invocation unverified in CI. |
-| **Cursor IDE** | **compatible** | Standard CLI (`~/.agents/skills/`) | Route documented and verified with `skills add`; local user skills do not automatically sync to Cloud Agents. |
-| **OpenAI Codex** | **compatible** | Standard CLI (`~/.agents/skills/`, `~/.codex/skills/`) | Route documented and verified with `skills add`; live invocation blocked by upstream account usage limit. |
-| **OpenCode** | **compatible** | Standard CLI (`~/.agents/skills/`) | Route documented and verified with `skills add`. |
+| **Claude Code CLI / IDE** | **compatible** | Standard CLI (`~/.claude/skills/`) | Route documented and verified with `skills add`; discovery confirmed via `/skills`; model invocation requires paid Anthropic plan / login. |
+| **Cursor IDE** | **compatible** | Standard CLI (`~/.cursor/skills/`, `~/.agents/skills/`) | Route documented and verified with `skills add`; local user skills do not automatically sync to Cloud Agents. |
+| **OpenAI Codex** | **compatible** | Standard CLI (`~/.agents/skills/`, `~/.codex/skills/`) | Route documented and verified with `skills add`; live invocation on Free accounts subject to upstream usage quota limits. |
+| **OpenCode** | **compatible** | Standard CLI (`~/.config/opencode/skills/`, `~/.agents/skills/`) | Route documented and verified with `skills add`; native discovery confirmed. |
 | **ChatGPT / Claude.ai / Cowork / Gemini Web** | **compatible** | Release ZIP upload | Verified local packaging; upload, scan, and confirmation require user action and account eligibility. |
-| **Windsurf** | **research_required** | Unconfirmed | Former documentation URL redirects to Devin; native route unconfirmed. |
+| **Windsurf** | **compatible** | Standard CLI (`~/.codeium/windsurf/skills/`) | Route documented in Vercel Skills CLI registry. |
 
 See the complete [Compatibility Guide](docs/compatibility.md) and [Installation Guide](docs/installation.md) for full audit records and evidence.
 
