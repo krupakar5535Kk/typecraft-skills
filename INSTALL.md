@@ -39,14 +39,15 @@ npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
 
 ## 2. One-URL Installation in Fresh Agent Sessions
 
-To install TypeCraft in a fresh conversation with a compatible AI agent, simply provide the canonical repository URL:
+To install or activate TypeCraft in a fresh conversation with a compatible AI agent, simply provide the canonical repository URL:
 
 ```text
 https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-The receiving agent inspects this repository, discovers `skills/typecraft-skills/`, identifies its own host platform ID, and autonomously executes the standard `skills add` command globally without requiring the user to open a separate terminal.
+- **In AI IDEs (Antigravity, Cursor, Claude Code, Codex, OpenCode, VS Code):** The receiving agent inspects this repository, discovers `skills/typecraft-skills/`, identifies its own host platform ID, and autonomously executes the standard `skills add` command globally without requiring the user to open a separate terminal.
+- **In Cloud Web Chats (Gemini Web, Claude Web, ChatGPT Web):** The agent immediately adopts TypeCraft into its working context, activates all 10 typography styles and 10 design templates for the current conversation, and provides permanent saving guidance without blocking the conversation.
 
 ---
 

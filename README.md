@@ -67,16 +67,17 @@ The canonical library contains exactly 20 production-approved design resources i
 
 ## Installation
 
-### 1. Zero-Context URL Installation (AI Coding Agents)
+### 1. Zero-Context URL Installation (AI Coding Agents & Web Chats)
 
-To install TypeCraft in a fresh conversation with any compatible AI coding agent, provide the repository URL:
+To install or activate TypeCraft in a fresh conversation with any compatible AI agent, simply provide the repository URL:
 
 ```text
 https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-The agent autonomously inspects the repository, reads [BOOTSTRAP.md](BOOTSTRAP.md), identifies its active platform ID, and executes the standard Skills CLI installation command globally. The user does not need to open a separate terminal, clone the repository, or copy files manually.
+- **In AI IDEs (Antigravity, Cursor, Claude Code, Codex, OpenCode, VS Code):** The agent autonomously inspects [BOOTSTRAP.md](BOOTSTRAP.md) and [AGENTS.md](AGENTS.md), identifies its active platform ID, and executes `npx --yes skills add ... --copy` to install TypeCraft globally with zero manual effort.
+- **In Cloud Web Chats (Gemini Web, Claude Web, ChatGPT Web):** The agent immediately loads the TypeCraft skill instructions from the repository into its working context, activates all 10 typography styles and 10 design templates for your conversation, and offers permanent saving options (Custom Gem / Review Card / Custom GPT).
 
 ---
 
