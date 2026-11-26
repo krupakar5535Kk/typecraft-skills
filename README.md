@@ -67,17 +67,17 @@ The canonical library contains exactly 20 production-approved design resources i
 
 ## Installation
 
-### 1. Zero-Context URL Installation (AI Coding Agents & Web Chats)
+### 1. Zero-Context URL and Code Installation (AI Coding Agents & Web Chats)
 
-To install or activate TypeCraft in a fresh conversation with any compatible AI agent, simply provide the repository URL:
+To install or activate TypeCraft in a fresh conversation with any compatible AI agent, provide the repository URL or paste the TypeCraft skill code (`SKILL.md`):
 
 ```text
 https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-- **In AI IDEs (Antigravity, Cursor, Claude Code, Codex, OpenCode, VS Code):** The agent autonomously inspects [BOOTSTRAP.md](BOOTSTRAP.md) and [AGENTS.md](AGENTS.md), identifies its active platform ID, and executes `npx --yes skills add ... --copy` to install TypeCraft globally with zero manual effort.
-- **In Cloud Web Chats (Gemini Web, Claude Web, ChatGPT Web):** The agent immediately loads the TypeCraft skill instructions from the repository into its working context, activates all 10 typography styles and 10 design templates for your conversation, and offers permanent saving options (Custom Gem / Review Card / Custom GPT).
+- **In AI IDEs (Antigravity, Cursor, Claude Code, OpenAI Codex / ChatGPT IDE, OpenCode, VS Code):** The agent autonomously inspects [BOOTSTRAP.md](BOOTSTRAP.md) and [AGENTS.md](AGENTS.md), identifies its active platform ID, and executes `npx --yes skills add ... --copy` to install TypeCraft globally (or writes pasted code into the active skills directory) with zero manual effort.
+- **In ChatGPT & Cloud Web Chats (ChatGPT Web / Canvas, Gemini Web, Claude Web):** When given the URL or when code is pasted, the agent immediately loads the TypeCraft skill instructions into its working context, activates all 10 typography styles and 10 design templates for your conversation, confirms installation, and offers permanent saving options (Custom GPT / Review Card / Custom Gem).
 
 ---
 
@@ -130,9 +130,11 @@ npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
 4. **Cursor IDE (`cursor`):**
    - Installs to `~/.cursor/skills/typecraft-skills/` and shared `~/.agents/skills/typecraft-skills/`.
    - Discovered in Features > Skills panel. Local skills do not automatically synchronize to remote Cloud Agents.
-5. **OpenAI Codex IDE (`codex`):**
+5. **ChatGPT IDE & OpenAI Codex (`codex`):**
    - Installs to `~/.agents/skills/typecraft-skills/` and `$CODEX_HOME/skills/typecraft-skills` (`~/.codex/skills/typecraft-skills`).
-   - Discovered via internal index and bundled `$skill-installer`. Note that ChatGPT Free includes Codex with strict rate limits; hitting a rate limit is an account quota constraint, not an installation failure.
+   - In Codex IDE / CLI: executes `npx --yes skills add ... --agent codex --global --copy --yes` (or writes pasted code directly to `~/.agents/skills/typecraft-skills/`).
+   - In ChatGPT Web / Canvas IDE: immediately loads directives, activates all 10 styles and 10 templates, and confirms installation in the active session.
+   - Note that ChatGPT Free includes Codex with strict rate limits; hitting a rate limit is an account quota constraint, not an installation failure.
 6. **OpenCode IDE / Environment (`opencode`):**
    - Installs to `~/.config/opencode/skills/typecraft-skills/` and `~/.agents/skills/typecraft-skills/`.
    - Verified via `opencode skills list` and native file discovery.

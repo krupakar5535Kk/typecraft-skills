@@ -15,8 +15,8 @@ https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-- **In AI IDEs (Antigravity, Cursor, Claude Code, Codex, OpenCode, VS Code):** Tool-enabled agents with command execution permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [AGENTS.md](../AGENTS.md), identify their active platform, and autonomously install TypeCraft globally using the standard Agent Skills CLI.
-- **In Cloud Web Chats (Gemini Web, Claude Web, ChatGPT Web):** The agent immediately adopts TypeCraft into its active session context, equipping itself with all 10 typography styles and 10 design templates instantly without forcing the user to touch a terminal.
+- **In AI IDEs (Antigravity, Cursor, Claude Code, OpenAI Codex / ChatGPT IDE, OpenCode, VS Code):** Tool-enabled agents with command execution permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [AGENTS.md](../AGENTS.md), identify their active platform, and autonomously install TypeCraft globally using the standard Agent Skills CLI (or write pasted code into the active skills directory).
+- **In ChatGPT & Cloud Web Chats (ChatGPT Web / Canvas, Gemini Web, Claude Web):** When given the URL or when code is pasted, the agent immediately adopts TypeCraft into its active session context, equipping itself with all 10 typography styles and 10 design templates instantly without forcing the user to touch a terminal.
 
 ---
 
@@ -83,9 +83,10 @@ npx --yes skills add https://github.com/krupakar5535Kk/typecraft-skills.git \
 - **Discovery:** Discovered in Cursor Features > Skills and Agent skill selector (`/typecraft-skills`).
 - *Important:* Local personal skills do not automatically synchronize to remote Cursor Cloud Agents.
 
-### 5. OpenAI Codex IDE (`codex`)
+### 5. ChatGPT IDE & OpenAI Codex (`codex`)
 - **Target:** `~/.agents/skills/typecraft-skills/` and `$CODEX_HOME/skills/typecraft-skills` (`~/.codex/skills/typecraft-skills`).
-- **Installation:** Run `npx --yes skills add ... --global --agent codex --copy --yes`.
+- **Installation:** Run `npx --yes skills add ... --global --agent codex --copy --yes`. If the user pastes TypeCraft code directly into Codex, the agent writes the skill files directly to `~/.agents/skills/typecraft-skills/`. Both paths are verified.
+- **ChatGPT Web & Canvas IDE:** When a user pastes the repository URL or pastes the TypeCraft skill code and says "Install this skill", ChatGPT immediately adopts the directives into the active session / canvas, confirming that TypeCraft is installed and active without demanding manual shell steps.
 - **Discovery:** Verified via internal index and bundled `$skill-installer`.
 - **Usage Limits:** ChatGPT Free includes Codex with strict rate limits. Hitting a rate limit (`hit your usage limit`) is an upstream quota boundary, not an installation failure.
 
