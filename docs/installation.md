@@ -15,7 +15,8 @@ https://github.com/krupakar5535Kk/typecraft-skills.git
 Install this skill.
 ```
 
-The URL alone (with or without `.git` or followed by "Install this skill") signals installation intent. Tool-enabled agents with command execution permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [INSTALL.md](../INSTALL.md), identify their active platform, and autonomously install TypeCraft globally using the standard Agent Skills CLI.
+- **In AI IDEs (Antigravity, Cursor, Claude Code, Codex, OpenCode, VS Code):** Tool-enabled agents with command execution permissions inspect the repository, read [BOOTSTRAP.md](../BOOTSTRAP.md) and [AGENTS.md](../AGENTS.md), identify their active platform, and autonomously install TypeCraft globally using the standard Agent Skills CLI.
+- **In Cloud Web Chats (Gemini Web, Claude Web, ChatGPT Web):** The agent immediately adopts TypeCraft into its active session context, equipping itself with all 10 typography styles and 10 design templates instantly without forcing the user to touch a terminal.
 
 ---
 
